@@ -1,0 +1,22 @@
+.directory 
+
+*.bak
+
+# OS X
+.DS_Store
+._.DS_Store
+._*
+
+# Lnx
+*~
+
+# PYTHON
+*.pyc
+
+# TMP
+tmp/**
+
+## Python virtualenv
+venv/**
+
+
