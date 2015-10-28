@@ -228,7 +228,8 @@ while(True):
     result_img = np.zeros_like(color_img)
 
     for id in range(len(stones_contours)):
-        m = cv2.moments(stones_contours[id])
+        contour = stones_contours[id]
+        m = cv2.moments(contour)
 
         cx = int(m['m10'] / m['m00'])
         cy = int(m['m01'] / m['m00'])
@@ -237,6 +238,11 @@ while(True):
         cv2.drawContours(result_img, stones_contours, id, c, -1)
 
         cv2.circle(result_img, (cx, cy), 10, (255, 0, 255))
+
+        r = cv2.boundingRect(contour)
+        cv2.rectangle(result_img, (r[0], r[1]), (r[0] + r[2], r[1] + r[3]), (0, 255, 0), 2)
+
+        print r
 
     # Display
     cv2.imshow('color with debug', color_img)
