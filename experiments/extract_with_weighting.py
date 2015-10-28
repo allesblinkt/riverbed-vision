@@ -242,8 +242,6 @@ while(True):
         r = cv2.boundingRect(contour)
         cv2.rectangle(result_img, (r[0], r[1]), (r[0] + r[2], r[1] + r[3]), (0, 255, 0), 2)
 
-        print r
-
     # Display
     cv2.imshow('color with debug', color_img)
     cv2.imshow('curvature weighting', weight_img)
