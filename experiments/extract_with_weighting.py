@@ -187,7 +187,7 @@ while(True):
             if np.linalg.norm(cut_normal) < 0.0001:  # Normal too short
                 continue
 
-            rad = 35.0
+            rad = 35.0   # FIXME: roi index calculation
 
             x = max(0, cut_point[0] - rad)
             y = max(0, cut_point[1] - rad)
