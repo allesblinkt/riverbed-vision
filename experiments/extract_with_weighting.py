@@ -218,17 +218,15 @@ while(True):
     markers_img = markers_img + 1
     markers_img[unknown_img == 255] = 0      # mark the region of unknown with zero
 
-    segmented_img = np.zeros_like(frame)
-    cv2.watershed(segmented_img, markers_img)
-    segmented_img[markers_img == -1] = (255, 0, 0)
-
-    _, areas_img = cv2.threshold(np.uint8(markers_img), 1, 255, cv2.THRESH_BINARY)
-    areas_img[markers_img == -1] = 0
+    segmented_img = markers_img.copy()
+    cv2.watershed(color_img, segmented_img)
+    segmented_img[segmented_img == 1] = -1
 
     # Find individual stones and draw them
-    stones_contours, _ = cv2.findContours(cv2.erode(areas_img, kernel, iterations=1), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
 
     result_img = np.zeros_like(color_img)
+
     for id in range(len(stones_contours)):
         m = cv2.moments(stones_contours[id])
 
@@ -245,7 +243,6 @@ while(True):
     cv2.imshow('curvature weighting', weight_img)
     cv2.imshow('curvature weighting threshold', weight_thresh_img)
     cv2.imshow('markers', markers_img * 256)
-    cv2.imshow('areas', areas_img)
     cv2.imshow('stones', result_img)
 
     # Input
