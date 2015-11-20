@@ -5,8 +5,12 @@ import threading
 import logging
 import Pyro4
 
-log = logging.getLogger(__name__)
+NEWLINE = '\r\n'
+DEVICE  = None # '/dev/ttyACM0'
+PORT    = 5001
 
+logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
+log = logging.getLogger(__name__)
 
 def format_pos(pos):
     return '{:0.2f}'.format(pos)
@@ -16,11 +20,10 @@ def format_feed(feed):
     return '{:0.1f}'.format(feed)
 
 
-def pos_string(x=None, y=None, z=None):
+def format_xyz(x=None, y=None, z=None):
     x_str = format_pos(x)
     y_str = format_pos(y)
     z_str = format_pos(z)
-
     return 'X{} Y{} Z{}'.format(x_str, y_str, z_str)
 
 
@@ -48,29 +51,25 @@ class MachineController(object):
             except SerialOpenError:
                 raise SerialOpenError(port_name, baudrate)
         else:
-            log.warn('Hardware created without a serial port')
+            log.warn('MachineController created without a serial port')
 
     def check_movement(self, **kwargs):
         # CHECK bounds
         # CHECK if rapid in allowed rapid height
-
-        pass
+        return True
 
     def rapid(self, x=None, y=None, z=None):
-        self.check_movement(x, y, z)
-
-        cmd_str = 'G00' + ' ' + pos_string(x, y, z)
-        self._command(cmd_str)
+        if self.check_movement(x=x, y=y, z=z):
+            cmd_str = 'G00' + ' ' + format_xyz(x, y, z)
+            self._command(cmd_str)
 
     def go(self, x=None, y=None, z=None):
-        self.check_movement(x, y, z)
-
-        cmd_str = 'G01' + ' ' + pos_string(x, y, z)
-        self._command(cmd_str)
+        if self.check_movement(x=x, y=y, z=z):
+            cmd_str = 'G01' + ' ' + format_xyz(x, y, z)
+            self._command(cmd_str)
 
     def pickup(self):
         cmd_str = 'G30'
-
         self._command(cmd_str)
 
     def set_pickup_params(self, slow_feed=None, fast_feed=None, return_feed=None, max_z=None, probe_height=None):
@@ -91,14 +90,13 @@ class MachineController(object):
 
     def save_pickup_params(self):
         cmd_str = 'M500'
-
         self._command(cmd_str)
 
     def read_vacuum(self):
         cmd_str = 'M119'
         self._command(cmd_str)
 
-        read = self._read_back()
+        read = self._response()
 
         rs = 'Probe: (\d+)'
 
@@ -113,12 +111,10 @@ class MachineController(object):
 
     def switch_vacuum(self, state):
         cmd_str = 'M106' if state else 'M0107'
-
         self._command(cmd_str)
 
     def switch_throwoff(self, state):
         cmd_str = 'M108' if state else 'M0109'
-
         self._command(cmd_str)
 
     def close(self):
@@ -132,15 +128,16 @@ class MachineController(object):
 
     def _command(self, cmd_str):
         log.debug('Sending command "%s"', cmd_str.rstrip())
-
         if self.serial_port:
             with self.serial_mutex:
-                self.serial_port.write(cmd_str + self.CMD_NEWLINE)
+                self.serial_port.write(cmd_str + NEWLINE)
                 self.serial_port.flushOutput()
 
-    def _read_back(self):
-        self.serial_port.readline()   # TODO: read and handle error
-        return ''
+    def _response(self):
+        try:
+            return self.serial_port.readline()
+        except:
+            return ''
 
     def __del__(self):
         self.close()
@@ -158,7 +155,8 @@ class SerialOpenError(Exception):
 
 
 if __name__ == '__main__':
-    daemon = Pyro4.Daemon(port=5001)
-    uri = daemon.register(MachineController, 'control')
+    daemon = Pyro4.Daemon(port=PORT)
+    control = MachineController(DEVICE)
+    uri = daemon.register(control, 'control')
     print 'Running at', uri
     daemon.requestLoop()
