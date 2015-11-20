@@ -1,9 +1,10 @@
-import math
+#!/usr/bin/python
 import re
 import serial
 import threading
-
 import logging
+import Pyro4
+
 log = logging.getLogger(__name__)
 
 
@@ -154,3 +155,10 @@ class SerialOpenError(Exception):
 
     def __str__(self):
         return self.message
+
+
+if __name__ == '__main__':
+    daemon = Pyro4.Daemon(port=5001)
+    uri = daemon.register(MachineController, 'control')
+    print 'Running at', uri
+    daemon.requestLoop()
