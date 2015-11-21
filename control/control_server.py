@@ -12,23 +12,16 @@ PORT    = 5001
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
-def format_pos(pos):
-    return '{:0.2f}'.format(pos)
+
+def format_feed(**kwargs):
+    return ' '.join(['{}{:0.1f}'.format(k.upper(), v) for k, v in sorted(kwargs.items()) if v is not None])
 
 
-def format_feed(feed):
-    return '{:0.1f}'.format(feed)
-
-
-def format_xyz(x=None, y=None, z=None):
-    x_str = format_pos(x)
-    y_str = format_pos(y)
-    z_str = format_pos(z)
-    return 'X{} Y{} Z{}'.format(x_str, y_str, z_str)
+def format_pos(**kwargs):
+    return ' '.join(['{}{:0.2f}'.format(k.upper(), v) for k, v in sorted(kwargs.items()) if v is not None])
 
 
 class MachineController(object):
-    """MachineController"""
 
     def __init__(self, port_name, baudrate=115200):
         super(MachineController, self).__init__()
@@ -60,12 +53,12 @@ class MachineController(object):
 
     def rapid(self, x=None, y=None, z=None):
         if self.check_movement(x=x, y=y, z=z):
-            cmd_str = 'G00' + ' ' + format_xyz(x, y, z)
+            cmd_str = 'G00' + ' ' + format_pos(x=x, y=y, z=z)
             self._command(cmd_str)
 
     def go(self, x=None, y=None, z=None):
         if self.check_movement(x=x, y=y, z=z):
-            cmd_str = 'G01' + ' ' + format_xyz(x, y, z)
+            cmd_str = 'G01' + ' ' + format_pos(x=x, y=y, z=z)
             self._command(cmd_str)
 
     def pickup(self):
@@ -74,18 +67,12 @@ class MachineController(object):
 
     def set_pickup_params(self, slow_feed=None, fast_feed=None, return_feed=None, max_z=None, probe_height=None):
         cmd_str = 'M670'
-
-        if slow_feed:
-            cmd_str += ' S' + format_feed(slow_feed)
-        if fast_feed:
-            cmd_str += ' K' + format_feed(fast_feed)
-        if return_feed:
-            cmd_str += ' R' + format_feed(return_feed)
-        if max_z:
-            cmd_str += ' Z' + format_pos(max_z)
-        if probe_height:
-            cmd_str += ' H' + format_pos(probe_height)
-
+        cmd_feed = format_feed(s=slow_feed, k=fast_feed, r=return_feed)
+        cmd_pos = format_pos(z=max_z, h=probe_height)
+        if cmd_feed:
+            cmd_str += ' ' + cmd_feed
+        if cmd_pos:
+            cmd_str += ' ' + cmd_pos
         self._command(cmd_str)
 
     def save_pickup_params(self):
@@ -118,7 +105,6 @@ class MachineController(object):
         self._command(cmd_str)
 
     def close(self):
-        """ Be nice, close the serial port. """
         if self.serial_port:
             with self.serial_mutex:
                 self.serial_port.flushInput()
