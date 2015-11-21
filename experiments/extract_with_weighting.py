@@ -237,10 +237,16 @@ while(True):
         c = random_color_rgb()
         cv2.drawContours(result_img, stones_contours, id, c, -1)
 
-        cv2.circle(result_img, (cx, cy), 10, (255, 0, 255))
+        cv2.circle(result_img, (cx, cy), 4, (255, 0, 255))
 
-        r = cv2.boundingRect(contour)
-        cv2.rectangle(result_img, (r[0], r[1]), (r[0] + r[2], r[1] + r[3]), (0, 255, 0), 2)
+        # r = cv2.boundingRect(contour)
+        # cv2.rectangle(result_img, (r[0], r[1]), (r[0] + r[2], r[1] + r[3]), (0, 255, 0), 2)
+
+        c, s, a = cv2.minAreaRect(contour)
+        c = (int(c[0]), int(c[1]))
+        s = (int(s[0]) / 2, int(s[1]) / 2)
+        a = int(a)
+        cv2.ellipse(result_img, c, s, a, 0, 360, (0, 255, 0), 2)
 
     # Display
     cv2.imshow('color with debug', color_img)
