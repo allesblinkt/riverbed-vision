@@ -144,7 +144,7 @@ def draw_normal(img, pt, normal, angle, scale=10.0):
     cv2.line(img, (start[0], start[1]), (end[0], end[1]), (0, 0, 255))
 
 
-def process_stone(id, contour, result_img):
+def process_stone(id, contour, src_img, result_img):
     m = cv2.moments(contour)
 
     try:
@@ -169,6 +169,8 @@ def process_stone(id, contour, result_img):
 
     print 'id:{} bbox:{} center:{} size:{} angle:{}'.format(id, bbox, ec, es, ea)
 
+    crop_img = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
+    cv2.imshow('cropped#{}'.format(id), crop_img)
 
 while(True):
 
@@ -264,7 +266,7 @@ while(True):
 
     for id in range(len(stones_contours)):
         contour = stones_contours[id]
-        process_stone(id, contour, result_img)
+        process_stone(id, contour, frame, result_img)
 
     # Display
     cv2.imshow('color with debug', color_img)
