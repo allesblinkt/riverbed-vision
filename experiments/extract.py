@@ -8,11 +8,6 @@ cam = None
 shaky_fake = False
 save_stones = False
 
-colormap = []
-for v in [255, 128]:
-    for m in [(0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0)]:
-        colormap.append((m[0]*v, m[1]*v, m[2]*v))
-
 if camera_port >= 0:
     cam = cv2.VideoCapture(camera_port)
     cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 640)
@@ -145,7 +140,8 @@ def draw_normal(img, pt, normal, angle, scale=10.0):
     cv2.line(img, (start[0], start[1]), (end[0], end[1]), (0, 0, 255))
 
 
-def process_stone(id, contour, src_img, result_img):
+def process_stone(id, stones_contours, src_img, result_img):
+    contour = stones_contours[id]
     m = cv2.moments(contour)
 
     try:
@@ -154,36 +150,32 @@ def process_stone(id, contour, src_img, result_img):
     except:
         return
 
-    c = colormap[ id % len(colormap) ]
-    cv2.drawContours(result_img, stones_contours, id, c, -1)
-
-    cv2.circle(result_img, (cx, cy), 4, (255, 0, 255))
 
     bbox = cv2.boundingRect(contour)
-    cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0), 2)
 
     ec, es, ea = cv2.minAreaRect(contour)
     ec = (int(ec[0]), int(ec[1]))
     es = (int(es[0]) / 2, int(es[1]) / 2)
     ea = int(ea)
-    cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 255, 0), 2)
 
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
     b, g, r = cv2.split(cutout)
-    a = np.zeros_like(b, dtype=np.float)
+    a = np.zeros_like(b, dtype=np.uint8)
     cv2.drawContours(a, stones_contours, id, 255, -1, offset=(-bbox[0], -bbox[1]))
-    # hell, the line below does not work for some reason :-(
-    # cropped = cv2.merge((b,g,r,a))
-    cropped = np.zeros((bbox[3], bbox[2], 4), dtype=np.float)
-    cropped[:,:,0] = b
-    cropped[:,:,1] = r
-    cropped[:,:,2] = g
-    cropped[:,:,3] = a
+    cropped = cv2.merge((b,g,r,a))
+    avg, dev = cv2.meanStdDev(cutout, mask=a)
+    avg, dev = avg.T[0], np.max(dev.T[0])
 
     if save_stones:
         cv2.imwrite('stone_{:03d}.png'.format(id), cropped)
 
-    print 'id:{} bbox:{} center:{} size:{} angle:{}'.format(id, bbox, ec, es, ea)
+    color = np.multiply(avg, 2)
+    cv2.drawContours(result_img, stones_contours, id, color, -1)
+    cv2.circle(result_img, (cx, cy), 4, (0, 128, 0))
+    cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
+    cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
+
+    print 'id:{} bbox:{} ecenter:{} esize:{} eangle:{} avg:{} dev:{}'.format(id, bbox, ec, es, ea, avg, dev)
 
 while(True):
 
@@ -278,8 +270,7 @@ while(True):
     result_img = np.zeros_like(color_img)
 
     for id in range(len(stones_contours)):
-        contour = stones_contours[id]
-        process_stone(id, contour, frame, result_img)
+        process_stone(id, stones_contours, frame, result_img)
 
     # Display
     cv2.imshow('color with debug', color_img)
