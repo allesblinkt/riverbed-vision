@@ -6,6 +6,7 @@ from random import randint, uniform, seed
 camera_port = -1
 cam = None
 shaky_fake = False
+save_stones = False
 
 colormap = []
 for v in [255, 128]:
@@ -167,10 +168,22 @@ def process_stone(id, contour, src_img, result_img):
     ea = int(ea)
     cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 255, 0), 2)
 
-    print 'id:{} bbox:{} center:{} size:{} angle:{}'.format(id, bbox, ec, es, ea)
+    cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
+    b, g, r = cv2.split(cutout)
+    a = np.zeros_like(b, dtype=np.float)
+    cv2.drawContours(a, stones_contours, id, 255, -1, offset=(-bbox[0], -bbox[1]))
+    # hell, the line below does not work for some reason :-(
+    # cropped = cv2.merge((b,g,r,a))
+    cropped = np.zeros((bbox[3], bbox[2], 4), dtype=np.float)
+    cropped[:,:,0] = b
+    cropped[:,:,1] = r
+    cropped[:,:,2] = g
+    cropped[:,:,3] = a
 
-    crop_img = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
-    # cv2.imshow('cropped#{}'.format(id), crop_img)
+    if save_stones:
+        cv2.imwrite('stone_{:03d}.png'.format(id), cropped)
+
+    print 'id:{} bbox:{} center:{} size:{} angle:{}'.format(id, bbox, ec, es, ea)
 
 while(True):
 
