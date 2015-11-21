@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from random import randint, random, seed
+from random import randint, uniform, seed
 
 camera_port = -1
 cam = None
@@ -170,7 +170,7 @@ def process_stone(id, contour, src_img, result_img):
     print 'id:{} bbox:{} center:{} size:{} angle:{}'.format(id, bbox, ec, es, ea)
 
     crop_img = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
-    cv2.imshow('cropped#{}'.format(id), crop_img)
+    # cv2.imshow('cropped#{}'.format(id), crop_img)
 
 while(True):
 
@@ -182,8 +182,8 @@ while(True):
         else:
             # rotate and zoom randomly input frame
             rows, cols, _ = fakecam.shape
-            rot, scale = -5 + random() * 10, 1.0 + random() / 2.0
-            M = cv2.getRotationMatrix2D((cols/2, rows/2), rot, scale)
+            x, y = uniform(-10, 10), uniform(-10, 10)
+            M = np.float32(((1,0,x), (0,1,y)))
             frame = cv2.warpAffine(fakecam, M, (cols, rows))
 
     color_img = frame.copy()
