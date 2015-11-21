@@ -1,10 +1,16 @@
 import cv2
 import numpy as np
 
-from random import randint, seed
+from random import randint, random, seed
 
 camera_port = -1
 cam = None
+shaky_fake = False
+
+colormap = []
+for v in [255, 128]:
+    for m in [(0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0)]:
+        colormap.append((m[0]*v, m[1]*v, m[2]*v))
 
 if camera_port >= 0:
     cam = cv2.VideoCapture(camera_port)
@@ -12,12 +18,7 @@ if camera_port >= 0:
     cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 360)
     cam.set(cv2.cv.CV_CAP_PROP_FPS, 30)
 else:
-    frame = cv2.imread('testdata/stones.jpg')
-
-
-def random_color_rgb():
-    """ Returns a random color in the GBR 255 format """
-    return (randint(0, 255), randint(0, 255), randint(0, 255))
+    fakecam = cv2.imread('testdata/stones.jpg')
 
 
 def analyze_contour_cuts(contour, step=7):
@@ -138,42 +139,50 @@ def falloff_gradient(x, x2, y, y2, pt, n, rad):   # max curvature influence     
 
 def draw_normal(img, pt, normal, angle, scale=10.0):
     """ Draws the normal onto an image at a given point """
-
-    color = random_color_rgb()
-
     start = np.uint16(np.round(pt))
     end = np.uint16(np.round(pt + normal * scale * angle))
-    cv2.line(img, (start[0], start[1]), (end[0], end[1]), color)
+    cv2.line(img, (start[0], start[1]), (end[0], end[1]), (0, 0, 255))
 
 
 def process_stone(id, contour, result_img):
     m = cv2.moments(contour)
 
-    cx = int(m['m10'] / m['m00'])
-    cy = int(m['m01'] / m['m00'])
+    try:
+        cx = int(m['m10'] / m['m00'])
+        cy = int(m['m01'] / m['m00'])
+    except:
+        return
 
-    c = random_color_rgb()
+    c = colormap[ id % len(colormap) ]
     cv2.drawContours(result_img, stones_contours, id, c, -1)
 
     cv2.circle(result_img, (cx, cy), 4, (255, 0, 255))
 
-    r = cv2.boundingRect(contour)
-    cv2.rectangle(result_img, (r[0], r[1]), (r[0] + r[2], r[1] + r[3]), (255, 0, 0), 2)
+    bbox = cv2.boundingRect(contour)
+    cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0), 2)
 
-    c, s, a = cv2.minAreaRect(contour)
-    c = (int(c[0]), int(c[1]))
-    s = (int(s[0]) / 2, int(s[1]) / 2)
-    a = int(a)
-    cv2.ellipse(result_img, c, s, a, 0, 360, (0, 255, 0), 2)
+    ec, es, ea = cv2.minAreaRect(contour)
+    ec = (int(ec[0]), int(ec[1]))
+    es = (int(es[0]) / 2, int(es[1]) / 2)
+    ea = int(ea)
+    cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 255, 0), 2)
 
-    print 'id:{} center:{} size:{} angle:{}'.format(id, c, s, a)
+    print 'id:{} bbox:{} center:{} size:{} angle:{}'.format(id, bbox, ec, es, ea)
 
 
 while(True):
-    seed(2)   # Same random seed each time, for persistent random colors...
 
     if cam:
         frame = cam.read()
+    else:
+        if not shaky_fake:
+            frame = fakecam.copy()
+        else:
+            # rotate and zoom randomly input frame
+            rows, cols, _ = fakecam.shape
+            rot, scale = -5 + random() * 10, 1.0 + random() / 2.0
+            M = cv2.getRotationMatrix2D((cols/2, rows/2), rot, scale)
+            frame = cv2.warpAffine(fakecam, M, (cols, rows))
 
     color_img = frame.copy()
 
@@ -220,7 +229,10 @@ while(True):
 
             falloff_part = falloff_gradient(x, x2, y, y2, cut_point, cut_normal, rad)
 
-            weight_img[y:y2, x:x2] *= falloff_part
+            try:
+                weight_img[y:y2, x:x2] *= falloff_part
+            except:
+                pass
 
     # Threshold the weighting image
     weight_thresh_img = np.uint8(np.clip(weight_img * 255.0, 0, 255))
