@@ -6,7 +6,8 @@ Install packages:
 
 ```
 sudo apt-get update
-sudo apt-get install python-opencv python-serial python2-pyro4
+sudo apt-get install python-opencv python-serial
+sudo pip install Pyro4
 ```
 
 Clone the repository:

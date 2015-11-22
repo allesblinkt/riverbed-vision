@@ -4,6 +4,7 @@ import serial
 import threading
 import logging
 import Pyro4
+import socket
 
 NEWLINE = '\r\n'
 DEVICE  = None # '/dev/ttyACM0'
@@ -145,7 +146,8 @@ class SerialOpenError(Exception):
 
 
 if __name__ == '__main__':
-    daemon = Pyro4.Daemon(port=PORT)
+    host = socket.gethostbyname(socket.gethostname())
+    daemon = Pyro4.Daemon(host=host, port=PORT)
     control = MachineController(DEVICE)
     uri = daemon.register(control, 'control')
     print 'Running at', uri
