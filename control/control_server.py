@@ -122,9 +122,11 @@ class MachineController(object):
                 self.serial_port.flushInput()
                 self.serial_port.flushOutput()
                 line = self.serial_port.readline()
+                log.debug('Received line "%s"', line.rstrip())
                 if read_result:
                     result = line
                     line = self.serial_port.readline()
+                    log.debug('Received line#2 "%s"', line.rstrip())
                 else:
                     result = None
                 if line.lower().startswith('ok'):
