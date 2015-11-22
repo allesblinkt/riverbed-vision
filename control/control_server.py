@@ -51,7 +51,7 @@ class MachineController(object):
         self._command('G28')
         self.block()
 
-    def check_movement(self, **kwargs):
+    def _check_movement(self, **kwargs):
         if 'x' in kwargs:
             if kwargs['x'] < 0 or kwargs['x'] > 4000:
                 return False
@@ -66,23 +66,18 @@ class MachineController(object):
                 return False
         return True
 
-    def rapid(self, x=None, y=None, z=None):
-        if self.check_movement(x=x, y=y, z=z):
-            cmd_str = 'G0' + ' ' + format_pos(x=x, y=y, z=z)
+    def rapid(self, x=None, y=None, z=None, e=None):
+        if self._check_movement(x=x, y=y, z=z, e=e):
+            cmd_str = 'G0' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
 
-    def go(self, x=None, y=None, z=None):
-        if self.check_movement(x=x, y=y, z=z):
-            cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z)
-            self._command(cmd_str)
-
-    def rotate(self, e):
-        if self.check_movement(e=e):
-            cmd_str = 'G1' + ' ' + format_pos(e=e)
+    def go(self, x=None, y=None, z=None, e=None):
+        if self._check_movement(x=x, y=y, z=z, e=e):
+            cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
 
     def pickup(self):
-        self.set_pickup_params(max_z=self.pickup_z/2.0) # weirdness, need to divide by 2
+        self.set_pickup_params(max_z=self.pickup_z)
         cmd_str = 'G30'
         result = self._command(cmd_str, read_result=True)
         if result.startswith('Z:'): # Z:20.0270 C:445 - parse as z_delta
@@ -97,6 +92,7 @@ class MachineController(object):
         return None
 
     def set_pickup_params(self, slow_feed=None, fast_feed=None, return_feed=None, max_z=None, probe_height=None):
+        max_z = max_z / 2 # weirdness, need to divide by 2
         cmd_str = 'M670'
         cmd_feed = format_feed(s=slow_feed, k=fast_feed, r=return_feed)
         cmd_pos = format_pos(z=max_z, h=probe_height)
@@ -106,11 +102,11 @@ class MachineController(object):
             cmd_str += ' ' + cmd_pos
         self._command(cmd_str)
 
-    def switch_vacuum(self, state):
+    def vacuum(self, state):
         cmd_str = 'M42' if state else 'M43'
         self._command(cmd_str)
 
-    def switch_light(self, state):
+    def light(self, state):
         cmd_str = 'M108' if state else 'M109'
         self._command(cmd_str)
 
@@ -133,12 +129,10 @@ class MachineController(object):
                     result = None
                 if line.lower().startswith('ok'):
                     return result
-                elif line.startswith('!!'):
-                    raise StateException('Sick State')
                 else:
                     raise CommunicationException('Communication Error')
 
-    def close(self):
+    def _close(self):
         if self.serial_port:
             with self.serial_mutex:
                 self.serial_port.flushInput()
@@ -147,7 +141,7 @@ class MachineController(object):
                 self.serial_port = None
 
     def __del__(self):
-        self.close()
+        self._close()
 
 
 class StateException(Exception):
