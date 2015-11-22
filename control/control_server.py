@@ -54,15 +54,19 @@ class MachineController(object):
     def _check_movement(self, **kwargs):
         if 'x' in kwargs:
             if kwargs['x'] < 0 or kwargs['x'] > 4000:
+                log.warn('Invalid movement: X=%f', kwargs['x'])
                 return False
         if 'y' in kwargs:
             if kwargs['y'] < 0 or kwargs['y'] > 2000:
+                log.warn('Invalid movement: Y=%f', kwargs['y'])
                 return False
         if 'z' in kwargs:
             if kwargs['z'] < 0 or kwargs['z'] > 38:
+                log.warn('Invalid movement: Z=%f', kwargs['z'])
                 return False
         if 'e' in kwargs:
             if kwargs['e'] < 0 or kwargs['e'] > 180:
+                log.warn('Invalid movement: E=%f', kwargs['e'])
                 return False
         return True
 
