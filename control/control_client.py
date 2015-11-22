@@ -1,5 +1,6 @@
 #!/usr/bin/ipython -i
 import Pyro4
+import time
 import sys
 
 if len(sys.argv) > 1:
