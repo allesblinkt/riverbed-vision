@@ -37,12 +37,7 @@ class MachineController(object):
             try:
                 self.serial_port = serial.Serial(port_name)
                 # self.serial_port.setTimeout(1.0)
-
                 self.serial_port.baudrate = baudrate
-
-                self.reading_thread = threading.Thread(target=self._threaded_read)
-                self.reading_thread.daemon = True
-                self.reading_thread.start()
             except SerialOpenError:
                 raise SerialOpenError(port_name, baudrate)
         else:
