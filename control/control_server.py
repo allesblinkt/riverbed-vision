@@ -124,6 +124,8 @@ class MachineController(object):
                 line = self.serial_port.readline()
                 log.debug('Received line "%s"', line.rstrip())
                 if read_result:
+                    if line.startswith('ok'):
+                        raise StateException('Expected result, but OK returned')
                     result = line
                     line = self.serial_port.readline()
                     log.debug('Received line#2 "%s"', line.rstrip())
