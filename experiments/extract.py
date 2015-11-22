@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-
 from random import randint, uniform, seed
+import time
 
 camera_port = -1
 cam = None
@@ -191,6 +191,8 @@ while(True):
             M = np.float32(((1,0,x), (0,1,y)))
             frame = cv2.warpAffine(fakecam, M, (cols, rows))
 
+    start_time = time.time()
+
     color_img = frame.copy()
 
     # Grayscale conversion, blurring, threshold
@@ -271,6 +273,9 @@ while(True):
 
     for id in range(len(stones_contours)):
         process_stone(id, stones_contours, frame, result_img)
+
+    elapsed_time = time.time() - start_time
+    print 'Analysis took: {:0.3f}s'.format(elapsed_time)
 
     # Display
     cv2.imshow('color with debug', color_img)
