@@ -46,6 +46,10 @@ class MachineController(object):
         else:
             log.warn('MachineController created without a serial port')
 
+    def home(self):
+        self._command('$X')
+        self._command('$H')
+
     def check_movement(self, **kwargs):
         # CHECK bounds
         # CHECK if rapid in allowed rapid height
@@ -113,7 +117,7 @@ class MachineController(object):
                 self.serial_port = None
 
     def _command(self, cmd_str):
-        log.debug('Sending command "%s"', cmd_str.rstrip())
+        log.debug('Sending command "%s"', cmd_str)
         if self.serial_port:
             with self.serial_mutex:
                 self.serial_port.write(cmd_str + NEWLINE)
