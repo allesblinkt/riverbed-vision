@@ -30,12 +30,13 @@ class MachineController(object):
         self.serial_mutex = threading.Lock()
         self.serial_port = None
         self.port_name = port_name
+        self.pickup_z = 38.0
 
         if port_name:
             log.info('Opening serial port %s at %d bps', port_name, baudrate)
             try:
                 self.serial_port = serial.Serial(port_name)
-                self.serial_port.setTimeout(1.0)
+                # self.serial_port.setTimeout(1.0)
 
                 self.serial_port.baudrate = baudrate
 
@@ -47,13 +48,27 @@ class MachineController(object):
         else:
             log.warn('MachineController created without a serial port')
 
+    def block(self):
+        # M400 - Wait for the queue to be empty before answering "OK"
+        self._command('M400')
+
     def home(self):
-        self._command('$X')
-        self._command('$H')
+        self._command('G28')
+        self.block()
 
     def check_movement(self, **kwargs):
-        # CHECK bounds
-        # CHECK if rapid in allowed rapid height
+        if 'x' in kwargs:
+            if kwargs['x'] < 0 || kwargs['x'] > 4000:
+                return False
+        if 'y' in kwargs:
+            if kwargs['y'] < 0 || kwargs['y'] > 2000:
+                return False
+        if 'z' in kwargs:
+            if kwargs['z'] < 0 || kwargs['z'] > 38:
+                return False
+        if 'e' in kwargs:
+            if kwargs['e'] < 0 || kwargs['e'] > 180:
+                return False
         return True
 
     def rapid(self, x=None, y=None, z=None):
@@ -66,9 +81,25 @@ class MachineController(object):
             cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z)
             self._command(cmd_str)
 
+    def rotate(self, e):
+        if self.check_movement(e=e):
+            cmd_str = 'G1' + ' ' + format_pos(e=e)
+            self._command(cmd_str)
+
     def pickup(self):
+        self.set_pickup_params(max_z=self.pickup_z/2.0) # weirdness, need to divide by 2
         cmd_str = 'G30'
-        self._command(cmd_str)
+        result = self._command(cmd_str, read_result=True)
+        if result.startswith('Z:'): # Z:20.0270 C:445 - parse as z_delta
+            m = re.search('Z:(\d+\.\d+)', result)
+            if len(m.groups()) >= 1:
+                z_delta = float(m.group(1))
+                z_val = self.pickup_z - z_delta
+                return z_val
+        # result is "ZProbe not triggered" or something else
+        # move to z pickup position and return nothing
+        self.rapid(z=self.pickup_z)
+        return None
 
     def set_pickup_params(self, slow_feed=None, fast_feed=None, return_feed=None, max_z=None, probe_height=None):
         cmd_str = 'M670'
@@ -80,38 +111,33 @@ class MachineController(object):
             cmd_str += ' ' + cmd_pos
         self._command(cmd_str)
 
-    def save_pickup_params(self):
-        cmd_str = 'M500'
-        self._command(cmd_str)
-
-    def read_vacuum(self):
-        cmd_str = 'M119'
-        self._command(cmd_str)
-
-        read = self._response()
-
-        rs = 'Probe: (\d+)'
-
-        m = re.search(rs, read)
-
-        if len(m.groups()) and m.group(1) == '255':
-            # True
-            pass
-        else:
-            # False
-            pass
-
     def switch_vacuum(self, state):
-        cmd_str = 'M106' if state else 'M107'
-        self._command(cmd_str)
-
-    def switch_throwoff(self, state):
-        cmd_str = 'M108' if state else 'M109'
+        cmd_str = 'M42' if state else 'M43'
         self._command(cmd_str)
 
     def switch_light(self, state):
-        cmd_str = 'M102' if state else 'M103'
+        cmd_str = 'M108' if state else 'M109'
         self._command(cmd_str)
+
+    def _command(self, cmd_str, read_result=False):
+        log.debug('Sending command "%s"', cmd_str)
+        if self.serial_port:
+            with self.serial_mutex:
+                self.serial_port.write(cmd_str + NEWLINE)
+                self.serial_port.flushInput()
+                self.serial_port.flushOutput()
+                line = self.serial_port.readline()
+                if read_result:
+                    result = line
+                    line = self.serial_port.readline()
+                else:
+                    result = None
+                if line.lower().startswith('ok'):
+                    return result
+                elif line.startswith('!!'):
+                    raise StateException('Sick State')
+                else:
+                    raise CommunicationException('Communication Error')
 
     def close(self):
         if self.serial_port:
@@ -121,22 +147,15 @@ class MachineController(object):
                 self.serial_port.close()
                 self.serial_port = None
 
-    def _command(self, cmd_str):
-        log.debug('Sending command "%s"', cmd_str)
-        if self.serial_port:
-            with self.serial_mutex:
-                self.serial_port.write(cmd_str + NEWLINE)
-                self.serial_port.flushOutput()
-
-    def _response(self):
-        try:
-            return self.serial_port.readline()
-        except:
-            return ''
-
     def __del__(self):
         self.close()
 
+
+class StateException(Exception):
+    pass
+
+class CommunicationException(Exception):
+    pass
 
 class SerialOpenError(Exception):
     def __init__(self, port, baud):
