@@ -6,7 +6,7 @@ Install packages:
 
 ```
 sudo apt-get update
-sudo apt-get install python-opencv python-serial
+sudo apt-get install python-netifaces python-opencv python-serial
 sudo pip install Pyro4
 ```
 

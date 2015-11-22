@@ -4,7 +4,7 @@ import serial
 import threading
 import logging
 import Pyro4
-import socket
+import netifaces
 
 NEWLINE = '\r\n'
 DEVICE  = None # '/dev/ttyACM0'
@@ -146,7 +146,10 @@ class SerialOpenError(Exception):
 
 
 if __name__ == '__main__':
-    host = socket.gethostbyname(socket.gethostname())
+    try: # raspi detection
+        host = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
+    except:
+        host = 'localhost'
     daemon = Pyro4.Daemon(host=host, port=PORT)
     control = MachineController(DEVICE)
     uri = daemon.register(control, 'control')
