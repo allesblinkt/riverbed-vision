@@ -58,16 +58,16 @@ class MachineController(object):
 
     def check_movement(self, **kwargs):
         if 'x' in kwargs:
-            if kwargs['x'] < 0 || kwargs['x'] > 4000:
+            if kwargs['x'] < 0 or kwargs['x'] > 4000:
                 return False
         if 'y' in kwargs:
-            if kwargs['y'] < 0 || kwargs['y'] > 2000:
+            if kwargs['y'] < 0 or kwargs['y'] > 2000:
                 return False
         if 'z' in kwargs:
-            if kwargs['z'] < 0 || kwargs['z'] > 38:
+            if kwargs['z'] < 0 or kwargs['z'] > 38:
                 return False
         if 'e' in kwargs:
-            if kwargs['e'] < 0 || kwargs['e'] > 180:
+            if kwargs['e'] < 0 or kwargs['e'] > 180:
                 return False
         return True
 
