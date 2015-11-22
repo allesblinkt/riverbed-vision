@@ -7,7 +7,7 @@ import Pyro4
 import netifaces
 
 NEWLINE = '\r\n'
-DEVICE  = None # '/dev/ttyACM0'
+DEVICE  = '/dev/ttyACM0'
 PORT    = 5001
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
