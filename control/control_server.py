@@ -70,6 +70,10 @@ class MachineController(object):
                 return False
         return True
 
+    def feedrate(self, f):
+        cmd_str = format_feed(f=f)
+        self._command(cmd_str)
+
     def rapid(self, x=None, y=None, z=None, e=None):
         if self._check_movement(x=x, y=y, z=z, e=e):
             cmd_str = 'G0' + ' ' + format_pos(x=x, y=y, z=z, e=e)
