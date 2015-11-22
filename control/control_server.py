@@ -58,12 +58,12 @@ class MachineController(object):
 
     def rapid(self, x=None, y=None, z=None):
         if self.check_movement(x=x, y=y, z=z):
-            cmd_str = 'G00' + ' ' + format_pos(x=x, y=y, z=z)
+            cmd_str = 'G0' + ' ' + format_pos(x=x, y=y, z=z)
             self._command(cmd_str)
 
     def go(self, x=None, y=None, z=None):
         if self.check_movement(x=x, y=y, z=z):
-            cmd_str = 'G01' + ' ' + format_pos(x=x, y=y, z=z)
+            cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z)
             self._command(cmd_str)
 
     def pickup(self):
@@ -102,11 +102,15 @@ class MachineController(object):
             pass
 
     def switch_vacuum(self, state):
-        cmd_str = 'M106' if state else 'M0107'
+        cmd_str = 'M106' if state else 'M107'
         self._command(cmd_str)
 
     def switch_throwoff(self, state):
-        cmd_str = 'M108' if state else 'M0109'
+        cmd_str = 'M108' if state else 'M109'
+        self._command(cmd_str)
+
+    def switch_light(self, state):
+        cmd_str = 'M102' if state else 'M103'
         self._command(cmd_str)
 
     def close(self):
