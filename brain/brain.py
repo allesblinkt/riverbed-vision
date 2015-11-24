@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import time
+import math
 import Pyro4
 
 CONTROL_HOSTNAME = 'localhost'
@@ -16,7 +17,7 @@ class Machine(object):
         self.last_pickup_height = None
         self.control.home()
 
-    def lift_up():
+    def lift_up(self):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
         self.control.vacuum(True)
@@ -25,10 +26,23 @@ class Machine(object):
         assert h
         self.last_pickup_height = h
 
-    def lift_down(h):
+    def lift_down(self.h):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
         time.sleep(0.1)
+
+    '''
+    Compute difference between center of the vacuum head and center of camera view.
+    Relative to camera center. In CNC units = milimeters.
+    '''
+    def vision_delta(self):
+        # length of rotating head (in mm)
+        length = 60.0 # FIXME: put real value
+        # distance between center of Z axis and center of camera view (both in mm)
+        dx, dy = -50.0, -5.0 # FIXME: put real values
+        angle = math.radians(self.e)
+        return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
+
 
 class Brain(object):
 
