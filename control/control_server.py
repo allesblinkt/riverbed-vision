@@ -87,7 +87,11 @@ class MachineController(object):
             cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
 
+    def pickup_top(self):
+        self.go(z=self.pickup_z)
+
     def pickup(self):
+        self.pickup_top()
         self.set_pickup_params(max_z=self.pickup_z)
         cmd_str = 'G30'
         result = self._command(cmd_str, read_result=True)
