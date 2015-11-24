@@ -4,6 +4,9 @@ import Pyro4
 
 CONTROL_HOSTNAME = 'localhost'
 
+'''
+High-level operations on CNC
+'''
 class Machine(object):
 
     def __init__(self, hostname):
@@ -14,6 +17,8 @@ class Machine(object):
         self.control.home()
 
     def lift_up():
+        if self.last_pickup_height is not None:
+            raise Exception('lift_up called, but previous call not cleared using lift_down')
         self.control.vacuum(True)
         time.sleep(1.0)
         h = self.control.pickup()
@@ -21,14 +26,9 @@ class Machine(object):
         self.last_pickup_height = h
 
     def lift_down(h):
-        if self.last_pickup_height is not None:
-            self.control.go(z=max(self.last_pickup_height - 3, 0))
-            self.control.vacuum(False)
-            time.sleep(0.1)
-            self.control.pickup_top()
-            self.last_pickup_height = None
-        raise Exception('lift_down called without calling lift_up first')
-
+        if self.last_pickup_height is None:
+            raise Exception('lift_down called without calling lift_up first')
+        time.sleep(0.1)
 
 class Brain(object):
 
@@ -41,7 +41,12 @@ class Brain(object):
     def start(self):
         pass
 
-    def run(self):
+    def run(self, prgname):
+        f = getattr(self, prgname)
+        f()
+
+    def demo1(self):
+        # demo program which moves stone back and forth
         while True:
             self._move_stone(0, 0, 0, 500, 250, 90)
             self._move_stone(500, 250, 90, 0, 0, 0)
@@ -57,4 +62,4 @@ class Brain(object):
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    brain.run()
+    brain.run('demo1')
