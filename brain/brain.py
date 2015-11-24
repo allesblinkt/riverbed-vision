@@ -37,7 +37,7 @@ class Machine(object):
     '''
     def vision_delta(self):
         # length of rotating head (in mm)
-        length = 60.0 # FIXME: put real value
+        length = 40.0 # distance of vacuum tool to rotation axis (Z center)
         # distance between center of Z axis and center of camera view (both in mm)
         dx, dy = -50.0, -5.0 # FIXME: put real value
         angle = math.radians(self.e)
