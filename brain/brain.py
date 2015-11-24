@@ -39,7 +39,7 @@ class Machine(object):
         # length of rotating head (in mm)
         length = 40.0 # distance of vacuum tool to rotation axis (Z center)
         # distance between center of Z axis and center of camera view (both in mm)
-        dx, dy = -50.0, -5.0 # FIXME: put real value
+        dx, dy = 69.23, 1.88 # TODO: check the signs.
         angle = math.radians(self.e)
         return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
 
