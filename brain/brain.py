@@ -39,9 +39,24 @@ class Machine(object):
         # length of rotating head (in mm)
         length = 60.0 # FIXME: put real value
         # distance between center of Z axis and center of camera view (both in mm)
-        dx, dy = -50.0, -5.0 # FIXME: put real values
+        dx, dy = -50.0, -5.0 # FIXME: put real value
         angle = math.radians(self.e)
         return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
+
+
+class Camera(object):
+
+    def __init__(self):
+        self.resx = 1280.0 # image width (in pixels)
+        self.resy = 720.0 # image height (in pixels)
+        self.viewx = 128.0 # view width (in cnc units = mm) # FIXME: put real value
+        self.viewy = 72.0 # view height (in cnc units = mm) # FIXME: put real value
+
+    # calc distance of perceived pixel from center of the view (in cnc units = mm)
+    def pos_to_mm(self, x, y):
+        rx = self.viewx * (x / self.resx - 0.5)
+        ry = self.viewy * (y / self.resy - 0.5)
+        return rx, ry
 
 
 class Brain(object):
