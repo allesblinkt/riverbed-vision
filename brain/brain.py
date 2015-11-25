@@ -2,6 +2,8 @@
 import time
 import math
 import Pyro4
+# import pickle as serialization
+import serpent as serialization
 
 CONTROL_HOSTNAME = 'localhost'
 
@@ -26,10 +28,14 @@ class Machine(object):
         assert h
         self.last_pickup_height = h
 
-    def lift_down(self.h):
+    def lift_down(self):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
+        self.control.go(z=max(self.last_pickup_height - 3, 0))
+        self.control.vacuum(False)
         time.sleep(0.1)
+        self.control.pickup_top()
+        self.last_pickup_height = None
 
     '''
     Compute difference between center of the vacuum head and center of camera view.
@@ -59,10 +65,44 @@ class Camera(object):
         return rx, ry
 
 
+class Stone(object):
+
+    def __init__(self, id, center, el_center, el_size, el_angle, color_avg, color_dev):
+        self.id = id
+        self.center = center
+        self.el_center = el_center
+        self.el_size = el_size
+        self.el_angle = el_angle
+        self.color_avg = color_avg
+        self.color_dev = color_dev
+
+
+class StoneMap(object):
+
+    def __init__(self, filename):
+        self.filename = filename
+        try:
+            with open(self.filename, 'rb') as f:
+                self.stones = serialization.load(f)
+        except:
+            self.stones = {}
+            self.save()
+
+    # functions also as replace
+    def add(self, stone):
+        self.stones[stone.id] = stone
+        self.save()
+
+    def save(self):
+        with open(self.filename, 'wb') as f:
+            serialization.dump(self.stones, f)
+
+
 class Brain(object):
 
     def __init__(self):
         self.machine = Machine(CONTROL_HOSTNAME)
+        self.map = StoneMap('stones.data')
         # shortcuts for convenience
         self.m = self.machine
         self.c = self.machine.control
