@@ -4,8 +4,15 @@ import math
 import Pyro4
 # import pickle as serialization
 import serpent as serialization
+from random import uniform
+from PIL import Image, ImageDraw
+import logging
 
 CONTROL_HOSTNAME = 'localhost'
+
+logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
+log = logging.getLogger(__name__)
+
 
 '''
 High-level operations on CNC
@@ -17,7 +24,10 @@ class Machine(object):
         self.control = Pyro4.Proxy(self.uri)
         self.x, self.y, self.z, self.e = 0.0, 0.0, 0.0, 0.0
         self.last_pickup_height = None
-        self.control.home()
+        try:
+            self.control.home()
+        except:
+            self.control = None
 
     def lift_up(self):
         if self.last_pickup_height is not None:
@@ -67,35 +77,81 @@ class Camera(object):
 
 class Stone(object):
 
-    def __init__(self, id, center, el_center, el_size, el_angle, color_avg, color_dev):
+    def __init__(self, id, center, size, angle, color_avg, color_dev):
         self.id = id
         self.center = center
-        self.el_center = el_center
-        self.el_size = el_size
-        self.el_angle = el_angle
+        self.size = size
+        self.angle = angle
         self.color_avg = color_avg
         self.color_dev = color_dev
-
+        ux = size[0] * math.cos(math.radians(angle))
+        uy = size[0] * math.sin(math.radians(angle))
+        vx = size[1] * math.cos(math.radians(angle + 90))
+        vy = size[1] * math.sin(math.radians(angle + 90))
+        h = math.sqrt(ux ** 2 + vx ** 2)
+        w = math.sqrt(uy ** 2 + vy ** 2)
+        self.bbox = (center[0] - w, center[1] - h, center[0] + w, center[1] + h)
 
 class StoneMap(object):
 
     def __init__(self, filename):
         self.filename = filename
+        self.size = 4000, 2000
         try:
             with open(self.filename, 'rb') as f:
-                self.stones = serialization.load(f)
+                d = serialization.load(f)
+                self.stones = d['stones']
+                self.size = d['size']
         except:
             self.stones = {}
             self.save()
 
+    # populate the map with random stones
+    def _randomize(self, count=300):
+        log.debug('Generating random map of %d stones', count)
+        self.stones = {}
+        for i in range(count):
+            center = (uniform(100, self.size[0] - 100), uniform(100, self.size[1] - 100))
+            a = uniform(20, 50)
+            b = uniform(20, 50)
+            if b > a:
+                a, b = b, a
+            r = uniform(-90, 90)
+            c, d = ((uniform(96, 160), uniform(96, 160), uniform(96, 160)), uniform(10, 40))
+            s = Stone(i, center, (a, b), r, c, d)
+            self.add_stone(s)
+
+    # scan the working area and populate the map
+    def _scan(self):
+        pass
+
+    def usage(self):
+        log.debug('Creating usage bitmap')
+        m = [[0]*self.size[1] for i in range(self.size[0])]
+        for s in self.stones.values():
+            a, b, c, d = s.bbox
+            for x in range(int(math.floor(a)), int(math.ceil(c)) + 1):
+                for y in range(int(math.floor(b)), int(math.ceil(d)) + 1):
+                    m[x][y] = 1
+        return m
+
+    def image(self):
+        log.debug('Creating map image')
+        im = Image.new('RGB', self.size)
+        draw = ImageDraw.Draw(im)
+        for s in self.stones.values():
+            draw.rectangle(s.bbox, outline='blue')
+        im.save('map.png')
+
     # functions also as replace
-    def add(self, stone):
+    def add_stone(self, stone):
         self.stones[stone.id] = stone
         self.save()
 
     def save(self):
         with open(self.filename, 'wb') as f:
-            serialization.dump(self.stones, f)
+            d = {'stones': self.stones, 'size': self.size}
+            serialization.dump(d, f)
 
 
 class Brain(object):
@@ -103,6 +159,9 @@ class Brain(object):
     def __init__(self):
         self.machine = Machine(CONTROL_HOSTNAME)
         self.map = StoneMap('stones.data')
+        self.map._randomize()
+        self.map.save()
+        self.map.image()
         # shortcuts for convenience
         self.m = self.machine
         self.c = self.machine.control
@@ -128,7 +187,8 @@ class Brain(object):
         self.c.go(x=x2, y=y2)
         self.m.lift_down(h)
 
+
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    brain.run('demo1')
+    # brain.run('demo1')
