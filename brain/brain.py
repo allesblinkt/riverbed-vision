@@ -88,9 +88,12 @@ class Stone(object):
         uy = size[0] * math.sin(math.radians(angle))
         vx = size[1] * math.cos(math.radians(angle + 90))
         vy = size[1] * math.sin(math.radians(angle + 90))
-        h = math.sqrt(ux ** 2 + vx ** 2)
-        w = math.sqrt(uy ** 2 + vy ** 2)
-        self.bbox = (center[0] - w, center[1] - h, center[0] + w, center[1] + h)
+        self.w = math.sqrt(ux ** 2 + vx ** 2)
+        self.h = math.sqrt(uy ** 2 + vy ** 2)
+        self.bbox = (center[0] - self.w, center[1] - self.h, center[0] + self.w, center[1] + self.h)
+
+    def overlaps(self, stone):
+        return (abs(self.center[0] - stone.center[0]) < (self.w + stone.w)) and (abs(self.center[1] - stone.center[1]) < (self.h + stone.h))
 
 class StoneMap(object):
 
@@ -119,7 +122,13 @@ class StoneMap(object):
             r = uniform(-90, 90)
             c, d = ((uniform(96, 160), uniform(96, 160), uniform(96, 160)), uniform(10, 40))
             s = Stone(i, center, (a, b), r, c, d)
-            self.add_stone(s)
+            bad = False
+            for s2 in self.stones.values():
+                if s.overlaps(s2):
+                    bad = True
+                    break
+            if not bad:
+                self.add_stone(s)
 
     # scan the working area and populate the map
     def _scan(self):
