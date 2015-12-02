@@ -9,7 +9,8 @@ from PIL import Image, ImageDraw
 import cv2
 import logging
 
-CONTROL_HOSTNAME = 'localhost'
+# CONTROL_HOSTNAME = 'localhost'
+CONTROL_HOSTNAME = '192.168.0.27'
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -77,14 +78,18 @@ class Camera(object):
         return rx, ry
 
     def grab(self):
-        cam = cv2.VideoCapture(self.index)
-        cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 1280)
-        cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 720)
-        cam.set(cv2.cv.CV_CAP_PROP_FPS, 15)
-        cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 39)
-        ret, frame = cam.read()
-        cam.release()
-        return frame if ret else None
+        try:
+            cam = cv2.VideoCapture(self.index)
+            cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 1280)
+            cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 720)
+            cam.set(cv2.cv.CV_CAP_PROP_FPS, 15)
+            cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 39)
+            ret, frame = cam.read()
+            cam.release()
+            return frame if ret else None
+        except:
+            return None
+
 
 class Stone(object):
 
@@ -142,10 +147,6 @@ class StoneMap(object):
                 self.add_stone(s)
         self._find_workarea()
 
-    # scan the working area and populate the map
-    def _scan(self):
-        self._find_workarea()
-
     def _find_workarea(self):
         pass
 
@@ -188,12 +189,12 @@ class Brain(object):
     def __init__(self):
         self.machine = Machine(CONTROL_HOSTNAME)
         self.map = StoneMap('stones.data')
-        self.map._randomize()
-        self.map.save()
-        self.map.image()
+        self.cam = Camera()
         # shortcuts for convenience
         self.m = self.machine
         self.c = self.machine.control
+        # go home (also test if the machine is initialized and working)
+        self.c.home()
 
     def start(self):
         pass
@@ -201,6 +202,29 @@ class Brain(object):
     def run(self, prgname):
         f = getattr(self, prgname)
         f()
+
+    def scan(self):
+        log.debug('Begin scanning')
+        self.c.pickup_top()
+        self.c.go(e=90)
+        self.c.block()
+        self.c.feedrate(30000)
+        step = 100
+        x, y = 1000, 1000 # self.map.size
+        for i in range(0, x + 1, step):
+            for j in range(0, y + 1, step):
+                self.c.go(x=i, y=j)
+                self.c.block()
+                self.c.light(True)
+                log.debug('Taking picture at coords {},{}'.format(i, j))
+                frame = self.cam.grab()
+                if frame is not None:
+                    cv2.imwrite('cam_{:04d}_{:04d}.jpg'.format(i, j), frame)
+                    log.debug('Saved as cam_{:04d}_{:04d}.jpg'.format(i, j))
+                else:
+                    log.error('Error taking picture')
+                self.c.light(False)
+        log.debug('End scanning')
 
     def demo1(self):
         # demo program which moves stone back and forth
@@ -220,4 +244,4 @@ class Brain(object):
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    # brain.run('demo1')
+    brain.run('scan')
