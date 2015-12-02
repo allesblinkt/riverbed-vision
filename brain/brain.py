@@ -6,6 +6,7 @@ import Pyro4
 import serpent as serialization
 from random import uniform
 from PIL import Image, ImageDraw
+import cv2
 import logging
 
 CONTROL_HOSTNAME = 'localhost'
@@ -62,7 +63,8 @@ class Machine(object):
 
 class Camera(object):
 
-    def __init__(self):
+    def __init__(self, index=0):
+        self.index = index
         self.resx = 1280.0 # image width (in pixels)
         self.resy = 720.0 # image height (in pixels)
         self.viewx = 128.0 # view width (in cnc units = mm) # FIXME: put real value
@@ -74,6 +76,15 @@ class Camera(object):
         ry = self.viewy * (y / self.resy - 0.5)
         return rx, ry
 
+    def grab(self):
+        cam = cv2.VideoCapture(self.index)
+        cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 1280)
+        cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 720)
+        cam.set(cv2.cv.CV_CAP_PROP_FPS, 15)
+        cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 39)
+        ret, frame = cam.read()
+        cam.release()
+        return frame if ret else None
 
 class Stone(object):
 
@@ -129,9 +140,13 @@ class StoneMap(object):
                     break
             if not bad:
                 self.add_stone(s)
+        self._find_workarea()
 
     # scan the working area and populate the map
     def _scan(self):
+        self._find_workarea()
+
+    def _find_workarea(self):
         pass
 
     def usage(self):
@@ -150,6 +165,11 @@ class StoneMap(object):
         draw = ImageDraw.Draw(im)
         for s in self.stones.values():
             draw.rectangle(s.bbox, outline='blue')
+            size = int(math.ceil(s.size[0] * 2.0)), int(math.ceil(s.size[1] * 2.0))
+            t = Image.new('RGBA', size)
+            ImageDraw.Draw(t).ellipse(((0, 0), size), outline='red')
+            t = t.rotate(s.angle, resample=Image.BILINEAR, expand=True)
+            draw.bitmap((s.center[0] - t.size[0] / 2.0, s.center[1] - t.size[1] / 2.0), t)
         im.save('map.png')
 
     # functions also as replace
