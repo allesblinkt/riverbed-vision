@@ -4,13 +4,17 @@ import math
 import Pyro4
 # import pickle as serialization
 import serpent as serialization
-from random import uniform
+from random import uniform, seed
 from PIL import Image, ImageDraw
 import cv2
 import logging
+import operator
+import numpy as np
+from collections import namedtuple
 
-# CONTROL_HOSTNAME = 'localhost'
-CONTROL_HOSTNAME = '192.168.0.27'
+
+CONTROL_HOSTNAME = 'localhost'
+# CONTROL_HOSTNAME = '192.168.0.27'
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -116,6 +120,7 @@ class StoneMap(object):
     def __init__(self, filename):
         self.filename = filename
         self.size = 4000, 2000
+        self.workarea = None
         try:
             with open(self.filename, 'rb') as f:
                 d = serialization.load(f)
@@ -126,13 +131,13 @@ class StoneMap(object):
             self.save()
 
     # populate the map with random stones
-    def _randomize(self, count=300):
+    def _randomize(self, count=500):
         log.debug('Generating random map of %d stones', count)
         self.stones = {}
         for i in range(count):
-            center = (uniform(100, self.size[0] - 100), uniform(100, self.size[1] - 100))
-            a = uniform(20, 50)
-            b = uniform(20, 50)
+            center = (uniform(50, self.size[0] - 50), uniform(50, self.size[1] - 50))
+            a = uniform(10, 30)
+            b = uniform(10, 30)
             if b > a:
                 a, b = b, a
             r = uniform(-90, 90)
@@ -145,20 +150,100 @@ class StoneMap(object):
                     break
             if not bad:
                 self.add_stone(s)
-        self._find_workarea()
+        self.workarea = self._find_workarea()
 
     def _find_workarea(self):
-        pass
 
-    def usage(self):
-        log.debug('Creating usage bitmap')
-        m = [[0]*self.size[1] for i in range(self.size[0])]
+        # implementation from http://drdobbs.com/database/184410529
+        Point = namedtuple('Point', ('X', 'Y'))
+
+        def area(ll, ur):
+            if ll.X < 0 or ll.Y < 0 or ur.X < 0 or ur.Y < 0:
+                return 0.0
+            if ll.X > ur.X or ll.Y > ur.Y:
+                return 0.0
+            return ((ur.X - ll.X) + 1) * ((ur.Y - ll.Y) + 1)
+
+        def grow_ones(a, c, ll):
+            N, M = a.shape
+            y = ll.Y - 1
+            ur = Point(ll.X - 1, ll.Y - 1)
+            x_max = 10000
+            while y + 1 < M and a[ll.X, y + 1] == False:
+                y += 1
+                x = min(ll.X + c[y] - 1, x_max)
+                x_max = x
+                if area(ll, Point(x, y)) > area(ll, ur):
+                    ur = Point(x, y)
+            return ur
+
+        def update_cache(a, c, x):
+            N, M = a.shape
+            for y in range(0, M):
+                if a[x][y] == False:
+                    c[y] += 1
+                else:
+                    c[y] = 0
+
+        # method #3
+        def mrp(a):
+            best_ll = Point(-1, -1)
+            best_ur = Point(-1, -1)
+            N, M = a.shape
+            c = [0] * M
+            for llx in range(N-1, -1, -1):
+                update_cache(a, c, llx)
+                for lly in range(0, M):
+                    ll = Point(llx, lly)
+                    ur = grow_ones(a, c, ll)
+                    if area(ll, ur) > area(best_ll, best_ur):
+                        best_ll, best_ur = ll, ur
+            return best_ll, best_ur
+
+
+        """
+        # method #4 - has a bug :-(
+        def mrp(a):
+            best_ll = Point(-1, -1)
+            best_ur = Point(-1, -1)
+            N, M = a.shape
+            c = [0] * (M + 1)
+            stack = []
+            for x in range(N-1, -1, -1):
+                update_cache(a, c, x)
+                width = 0
+                for y in range(M + 1):
+                    if c[y] > width:
+                        stack.append((y, width))
+                        width = c[y]
+                    if c[y] < width:
+                        while True:
+                            y0, w0 = stack.pop()
+                            if (width * (y - y0)) > area(best_ll, best_ur):
+                                best_ll = Point(x, y0)
+                                best_ur = Point(x + width - 1, y - 1)
+                            width = w0
+                            if (c[y] >= width):
+                                break
+                        width = c[y]
+                        if width != 0:
+                            stack.append((y0, width))
+            return best_ll, best_ur
+        """
+
+        log.debug('Finding workarea')
+        scale = 10 # work on centimeter scale instead of milimeter
+        usage = np.zeros((int(math.ceil(self.size[0]/scale)), int(math.ceil(self.size[1]/scale))), dtype=np.bool)
+        # calculate usage
         for s in self.stones.values():
             a, b, c, d = s.bbox
-            for x in range(int(math.floor(a)), int(math.ceil(c)) + 1):
-                for y in range(int(math.floor(b)), int(math.ceil(d)) + 1):
-                    m[x][y] = 1
-        return m
+            for x in range(int(math.floor(a/scale)), int(math.floor(c/scale) + 1)):
+                for y in range(int(math.floor(b/scale)), int(math.floor(d/scale) + 1)):
+                    usage[x][y] = True
+        # find workarea
+        ll, ur = mrp(usage)
+        wa = (ll.X * 10, ll.Y * 10, ur.X * 10, ur.Y * 10)
+        return wa
 
     def image(self):
         log.debug('Creating map image')
@@ -168,9 +253,10 @@ class StoneMap(object):
             draw.rectangle(s.bbox, outline='blue')
             size = int(math.ceil(s.size[0] * 2.0)), int(math.ceil(s.size[1] * 2.0))
             t = Image.new('RGBA', size)
-            ImageDraw.Draw(t).ellipse(((0, 0), size), outline='red')
+            ImageDraw.Draw(t).ellipse(((0, 0), size), fill=tuple([int(v) for v in s.color_avg]))
             t = t.rotate(s.angle, resample=Image.BILINEAR, expand=True)
             draw.bitmap((s.center[0] - t.size[0] / 2.0, s.center[1] - t.size[1] / 2.0), t)
+        draw.rectangle(self.workarea, outline='red')
         im.save('map.png')
 
     # functions also as replace
@@ -194,10 +280,13 @@ class Brain(object):
         self.m = self.machine
         self.c = self.machine.control
         # go home (also test if the machine is initialized and working)
-        self.c.home()
+        # self.c.home()
 
     def start(self):
+        self.map._randomize()
+        self.map.image()
         pass
+
 
     def run(self, prgname):
         f = getattr(self, prgname)
@@ -244,4 +333,4 @@ class Brain(object):
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    brain.run('scan')
+    # brain.run('scan')
