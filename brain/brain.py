@@ -67,10 +67,16 @@ class Camera(object):
         self.viewy = 72.0 # view height (in cnc units = mm) # FIXME: put real value
 
     # calc distance of perceived pixel from center of the view (in cnc units = mm)
-    def pos_to_mm(self, x, y):
-        rx = self.viewx * (x / self.resx - 0.5)
-        ry = self.viewy * (y / self.resy - 0.5)
-        return rx, ry
+    def pos_to_mm(self, pos, offset=(0, 0)):
+        x = self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
+        y = self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
+        return x, y
+
+    # calc size of perceived pixels (in cnc units = mm)
+    def size_to_mm(self, size):
+        w = self.viewx * size[0] / self.resx
+        h = self.viewy * size[1] / self.resy
+        return w, h
 
     '''
     Compute difference between center of the vacuum head and center of camera view.
@@ -133,7 +139,7 @@ class StoneMap(object):
 
     def __init__(self, filename):
         self.filename = filename
-        self.size = 4000, 2000
+        self.size = 1000, 1000 # TODO: should be: 4000, 2000
         self.workarea = None
         try:
             with open(self.filename, 'rb') as f:
@@ -310,15 +316,22 @@ class Brain(object):
         self.c.block()
         self.c.feedrate(30000)
         step = 100
-        x, y = 1000, 1000 # self.map.size
+        x, y = self.map.size
+        stones = []
         for i in range(0, x + 1, step):
             for j in range(0, y + 1, step):
                 self.c.go(x=i, y=j)
                 self.c.block()
                 log.debug('Taking picture at coords {},{}'.format(i, j))
-                stones = self.machine.cam.grab_extract()
+                s = self.machine.cam.grab_extract()
+                s['center'] = self.machine.cam.pos_to_mm(s['center'], offset=(i, j))
+                s['size'] = self.machine.cam.size_to_mm(s['size'])
+                stones.append(s)
                 log.debug('Found {} stones'.format(len(stones)))
         log.debug('End scanning')
+        log.debug('Begin postprocessing stones')
+        # TODO: postprocess stones from list, find similarity, remove duplicates and odd ones
+        log.debug('End postprocessing stones')
 
     def demo_random_map(self):
         self.map._randomize()

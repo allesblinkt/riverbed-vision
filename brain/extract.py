@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import logging
 
+save_stones = False
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -123,6 +124,22 @@ def falloff_gradient(x, x2, y, y2, pt, n, rad):   # max curvature influence     
     return result
 
 
+# preselect stones
+def valid_stone(shape, ec, es):
+
+    # too close to the edge
+    if ec[0] < 128 or ec[0] > shape[0] - 128:
+        return False
+    if ec[1] < 128 or ec[1] > shape[1] - 128:
+        return False
+
+    # too small
+    if es[0] < 128 and es[1] < 128:
+        return False
+
+    return True
+
+
 def process_stone(id, stones_contours, src_img, result_img):
     contour = stones_contours[id]
     m = cv2.moments(contour)
@@ -157,7 +174,10 @@ def process_stone(id, stones_contours, src_img, result_img):
     cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
     cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
 
-    return {'bbox': bbox, 'ecenter': ec, 'esize': es, 'eangle': ea, 'color_avg': avg, 'color_dev': dev}
+    if not valid_stone(src_img.shape, ec, es):
+        return None
+
+    return {'center': ec, 'size': es, 'angle': ea, 'color_avg': avg, 'color_dev': dev}
 
 def process_image(color_img):
 
