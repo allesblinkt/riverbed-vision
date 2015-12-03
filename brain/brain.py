@@ -232,7 +232,7 @@ class StoneMap(object):
         """
 
         log.debug('Finding workarea')
-        scale = 10 # work on centimeter scale instead of milimeter
+        scale = 20 # work on less precise scale
         usage = np.zeros((int(math.ceil(self.size[0]/scale)), int(math.ceil(self.size[1]/scale))), dtype=np.bool)
         # calculate usage
         for s in self.stones.values():
@@ -242,7 +242,7 @@ class StoneMap(object):
                     usage[x][y] = True
         # find workarea
         ll, ur = mrp(usage)
-        wa = (ll.X * 10, ll.Y * 10, ur.X * 10, ur.Y * 10)
+        wa = (ll.X * scale, ll.Y * scale, ur.X * scale, ur.Y * scale)
         return wa
 
     def image(self):
