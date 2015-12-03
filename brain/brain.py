@@ -139,6 +139,7 @@ class StoneMap(object):
 
     def __init__(self, filename):
         self.filename = filename
+        self.stones = {}
         self.size = 1000, 1000 # TODO: should be: 4000, 2000
         self.workarea = None
         try:
@@ -146,12 +147,12 @@ class StoneMap(object):
                 d = serialization.load(f)
                 self.stones = d['stones']
                 self.size = d['size']
+                self.workarea = d['workarea']
         except:
-            self.stones = {}
             self.save()
 
     # populate the map with random stones
-    def _randomize(self, count=500):
+    def randomize(self, count=500):
         log.debug('Generating random map of %d stones', count)
         self.stones = {}
         for i in range(count):
@@ -170,7 +171,7 @@ class StoneMap(object):
                     break
             if not bad:
                 self.add_stone(s)
-        self.workarea = self._find_workarea()
+        self.save()
 
     def _find_workarea(self):
 
@@ -283,11 +284,12 @@ class StoneMap(object):
     # functions also as replace
     def add_stone(self, stone):
         self.stones[stone.id] = stone
-        self.save()
 
     def save(self):
+        if self.workarea is None:
+            self.workarea = self._find_workarea()
         with open(self.filename, 'wb') as f:
-            d = {'stones': self.stones, 'size': self.size}
+            d = {'stones': self.stones, 'size': self.size, 'workarea': self.workarea}
             serialization.dump(d, f)
 
 
@@ -329,12 +331,25 @@ class Brain(object):
                 stones.append(s)
                 log.debug('Found {} stones'.format(len(stones)))
         log.debug('End scanning')
-        log.debug('Begin postprocessing stones')
-        # TODO: postprocess stones from list, find similarity, remove duplicates and odd ones
-        log.debug('End postprocessing stones')
+        # select correct stones
+        log.debug('Begin selecting/reducing stones')
+        # TODO: implement this
+        for s in stones:
+            s['selected'] = True
+        log.debug('End selecting/reducing stones')
+        # copy selected stones to storage
+        id = 0
+        self.map.stones = {}
+        for s in stones:
+            if s['selected']:
+                s1 = Stone(id, s['center'], s['size'], s['angle'], s['color_avg'], s['color_dev'])
+                id += 1
+                self.map.add_stone(s1)
+        self.map.save()
+
 
     def demo_random_map(self):
-        self.map._randomize()
+        self.map.randomize()
         self.map.image()
 
     def demo1(self):
