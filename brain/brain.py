@@ -28,6 +28,7 @@ class Machine(object):
     def __init__(self, hostname):
         self.uri = 'PYRO:control@{}:5001'.format(hostname)
         self.control = Pyro4.Proxy(self.uri)
+        self.cam = Camera(self)
         self.x, self.y, self.z, self.e = 0.0, 0.0, 0.0, 0.0
         self.last_pickup_height = None
         try:
@@ -53,22 +54,11 @@ class Machine(object):
         self.control.pickup_top()
         self.last_pickup_height = None
 
-    '''
-    Compute difference between center of the vacuum head and center of camera view.
-    Relative to camera center. In CNC units = milimeters.
-    '''
-    def vision_delta(self):
-        # length of rotating head (in mm)
-        length = 40.0 # distance of vacuum tool to rotation axis (Z center)
-        # distance between center of Z axis and center of camera view (both in mm)
-        dx, dy = -69.23, -1.88
-        angle = math.radians(self.e)
-        return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
-
 
 class Camera(object):
 
-    def __init__(self, index=0):
+    def __init__(self, machine, index=0):
+        self.machine = machine
         self.index = index
         self.resx = 1280.0 # image width (in pixels)
         self.resy = 720.0 # image height (in pixels)
@@ -80,6 +70,18 @@ class Camera(object):
         rx = self.viewx * (x / self.resx - 0.5)
         ry = self.viewy * (y / self.resy - 0.5)
         return rx, ry
+
+    '''
+    Compute difference between center of the vacuum head and center of camera view.
+    Relative to camera center. In CNC units = milimeters.
+    '''
+    def vision_delta(self):
+        # length of rotating head (in mm)
+        length = 40.0 # distance of vacuum tool to rotation axis (Z center)
+        # distance between center of Z axis and center of camera view (both in mm)
+        dx, dy = -69.23, -1.88
+        angle = math.radians(self.machine.e)
+        return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
 
     def grab(self):
         try:
@@ -275,7 +277,6 @@ class Brain(object):
     def __init__(self):
         self.machine = Machine(CONTROL_HOSTNAME)
         self.map = StoneMap('stones.data')
-        self.cam = Camera()
         # shortcuts for convenience
         self.m = self.machine
         self.c = self.machine.control
@@ -283,10 +284,7 @@ class Brain(object):
         # self.c.home()
 
     def start(self):
-        self.map._randomize()
-        self.map.image()
-        pass
-
+       pass
 
     def run(self, prgname):
         f = getattr(self, prgname)
@@ -306,7 +304,7 @@ class Brain(object):
                 self.c.block()
                 self.c.light(True)
                 log.debug('Taking picture at coords {},{}'.format(i, j))
-                frame = self.cam.grab()
+                frame = self.machine.cam.grab()
                 if frame is not None:
                     cv2.imwrite('cam_{:04d}_{:04d}.jpg'.format(i, j), frame)
                     log.debug('Saved as cam_{:04d}_{:04d}.jpg'.format(i, j))
@@ -314,6 +312,10 @@ class Brain(object):
                     log.error('Error taking picture')
                 self.c.light(False)
         log.debug('End scanning')
+
+    def demo_random_map(self):
+        self.map._randomize()
+        self.map.image()
 
     def demo1(self):
         # demo program which moves stone back and forth
@@ -333,4 +335,6 @@ class Brain(object):
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
+    # brain.run('demo_random_map')
     # brain.run('scan')
+
