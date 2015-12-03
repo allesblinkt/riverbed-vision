@@ -11,6 +11,7 @@ import logging
 import operator
 import numpy as np
 from collections import namedtuple
+from extract import process_image
 
 
 CONTROL_HOSTNAME = 'localhost'
@@ -84,6 +85,7 @@ class Camera(object):
         return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
 
     def grab(self):
+        self.machine.control.light(True)
         try:
             cam = cv2.VideoCapture(self.index)
             cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 1280)
@@ -92,9 +94,19 @@ class Camera(object):
             cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 39)
             ret, frame = cam.read()
             cam.release()
-            return frame if ret else None
+            if ret:
+                ret = frame
         except:
-            return None
+            ret = None
+        self.machine.control.light(False)
+        return ret
+
+    def grab_extract(self):
+        f = self.grab()
+        if f is None:
+            return []
+        s = process_image(f)
+        return s
 
 
 class Stone(object):
@@ -258,7 +270,8 @@ class StoneMap(object):
             ImageDraw.Draw(t).ellipse(((0, 0), size), fill=tuple([int(v) for v in s.color_avg]))
             t = t.rotate(s.angle, resample=Image.BILINEAR, expand=True)
             draw.bitmap((s.center[0] - t.size[0] / 2.0, s.center[1] - t.size[1] / 2.0), t)
-        draw.rectangle(self.workarea, outline='red')
+        if self.workarea:
+            draw.rectangle(self.workarea, outline='red')
         im.save('map.png')
 
     # functions also as replace
@@ -302,15 +315,9 @@ class Brain(object):
             for j in range(0, y + 1, step):
                 self.c.go(x=i, y=j)
                 self.c.block()
-                self.c.light(True)
                 log.debug('Taking picture at coords {},{}'.format(i, j))
-                frame = self.machine.cam.grab()
-                if frame is not None:
-                    cv2.imwrite('cam_{:04d}_{:04d}.jpg'.format(i, j), frame)
-                    log.debug('Saved as cam_{:04d}_{:04d}.jpg'.format(i, j))
-                else:
-                    log.error('Error taking picture')
-                self.c.light(False)
+                stones = self.machine.cam.grab_extract()
+                log.debug('Found {} stones'.format(len(stones)))
         log.debug('End scanning')
 
     def demo_random_map(self):
