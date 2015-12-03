@@ -1,7 +1,7 @@
 # NOTE Lines must not exceed 132 characters
 # Robot module configurations : general handling of movement G-codes and slicing into moves
-default_feed_rate                            4000             # Default rate ( mm/minute ) for G1/G2/G3 moves
-default_seek_rate                            4000             # Default rate ( mm/minute ) for G0 moves
+default_feed_rate                           30000             # Default rate ( mm/minute ) for G1/G2/G3 moves
+default_seek_rate                           30000             # Default rate ( mm/minute ) for G0 moves
 mm_per_arc_segment                           0.5              # Arcs are cut into segments ( lines ), this is the length for
                                                               # these segments.  Smaller values mean more resolution,
                                                               # higher values mean faster computation
@@ -31,9 +31,9 @@ microseconds_per_step_pulse                  1                # Duration of step
 base_stepping_frequency                      100000           # Base frequency for stepping
 
 # Cartesian axis speed limits
-x_axis_max_speed                             120000            # mm/min
-y_axis_max_speed                             120000            # mm/min
-z_axis_max_speed                             50000              # mm/min
+x_axis_max_speed                             30000            # mm/min
+y_axis_max_speed                             30000            # mm/min
+z_axis_max_speed                             4000             # mm/min
 
 # Stepper module pins ( ports, and pin numbers, appending "!" to the number will invert a pin )
 alpha_step_pin                               2.0              # Pin for alpha stepper step signal
