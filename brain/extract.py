@@ -285,16 +285,17 @@ def process_image(frame_desc, color_img, save_stones=None):
     return stones
 
 
-def test(filename):
-    frame = cv2.imread(filename)
-    color_img = frame.copy()
-    s = process_image('frame', color_img, save_stones='png')
-    print s
-    # cv2.imshow('color with debug', color_img)
-    # cv2.imshow('curvature weighting', weight_img)
-    # cv2.imshow('curvature weighting threshold', weight_thresh_img)
-    # cv2.imshow('markers', markers_img * 256)
-    # cv2.imshow('stones', result_img)
+def main():
+    for i in range(13, 30+1):
+        frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
+        color_img = frame.copy()
+        s = process_image('photo-{}'.format(i), color_img, save_stones='png')
+        print s
+        # cv2.imshow('color with debug', color_img)
+        # cv2.imshow('curvature weighting', weight_img)
+        # cv2.imshow('curvature weighting threshold', weight_thresh_img)
+        # cv2.imshow('markers', markers_img * 256)
+        # cv2.imshow('stones', result_img)
 
 if __name__ == "__main__":
-    test('../experiments/testdata/photo-16.jpg')
+    main()
