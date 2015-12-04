@@ -8,6 +8,8 @@ import sys
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
+blank = cv2.imread('blank.png')
+
 def analyze_contour_cuts(contour, step=7):
     """
     Parameters
@@ -180,7 +182,7 @@ def process_stone(frame_desc, id, stones_contours, src_img, result_img, save_sto
 
     # color is not real RGB color now - it's HLS - normalize
     cv2.drawContours(result_img, stones_contours, id, color, -1)
-    cv2.circle(result_img, ec, 4, (0, 128, 0))
+    cv2.circle(result_img, ec, 4, (128, 0, 0))
     cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
     cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
 
@@ -197,11 +199,15 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     start_time = time.time()
 
+    # subtract blank vignette
+    color_img = cv2.subtract(blank, color_img)
+    color_img = 255 - color_img
+
     # Grayscale conversion, blurring, threshold
     gray_img = cv2.cvtColor(color_img, cv2.COLOR_BGR2GRAY)
     blur_img = cv2.GaussianBlur(gray_img, (5, 5), 0)
 
-    thresh_img = cv2.adaptiveThreshold(blur_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 251, 2)
+    thresh_img = cv2.adaptiveThreshold(blur_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 251, 3)
 
     # Cleaning
     kernel = np.ones((3, 3), np.uint8)
@@ -213,6 +219,8 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     if debug_draw:
         cv2.drawContours(color_img, contours, -1, (255, 0, 0))
 
+    # disable complex curvature analysis for now
+    """
     # Curvature analysis of the external contours
     curvature_img = np.zeros_like(gray_img, dtype=np.float)
 
@@ -272,8 +280,10 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     # Find individual stones and draw them
     stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
+    """
 
     result_img = np.zeros_like(color_img)
+    stones_contours = contours
 
     stones = []
     for id in range(len(stones_contours)):
@@ -287,9 +297,9 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     if debug_draw:
         cv2.imshow('color with debug', color_img)
-        cv2.imshow('curvature weighting', weight_img)
-        cv2.imshow('curvature weighting threshold', weight_thresh_img)
-        cv2.imshow('markers', markers_img * 256)
+        # cv2.imshow('curvature weighting', weight_img)
+        # cv2.imshow('curvature weighting threshold', weight_thresh_img)
+        # cv2.imshow('markers', markers_img * 256)
         cv2.imshow('stones', result_img)
         key = cv2.waitKey()
         if key == ord('q'):
@@ -302,7 +312,7 @@ def main():
     for i in range(13, 30+1):
         frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
         color_img = frame.copy()
-        s = process_image('photo-{}'.format(i), color_img, save_stones='png', debug_draw=False)
+        s = process_image('photo-{}'.format(i), color_img, save_stones='png', debug_draw=True)
         print s
 
 if __name__ == "__main__":
