@@ -393,4 +393,3 @@ if __name__ == '__main__':
     brain.start()
     # brain.run('demo_random_map')
     # brain.run('scan')
-
