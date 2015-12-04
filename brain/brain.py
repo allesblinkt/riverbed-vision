@@ -20,6 +20,14 @@ CONTROL_HOSTNAME = 'localhost'
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
+# common utility functions
+def distance2(a, b):
+    d = np.array(a) - np.array(b)
+    return np.dot(d, d)
+
+def distance(a, b):
+    return np.sqrt(distance2(a, b))
+
 
 '''
 High-level operations on CNC
@@ -120,20 +128,18 @@ class Stone(object):
     def __init__(self, id, center, size, angle, color, structure):
         self.id = id
         self.center = center
+        if size[1] > size[0]:
+            size[0], size[1] = size[1], size[0]
+            angle += 90
         self.size = size
-        self.angle = angle
+        self.angle = angle % 180
         self.color = color
         self.structure = structure
-        ux = size[0] * math.cos(math.radians(angle))
-        uy = size[0] * math.sin(math.radians(angle))
-        vx = size[1] * math.cos(math.radians(angle + 90))
-        vy = size[1] * math.sin(math.radians(angle + 90))
-        self.w = math.sqrt(ux ** 2 + vx ** 2)
-        self.h = math.sqrt(uy ** 2 + vy ** 2)
-        self.bbox = (center[0] - self.w, center[1] - self.h, center[0] + self.w, center[1] + self.h)
 
     def overlaps(self, stone):
-        return (abs(self.center[0] - stone.center[0]) < (self.w + stone.w)) and (abs(self.center[1] - stone.center[1]) < (self.h + stone.h))
+        d = distance(self.center, stone.center)
+        return d < self.size[0] + stone.size[0] + 2 # add 2 mm
+
 
 class StoneMap(object):
 
@@ -257,7 +263,8 @@ class StoneMap(object):
         usage = np.zeros((int(math.ceil(self.size[0]/scale)), int(math.ceil(self.size[1]/scale))), dtype=np.bool)
         # calculate usage
         for s in self.stones.values():
-            a, b, c, d = s.bbox
+            a, b = s.center[0] - s.size[0], s.center[1] - s.size[0]
+            c, d = s.center[0] + s.size[0], s.center[1] + s.size[0]
             for x in range(int(math.floor(a/scale)), int(math.floor(c/scale) + 1)):
                 for y in range(int(math.floor(b/scale)), int(math.floor(d/scale) + 1)):
                     usage[x][y] = True
@@ -271,7 +278,6 @@ class StoneMap(object):
         im = Image.new('RGB', self.size)
         draw = ImageDraw.Draw(im)
         for s in self.stones.values():
-            draw.rectangle(s.bbox, outline='blue')
             size = int(math.ceil(s.size[0] * 2.0)), int(math.ceil(s.size[1] * 2.0))
             t = Image.new('RGBA', size)
             ImageDraw.Draw(t).ellipse(((0, 0), size), fill='white')
@@ -311,13 +317,9 @@ class Brain(object):
 
     def scan(self):
 
-        def dist(a, b):
-            d = np.array(a) - np.array(b)
-            return np.sqrt(np.dot(d, d))
-
         def similarity_index(s1, s2):
-            dc = dist(s1.center, s2.center)
-            ds = dist(s1.size, s2.size)
+            dc = distance(s1.center, s2.center)
+            ds = distance(s1.size, s2.size)
             da = abs(s1.angle - s2.angle)
             if dc > 20:
                 return 0.0

@@ -156,6 +156,10 @@ def process_stone(id, stones_contours, src_img, result_img):
     ec = (int(ec[0]), int(ec[1]))
     es = (int(es[0]) / 2, int(es[1]) / 2)
     ea = int(ea)
+    if es[1] > es[0]:
+        es[0], es[1] = es[1], es[0]
+        ea += 90
+    ea = ea % 180
 
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
     b, g, r = cv2.split(cutout)
@@ -172,7 +176,7 @@ def process_stone(id, stones_contours, src_img, result_img):
         cv2.imwrite('stone_{:03d}.png'.format(id), cropped)
 
     cv2.drawContours(result_img, stones_contours, id, (192, 192, 192), -1)
-    cv2.circle(result_img, (cx, cy), 4, (0, 128, 0))
+    cv2.circle(result_img, ec, 4, (0, 128, 0))
     cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
     cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
 
