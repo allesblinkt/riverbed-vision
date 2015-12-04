@@ -152,7 +152,7 @@ class StoneMap(object):
             self.save()
 
     # populate the map with random stones
-    def randomize(self, count=500):
+    def randomize(self, count=2000):
         log.debug('Generating random map of %d stones', count)
         self.stones = {}
         for i in range(count):
@@ -253,7 +253,7 @@ class StoneMap(object):
         """
 
         log.debug('Finding workarea')
-        scale = 20 # work on less precise scale
+        scale = 10 # work on less precise scale
         usage = np.zeros((int(math.ceil(self.size[0]/scale)), int(math.ceil(self.size[1]/scale))), dtype=np.bool)
         # calculate usage
         for s in self.stones.values():
@@ -286,8 +286,6 @@ class StoneMap(object):
         self.stones[stone.id] = stone
 
     def save(self):
-        if self.workarea is None:
-            self.workarea = self._find_workarea()
         with open(self.filename, 'wb') as f:
             d = {'stones': self.stones, 'size': self.size, 'workarea': self.workarea}
             serialization.dump(d, f)
@@ -312,6 +310,23 @@ class Brain(object):
         f()
 
     def scan(self):
+
+        def dist(a, b):
+            d = np.array(a) - np.array(b)
+            return np.sqrt(np.dot(d, d))
+
+        def similarity_index(s1, s2):
+            dc = dist(s1.center, s2.center)
+            ds = dist(s1.size, s2.size)
+            da = abs(s1.angle - s2.angle)
+            if dc > 20:
+                return 0.0
+            if ds > 20:
+                return 0.0
+            if da > 20:
+                return 0.0
+            return 1.0 - max([dc / 20.0, ds / 20.0, da / 20.0])
+
         log.debug('Begin scanning')
         self.c.pickup_top()
         self.c.go(e=90)
@@ -333,15 +348,19 @@ class Brain(object):
         log.debug('End scanning')
         # select correct stones
         log.debug('Begin selecting/reducing stones')
-        # TODO: implement this
-        for s in stones:
-            s['selected'] = True
+        for i in range(len(stones)):
+            stones[i]['rank'] = 0.0
+        for i in range(len(stones)):
+            for j in range(i + 1, len(stones)):
+                s = simil_index(stones[i], stones[j])
+                stones[i]['rank'] += s
+                stones[j]['rank'] -= s
         log.debug('End selecting/reducing stones')
         # copy selected stones to storage
         id = 0
         self.map.stones = {}
         for s in stones:
-            if s['selected']:
+            if s['rank'] > 1.5:
                 s1 = Stone(id, s['center'], s['size'], s['angle'], s['color_avg'], s['color_dev'])
                 id += 1
                 self.map.add_stone(s1)

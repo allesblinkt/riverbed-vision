@@ -162,8 +162,9 @@ def process_stone(id, stones_contours, src_img, result_img):
     a = np.zeros_like(b, dtype=np.uint8)
     cv2.drawContours(a, stones_contours, id, 255, -1, offset=(-bbox[0], -bbox[1]))
     cropped = cv2.merge((b,g,r,a))
+    cutout = cv2.cvtColor(cutout, cv2.cv.CV_BGR2HLS)
     avg, dev = cv2.meanStdDev(cutout, mask=a)
-    avg, dev = avg.T[0], np.max(dev.T[0])
+    avg, dev = avg.T[0], dev.T[0][1] # take L value for dev
 
     if save_stones:
         cv2.imwrite('stone_{:03d}.png'.format(id), cropped)
