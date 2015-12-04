@@ -146,7 +146,7 @@ def preselect_stone(shape, ec, es):
     return True
 
 
-def process_stone(id, stones_contours, src_img, result_img, save_stones=None):
+def process_stone(frame_desc, id, stones_contours, src_img, result_img, save_stones=None):
     contour = stones_contours[id]
     m = cv2.moments(contour)
 
@@ -188,14 +188,12 @@ def process_stone(id, stones_contours, src_img, result_img, save_stones=None):
     if not preselect_stone((resx, resy), ec, es):
         return None
 
-    if save_stones == 'png':
-        cv2.imwrite('stone_{:03d}.png'.format(id), cropped)
-    if save_stones == 'jpg':
-        cv2.imwrite('stone_{:03d}.jpg'.format(id), cropped)
+    if save_stones:
+        cv2.imwrite('stone_{}_{:03d}.{}'.format(frame_desc, id, save_stones), cropped)
 
     return {'center': ec, 'size': es, 'angle': ea, 'color': color, 'structure': structure}
 
-def process_image(color_img, save_stones=None):
+def process_image(frame_desc, color_img, save_stones=None):
 
     start_time = time.time()
 
@@ -277,7 +275,7 @@ def process_image(color_img, save_stones=None):
 
     stones = []
     for id in range(len(stones_contours)):
-        s = process_stone(id, stones_contours, color_img, result_img, save_stones=save_stones)
+        s = process_stone(frame_desc, id, stones_contours, color_img, result_img, save_stones=save_stones)
         if s:
             stones.append(s)
 
@@ -290,7 +288,7 @@ def process_image(color_img, save_stones=None):
 def test(filename):
     frame = cv2.imread(filename)
     color_img = frame.copy()
-    s = process_image(color_img)
+    s = process_image('frame', color_img, save_stones='png')
     print s
     # cv2.imshow('color with debug', color_img)
     # cv2.imshow('curvature weighting', weight_img)
