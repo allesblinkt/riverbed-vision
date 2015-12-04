@@ -266,11 +266,12 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     markers_img = np.zeros((thresh_img.shape[0], thresh_img.shape[1]), dtype=np.int32)
 
-    kernel_contours, _ = cv2.findContours(np.uint8(dist_thresh_img.copy()), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    dist_thresh_img_u8 = np.uint8(dist_thresh_img)
+    kernel_contours, _ = cv2.findContours(dist_thresh_img_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     for id in range(len(kernel_contours)):
         cv2.drawContours(markers_img, kernel_contours, id, id + 1, -1)
 
-    unknown_img = cv2.subtract(sure_bg_img, np.uint8(dist_thresh_img))
+    unknown_img = cv2.subtract(sure_bg_img, dist_thresh_img_u8)
 
     markers_img = markers_img + 1
     markers_img[unknown_img == 255] = 0      # mark the region of unknown with zero
@@ -310,8 +311,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 def main():
     for i in range(13, 30+1):
         frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
-        color_img = frame.copy()
-        s = process_image('photo-{}'.format(i), color_img, save_stones='png', debug_draw=False)
+        s = process_image('photo-{}'.format(i), frame, save_stones=None, debug_draw=False)
         print s
 
 if __name__ == "__main__":
