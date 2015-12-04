@@ -5,6 +5,8 @@ import logging
 import time
 import sys
 
+from coloranalysis import find_dominant_color
+
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
@@ -173,14 +175,10 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     a = np.zeros_like(b, dtype=np.uint8)
     cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
     cropped = cv2.merge((b,g,r,a))
-    cutout = cv2.cvtColor(cutout, cv2.cv.CV_BGR2HLS)
-    # TODO: maybe not find mean color but dominant color(?)
-    color, structure = cv2.meanStdDev(cutout, mask=a)
-    color = color.T[0]
-    structure = structure.T[0][1] # take variation of L value for determining structure
+    color = find_dominant_color(cropped)
+    structure = 1
 
     if result_img is not None:
-        # color is not real RGB color now - it's HLS - normalize
         cv2.drawContours(result_img, [contour], 0, color, -1)
         cv2.circle(result_img, ec, 4, (128, 0, 0))
         cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))

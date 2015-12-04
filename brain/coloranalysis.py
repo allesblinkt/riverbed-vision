@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import cv2
 import numpy as np
 
@@ -54,7 +56,7 @@ def centroid_histogram(labels):
 def find_dominant_color(img):
     """ Expects an image with or without alpha channel and returns the dominant color (BGR) """
 
-    small_img = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
+    small_img = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
 
     dominant, hist, processed = kmeans_quantization(small_img, n_clusters=3)
     return dominant.tolist()
@@ -81,7 +83,7 @@ if __name__ == '__main__':
         t = time.time()
         dominant = find_dominant_color(image)
         cv2.circle(image, (w / 2, h / 2), w / 8, dominant, -1)
-        print("Time taken: %.3  `f" % (time.time() - t))
+        print("Time taken: %.3f" % (time.time() - t))
 
         cv2.imshow("image", image)
         cv2.waitKey(0)
