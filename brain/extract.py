@@ -1,8 +1,8 @@
+#!/usr/bin/python
 import cv2
 import numpy as np
 import logging
-
-save_stones = False
+import time
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -124,8 +124,14 @@ def falloff_gradient(x, x2, y, y2, pt, n, rad):   # max curvature influence     
     return result
 
 
-# preselect stones
-def valid_stone(shape, ec, es):
+def draw_normal(img, pt, normal, angle, scale=10.0):
+    """ Draws the normal onto an image at a given point """
+    start = np.uint16(np.round(pt))
+    end = np.uint16(np.round(pt + normal * scale * angle))
+    cv2.line(img, (start[0], start[1]), (end[0], end[1]), (0, 0, 255))
+
+
+def preselect_stone(shape, ec, es):
 
     # too close to the edge
     if ec[0] < 128 or ec[0] > shape[0] - 128:
@@ -134,13 +140,13 @@ def valid_stone(shape, ec, es):
         return False
 
     # too small
-    if es[0] < 128 and es[1] < 128:
+    if es[0] < 64 and es[1] < 64:
         return False
 
     return True
 
 
-def process_stone(id, stones_contours, src_img, result_img):
+def process_stone(id, stones_contours, src_img, result_img, save_stones=None):
     contour = stones_contours[id]
     m = cv2.moments(contour)
 
@@ -157,7 +163,7 @@ def process_stone(id, stones_contours, src_img, result_img):
     es = (int(es[0]) / 2, int(es[1]) / 2)
     ea = int(ea)
     if es[1] > es[0]:
-        es[0], es[1] = es[1], es[0]
+        es = es[1], es[0]
         ea += 90
     ea = ea % 180
 
@@ -172,20 +178,26 @@ def process_stone(id, stones_contours, src_img, result_img):
     color = color.T[0]
     structure = structure.T[0][1] # take variation of L value for determining structure
 
-    if save_stones:
-        cv2.imwrite('stone_{:03d}.png'.format(id), cropped)
-
-    cv2.drawContours(result_img, stones_contours, id, (192, 192, 192), -1)
+    # color is not real RGB color now - it's HLS - normalize
+    cv2.drawContours(result_img, stones_contours, id, color, -1)
     cv2.circle(result_img, ec, 4, (0, 128, 0))
     cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
     cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
 
-    if not valid_stone(src_img.shape, ec, es):
+    resy, resx, _ = src_img.shape
+    if not preselect_stone((resx, resy), ec, es):
         return None
+
+    if save_stones == 'png':
+        cv2.imwrite('stone_{:03d}.png'.format(id), cropped)
+    if save_stones == 'jpg':
+        cv2.imwrite('stone_{:03d}.jpg'.format(id), cropped)
 
     return {'center': ec, 'size': es, 'angle': ea, 'color': color, 'structure': structure}
 
-def process_image(color_img):
+def process_image(color_img, save_stones=None):
+
+    start_time = time.time()
 
     # Grayscale conversion, blurring, threshold
     gray_img = cv2.cvtColor(color_img, cv2.COLOR_BGR2GRAY)
@@ -265,10 +277,26 @@ def process_image(color_img):
 
     stones = []
     for id in range(len(stones_contours)):
-        s = process_stone(id, stones_contours, frame, result_img)
+        s = process_stone(id, stones_contours, color_img, result_img, save_stones=save_stones)
         if s:
             stones.append(s)
 
     elapsed_time = time.time() - start_time
 
     log.debug('Analysis took: {:0.3f}s'.format(elapsed_time))
+    return stones
+
+
+def test(filename):
+    frame = cv2.imread(filename)
+    color_img = frame.copy()
+    s = process_image(color_img)
+    print s
+    # cv2.imshow('color with debug', color_img)
+    # cv2.imshow('curvature weighting', weight_img)
+    # cv2.imshow('curvature weighting threshold', weight_thresh_img)
+    # cv2.imshow('markers', markers_img * 256)
+    # cv2.imshow('stones', result_img)
+
+if __name__ == "__main__":
+    test('../experiments/testdata/photo-16.jpg')

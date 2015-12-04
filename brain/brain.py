@@ -129,7 +129,7 @@ class Stone(object):
         self.id = id
         self.center = center
         if size[1] > size[0]:
-            size[0], size[1] = size[1], size[0]
+            size = size[1], size[0]
             angle += 90
         self.size = size
         self.angle = angle % 180
