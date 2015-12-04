@@ -81,7 +81,7 @@ if __name__ == '__main__':
         t = time.time()
         dominant = find_dominant_color(image)
         cv2.circle(image, (w / 2, h / 2), w / 8, dominant, -1)
-        print("Time taken: %.3  `f" % (time.time() - t))
+        print("Time taken: %.3f" % (time.time() - t))
 
         cv2.imshow("image", image)
         cv2.waitKey(0)
