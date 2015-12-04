@@ -148,8 +148,7 @@ def preselect_stone(shape, ec, es):
     return True
 
 
-def process_stone(frame_desc, id, stones_contours, src_img, result_img, save_stones=None):
-    contour = stones_contours[id]
+def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None):
     m = cv2.moments(contour)
 
     try:
@@ -172,7 +171,7 @@ def process_stone(frame_desc, id, stones_contours, src_img, result_img, save_sto
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
     b, g, r = cv2.split(cutout)
     a = np.zeros_like(b, dtype=np.uint8)
-    cv2.drawContours(a, stones_contours, id, 255, -1, offset=(-bbox[0], -bbox[1]))
+    cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
     cropped = cv2.merge((b,g,r,a))
     cutout = cv2.cvtColor(cutout, cv2.cv.CV_BGR2HLS)
     # TODO: maybe not find mean color but dominant color(?)
@@ -180,9 +179,9 @@ def process_stone(frame_desc, id, stones_contours, src_img, result_img, save_sto
     color = color.T[0]
     structure = structure.T[0][1] # take variation of L value for determining structure
 
-    if result_img:
+    if result_img is not None:
         # color is not real RGB color now - it's HLS - normalize
-        cv2.drawContours(result_img, stones_contours, id, color, -1)
+        cv2.drawContours(result_img, [contour], 0, color, -1)
         cv2.circle(result_img, ec, 4, (128, 0, 0))
         cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
         cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
@@ -204,8 +203,10 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     color_img = cv2.subtract(blank, color_img)
     color_img = 255 - color_img
 
+    half_img = cv2.resize(color_img, (color_img.shape[1]/2, color_img.shape[0]/2))
+
     # Grayscale conversion, blurring, threshold
-    hls = cv2.cvtColor(color_img, cv2.COLOR_BGR2HLS)
+    hls = cv2.cvtColor(half_img, cv2.COLOR_BGR2HLS)
     h, l, s = cv2.split(hls)
     s[ l > 220 ] = 255
     gray_img = s
@@ -220,8 +221,6 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     # Contouring
     contours, _ = cv2.findContours(thresh_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    if debug_draw:
-        cv2.drawContours(color_img, contours, -1, (255, 0, 0))
 
     # Curvature analysis of the external contours
     curvature_img = np.zeros_like(gray_img, dtype=np.float)
@@ -236,13 +235,11 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
             continue
 
         for cut_point, cut_normal, cut_angle in cuts:
-            if debug_draw:
-                draw_normal(color_img, cut_point, cut_normal, cut_angle)
 
             if np.linalg.norm(cut_normal) < 0.0001:  # Normal too short
                 continue
 
-            rad = 180.0
+            rad = 90.0
 
             x = max(0, cut_point[0] - rad)
             y = max(0, cut_point[1] - rad)
@@ -278,7 +275,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     markers_img[unknown_img == 255] = 0      # mark the region of unknown with zero
 
     segmented_img = markers_img.copy()
-    cv2.watershed(color_img, segmented_img)
+    cv2.watershed(half_img, segmented_img)
     segmented_img[segmented_img == 1] = -1
 
     # Find individual stones and draw them
@@ -290,8 +287,9 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
         result_img = None
 
     stones = []
-    for id in range(len(stones_contours)):
-        s = process_stone(frame_desc, id, stones_contours, color_img, result_img, save_stones=save_stones)
+    for id, contour in enumerate(stones_contours):
+        contour *= 2
+        s = process_stone(frame_desc, id, contour, color_img, result_img, save_stones=save_stones)
         if s:
             stones.append(s)
 
