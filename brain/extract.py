@@ -163,14 +163,15 @@ def process_stone(id, stones_contours, src_img, result_img):
     cv2.drawContours(a, stones_contours, id, 255, -1, offset=(-bbox[0], -bbox[1]))
     cropped = cv2.merge((b,g,r,a))
     cutout = cv2.cvtColor(cutout, cv2.cv.CV_BGR2HLS)
-    avg, dev = cv2.meanStdDev(cutout, mask=a)
-    avg, dev = avg.T[0], dev.T[0][1] # take L value for dev
+    # TODO: maybe not find mean color but dominant color(?)
+    color, structure = cv2.meanStdDev(cutout, mask=a)
+    color = color.T[0]
+    structure = structure.T[0][1] # take variation of L value for determining structure
 
     if save_stones:
         cv2.imwrite('stone_{:03d}.png'.format(id), cropped)
 
-    color = np.multiply(avg, 2)
-    cv2.drawContours(result_img, stones_contours, id, color, -1)
+    cv2.drawContours(result_img, stones_contours, id, (192, 192, 192), -1)
     cv2.circle(result_img, (cx, cy), 4, (0, 128, 0))
     cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
     cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
@@ -178,7 +179,7 @@ def process_stone(id, stones_contours, src_img, result_img):
     if not valid_stone(src_img.shape, ec, es):
         return None
 
-    return {'center': ec, 'size': es, 'angle': ea, 'color_avg': avg, 'color_dev': dev}
+    return {'center': ec, 'size': es, 'angle': ea, 'color': color, 'structure': structure}
 
 def process_image(color_img):
 

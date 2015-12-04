@@ -117,13 +117,13 @@ class Camera(object):
 
 class Stone(object):
 
-    def __init__(self, id, center, size, angle, color_avg, color_dev):
+    def __init__(self, id, center, size, angle, color, structure):
         self.id = id
         self.center = center
         self.size = size
         self.angle = angle
-        self.color_avg = color_avg
-        self.color_dev = color_dev
+        self.color = color
+        self.structure = structure
         ux = size[0] * math.cos(math.radians(angle))
         uy = size[0] * math.sin(math.radians(angle))
         vx = size[1] * math.cos(math.radians(angle + 90))
@@ -274,7 +274,7 @@ class StoneMap(object):
             draw.rectangle(s.bbox, outline='blue')
             size = int(math.ceil(s.size[0] * 2.0)), int(math.ceil(s.size[1] * 2.0))
             t = Image.new('RGBA', size)
-            ImageDraw.Draw(t).ellipse(((0, 0), size), fill=tuple([int(v) for v in s.color_avg]))
+            ImageDraw.Draw(t).ellipse(((0, 0), size), fill='white')
             t = t.rotate(s.angle, resample=Image.BILINEAR, expand=True)
             draw.bitmap((s.center[0] - t.size[0] / 2.0, s.center[1] - t.size[1] / 2.0), t)
         if self.workarea:
@@ -361,7 +361,7 @@ class Brain(object):
         self.map.stones = {}
         for s in stones:
             if s['rank'] > 1.5:
-                s1 = Stone(id, s['center'], s['size'], s['angle'], s['color_avg'], s['color_dev'])
+                s1 = Stone(id, s['center'], s['size'], s['angle'], s['color'], s['structure'])
                 id += 1
                 self.map.add_stone(s1)
         self.map.save()
