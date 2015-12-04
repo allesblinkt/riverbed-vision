@@ -45,7 +45,7 @@ def centroid_histogram(labels):
     num_labels = np.arange(0, len(np.unique(labels)) + 1)
     (hist, _) = np.histogram(labels, bins=num_labels)
 
-    hist = hist.astype("float")
+    hist = hist.astype('float')
     hist /= hist.sum()
 
     return hist
@@ -82,9 +82,9 @@ if __name__ == '__main__':
         t = time.time()
         dominant = find_dominant_color(image)
         cv2.circle(image, (w / 2, h / 2), w / 8, dominant, -1)
-        print("Time taken: %.3f" % (time.time() - t))
+        print('Time taken: %.3f' % (time.time() - t))
 
-        cv2.imshow("image", image)
+        cv2.imshow('image', image)
         if cv2.waitKey(0) == 27:
             sys.exit(-1)
         
