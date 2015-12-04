@@ -180,11 +180,12 @@ def process_stone(frame_desc, id, stones_contours, src_img, result_img, save_sto
     color = color.T[0]
     structure = structure.T[0][1] # take variation of L value for determining structure
 
-    # color is not real RGB color now - it's HLS - normalize
-    cv2.drawContours(result_img, stones_contours, id, color, -1)
-    cv2.circle(result_img, ec, 4, (128, 0, 0))
-    cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
-    cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
+    if result_img:
+        # color is not real RGB color now - it's HLS - normalize
+        cv2.drawContours(result_img, stones_contours, id, color, -1)
+        cv2.circle(result_img, ec, 4, (128, 0, 0))
+        cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
+        cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
 
     resy, resx, _ = src_img.shape
     if not preselect_stone((resx, resy), ec, es):
@@ -283,7 +284,10 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     # Find individual stones and draw them
     stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
 
-    result_img = np.zeros_like(color_img)
+    if debug_draw:
+        result_img = np.zeros_like(color_img)
+    else:
+        result_img = None
 
     stones = []
     for id in range(len(stones_contours)):
