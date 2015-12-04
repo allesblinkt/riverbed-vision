@@ -64,6 +64,7 @@ if __name__ == '__main__':
     import os
     import fnmatch
     import time
+    import sys
 
     p = "."   # looks here for pngs...
 
@@ -84,4 +85,6 @@ if __name__ == '__main__':
         print("Time taken: %.3f" % (time.time() - t))
 
         cv2.imshow("image", image)
-        cv2.waitKey(0)
+        if cv2.waitKey(0) == 27:
+            sys.exit(-1)
+        
