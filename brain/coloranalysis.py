@@ -52,7 +52,7 @@ def centroid_histogram(labels):
 
 
 def find_dominant_color(img):
-    """ Expects an image with or without alpha channel and returns the dominant color """
+    """ Expects an image with or without alpha channel and returns the dominant color (BGR) """
 
     small_img = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
 
