@@ -3,10 +3,10 @@ import cv2
 import numpy as np
 import logging
 import time
+import sys
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
-
 
 def analyze_contour_cuts(contour, step=7):
     """
@@ -193,7 +193,7 @@ def process_stone(frame_desc, id, stones_contours, src_img, result_img, save_sto
 
     return {'center': ec, 'size': es, 'angle': ea, 'color': color, 'structure': structure}
 
-def process_image(frame_desc, color_img, save_stones=None):
+def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     start_time = time.time()
 
@@ -210,7 +210,8 @@ def process_image(frame_desc, color_img, save_stones=None):
 
     # Contouring
     contours, _ = cv2.findContours(thresh_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cv2.drawContours(color_img, contours, -1, (255, 0, 0))
+    if debug_draw:
+        cv2.drawContours(color_img, contours, -1, (255, 0, 0))
 
     # Curvature analysis of the external contours
     curvature_img = np.zeros_like(gray_img, dtype=np.float)
@@ -225,7 +226,8 @@ def process_image(frame_desc, color_img, save_stones=None):
             continue
 
         for cut_point, cut_normal, cut_angle in cuts:
-            draw_normal(color_img, cut_point, cut_normal, cut_angle)
+            if debug_draw:
+                draw_normal(color_img, cut_point, cut_normal, cut_angle)
 
             if np.linalg.norm(cut_normal) < 0.0001:  # Normal too short
                 continue
@@ -282,6 +284,17 @@ def process_image(frame_desc, color_img, save_stones=None):
     elapsed_time = time.time() - start_time
 
     log.debug('Analysis took: {:0.3f}s'.format(elapsed_time))
+
+    if debug_draw:
+        cv2.imshow('color with debug', color_img)
+        cv2.imshow('curvature weighting', weight_img)
+        cv2.imshow('curvature weighting threshold', weight_thresh_img)
+        cv2.imshow('markers', markers_img * 256)
+        cv2.imshow('stones', result_img)
+        key = cv2.waitKey()
+        if key == ord('q'):
+            sys.exit(1)
+
     return stones
 
 
@@ -289,13 +302,8 @@ def main():
     for i in range(13, 30+1):
         frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
         color_img = frame.copy()
-        s = process_image('photo-{}'.format(i), color_img, save_stones='png')
+        s = process_image('photo-{}'.format(i), color_img, save_stones='png', debug_draw=False)
         print s
-        # cv2.imshow('color with debug', color_img)
-        # cv2.imshow('curvature weighting', weight_img)
-        # cv2.imshow('curvature weighting threshold', weight_thresh_img)
-        # cv2.imshow('markers', markers_img * 256)
-        # cv2.imshow('stones', result_img)
 
 if __name__ == "__main__":
     main()
