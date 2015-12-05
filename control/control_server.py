@@ -24,7 +24,7 @@ def format_pos(**kwargs):
 
 class MachineController(object):
 
-    def __init__(self, port_name, baudrate=115200):
+    def __init__(self, port_name, baudrate=19200):
         super(MachineController, self).__init__()
 
         self.serial_mutex = threading.Lock()
