@@ -12,6 +12,7 @@ import operator
 import numpy as np
 from collections import namedtuple
 from extract import process_image
+from utils import *
 
 
 CONTROL_HOSTNAME = 'localhost'
@@ -19,14 +20,6 @@ CONTROL_HOSTNAME = 'localhost'
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
-
-# common utility functions
-def distance2(a, b):
-    d = np.array(a) - np.array(b)
-    return np.dot(d, d)
-
-def distance(a, b):
-    return np.sqrt(distance2(a, b))
 
 
 '''
