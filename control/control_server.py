@@ -7,7 +7,7 @@ import Pyro4
 import netifaces
 
 NEWLINE = '\r\n'
-DEVICE  = '/dev/ttyACM0'
+DEVICE  = '/dev/ttyAMA0'
 PORT    = 5001
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
@@ -60,7 +60,7 @@ class MachineController(object):
                 log.warn('Invalid movement: X=%f', kwargs['x'])
                 return False
         if 'y' in kwargs and kwargs['y'] is not None:
-            if kwargs['y'] < 0 or kwargs['y'] > 1000:
+            if kwargs['y'] < 0 or kwargs['y'] > 1730:
                 log.warn('Invalid movement: Y=%f', kwargs['y'])
                 return False
         if 'z' in kwargs and kwargs['z'] is not None:
@@ -116,6 +116,10 @@ class MachineController(object):
             cmd_str += ' ' + cmd_feed
         if cmd_pos:
             cmd_str += ' ' + cmd_pos
+        self._command(cmd_str)
+
+    def motors(self, state):
+        cmd_str = 'M17' if state else 'M18'
         self._command(cmd_str)
 
     def vacuum(self, state):
