@@ -3,6 +3,7 @@
 import cv2
 import numpy as np
 
+from utils import distance2
 
 def kmeans_quantization(img, n_clusters):
     """ Quantizises the image into a given number of clusters (n_clusters). 
@@ -55,6 +56,10 @@ def find_dominant_color(img):
 
     dominant, hist, processed = kmeans_quantization(small_img, n_clusters=3)
     return dominant
+
+
+def compare_colors(a, b):
+    return distance2(a, b)
 
 
 if __name__ == '__main__':
