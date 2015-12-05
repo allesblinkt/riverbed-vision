@@ -89,4 +89,3 @@ if __name__ == '__main__':
         cv2.imshow('image', image)
         if cv2.waitKey(0) == 27:
             sys.exit(-1)
-        

@@ -1,14 +1,11 @@
 #!/usr/bin/python
 import cv2
 import numpy as np
-import logging
 import time
 import sys
 
 from coloranalysis import find_dominant_color
-
-logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
-log = logging.getLogger(__name__)
+from log import log
 
 blank = cv2.imread('blank.png')
 
@@ -311,7 +308,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 def main():
     for i in range(13, 30+1):
         frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
-        s = process_image('photo-{}'.format(i), frame, save_stones=None, debug_draw=False)
+        s = process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
         print s
 
 if __name__ == "__main__":
