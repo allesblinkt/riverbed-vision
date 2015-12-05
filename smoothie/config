@@ -203,6 +203,13 @@ switch.led.input_off_command                M109              #
 switch.led.output_pin                       0.25             #
 switch.led.output_type                      digital          # just an on or off pin
 
+# Rotation limit input. CHANGED
+switch.rlimit.enable                           true             #
+switch.rlimit.input_pin_behavior               momentary        #
+switch.rlimit.input_off_command                M109              #
+switch.rlimit.input_pin                        0.21^             #
+
+
 # automatically toggle a switch at a specified temperature. Different ones of these may be defined to monitor different temperatures and switch different swithxes
 # useful to turn on a fan or water pump to cool the hotend
 #temperatureswitch.hotend.enable              true             #
