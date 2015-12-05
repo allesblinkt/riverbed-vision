@@ -185,10 +185,14 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     if not preselect_stone((resx, resy), ec, es):
         return None
 
-    if save_stones:
-        cv2.imwrite('stone_{}_{:03d}.{}'.format(frame_desc, id, save_stones), cropped)
+    ret = {'center': ec, 'size': es, 'angle': ea, 'color': color, 'structure': structure}
 
-    return {'center': ec, 'size': es, 'angle': ea, 'color': color, 'structure': structure}
+    if save_stones:
+        cv2.imwrite('stones/stone_{}_{:03d}.{}'.format(frame_desc, id, save_stones), cropped)
+        with open('stones/stone_{}_{:03d}.txt'.format(frame_desc, id), 'w') as f:
+            f.write(str(ret))
+
+    return ret
 
 def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 

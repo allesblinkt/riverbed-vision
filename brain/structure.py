@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import cv2
 import numpy as np
 
@@ -38,7 +40,7 @@ if __name__ == '__main__':
     import time
     import sys
 
-    p = "."   # looks here for pngs...
+    p = "stones/"   # looks here for pngs...
 
     pngfiles = []
 
