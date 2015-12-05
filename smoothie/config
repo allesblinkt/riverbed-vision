@@ -125,7 +125,7 @@ laser_module_enable                          false            # Whether to activ
 #laser_module_pwm_period                      20              # this sets the pwm frequency as the period in microseconds
 
 # Hotend temperature control configuration
-temperature_control.hotend.enable            true             # Whether to activate this ( "hotend" ) module at all.
+temperature_control.hotend.enable            false            # Whether to activate this ( "hotend" ) module at all.
                                                               # All configuration is ignored if false.
 temperature_control.hotend.thermistor_pin    0.23             # Pin for the thermistor to read
 temperature_control.hotend.heater_pin        2.7              # Pin that controls the heater, set to nc if a readonly thermistor is being defined
@@ -193,7 +193,7 @@ switch.fan.output_type                       pwm              # pwm output setta
 switch.vacuum.enable                           true             #
 switch.vacuum.input_on_command                 M42              #
 switch.vacuum.input_off_command                M43              #
-switch.vacuum.output_pin                       3.26             #
+switch.vacuum.output_pin                       0.23             #
 switch.vacuum.output_type                      digital          # just an on or off pin
 
 # automatically toggle a switch at a specified temperature. Different ones of these may be defined to monitor different temperatures and switch different swithxes
@@ -251,9 +251,9 @@ gamma_homing_retract_mm                      1                # "
 
 # optional Z probe
 zprobe.enable                                true            # CHANGED. set to true to enable a zprobe
-zprobe.probe_pin                             4.28!           # CHANGED. vacuum sense
+zprobe.probe_pin                             0.24!           # CHANGED. vacuum sense
 zprobe.slow_feedrate                         50               # mm/sec probe feed rate
-zprobe.debounce_count                       100             # CHANGED. set if noisy
+zprobe.debounce_count                        100             # CHANGED. set if noisy
 zprobe.fast_feedrate                         1000             # move feedrate mm/sec
 zprobe.probe_height                          30               # CHANGED. how much above bed to start probe
 #gamma_min_endstop                           nc              # normally 1.28. Change to nc to prevent conflict,
