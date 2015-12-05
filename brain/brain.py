@@ -83,6 +83,7 @@ class Camera(object):
         return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
 
     def grab(self):
+        log.debug('Taking picture at coords {},{}'.format(self.machine.x, self.machine.y))
         self.machine.control.light(True)
         try:
             cam = cv2.VideoCapture(self.index)
@@ -103,7 +104,8 @@ class Camera(object):
         f = self.grab()
         if f is None:
             return []
-        s = process_image('grab_{:03d}_{:03d}'.format(self.machine.x, self.machine.y), f)
+        s = process_image('grab_{:03d}_{:03d}'.format(self.machine.x, self.machine.y), f, save_stones='png')
+        log.debug('Found {} stones'.format(len(s)))
         return s
 
 
@@ -111,7 +113,7 @@ class Brain(object):
 
     def __init__(self):
         self.machine = Machine(CONTROL_HOSTNAME)
-        self.map = StoneMap('stonemap.data')
+        self.map = StoneMap('stonemap')
         # shortcuts for convenience
         self.m = self.machine
         self.c = self.machine.control
@@ -130,7 +132,6 @@ class Brain(object):
         self.c.pickup_top()
         self.c.go(e=90)
         self.c.block()
-        self.c.feedrate(30000)
         step = 100
         x, y = self.map.size
         stones = []
@@ -138,31 +139,21 @@ class Brain(object):
             for j in range(0, y + 1, step):
                 self.c.go(x=i, y=j)
                 self.c.block()
-                log.debug('Taking picture at coords {},{}'.format(i, j))
                 s = self.machine.cam.grab_extract()
-                s['center'] = self.machine.cam.pos_to_mm(s['center'], offset=(i, j))
-                s['size'] = self.machine.cam.size_to_mm(s['size'])
+                s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
+                s.size = self.machine.cam.size_to_mm(s.size)
                 stones.append(s)
-                log.debug('Found {} stones'.format(len(stones)))
         log.debug('End scanning')
         # select correct stones
         log.debug('Begin selecting/reducing stones')
         for i in range(len(stones)):
-            stones[i]['rank'] = 0.0
-        for i in range(len(stones)):
             for j in range(i + 1, len(stones)):
                 s = stones[i].similarity(stones[j])
-                stones[i]['rank'] += s
-                stones[j]['rank'] -= s
+                stones[i].rank += s
+                stones[j].rank -= s
         log.debug('End selecting/reducing stones')
         # copy selected stones to storage
-        id = 0
-        self.map.stones = {}
-        for s in stones:
-            if s['rank'] > 1.5:
-                s1 = Stone(id, s['center'], s['size'], s['angle'], s['color'], s['structure'])
-                id += 1
-                self.map.add_stone(s1)
+        self.map.stones = [ s for s in stones if s.rank >= 1.5 ]
         self.map.save()
 
     def demo1(self):
@@ -183,4 +174,4 @@ class Brain(object):
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    # brain.run('scan')
+    brain.run('scan')
