@@ -61,25 +61,32 @@ class StoneMap(object):
             self.save()
 
     # populate the map with random stones
-    def randomize(self, count=100):
+    def randomize(self, count=2000):
         log.debug('Generating random map of %d stones', count)
         self.stones = []
-        for i in range(count):
-            center = (uniform(1000 + 50, self.size[0] - 50), uniform(50, self.size[1] - 50))
-            a = uniform(10, 30)
-            b = uniform(10, 30)
+        failures = 0
+        while count > 0 and failures < 100:
+            center = (uniform(1000 + 30, self.size[0] - 30), uniform(30, self.size[1] - 30))
+            a = uniform(6, 30)
+            b = uniform(6, 20)
             if b > a:
                 a, b = b, a
             r = uniform(-90, 90)
-            c, d = ((uniform(96, 160), uniform(96, 160), uniform(96, 160)), uniform(10, 40))
-            s = Stone(center, (a, b), r, c, d)
+            c = uniform(0, 255), uniform(42, 226), uniform(20, 223)
+            s = [ uniform(0.001, 0.02) for i in range(40) ] + [ uniform(0.15, 0.3), uniform(0.2, 0.4) ]
+            s = Stone(center, (a, b), r, c, s)
             bad = False
             for s2 in self.stones:
                 if s.overlaps(s2):
                     bad = True
+                    failures += 1
                     break
             if not bad:
+                log.debug('%d left, %d tries', count, failures)
                 self.stones.append(s)
+                failures = 0
+                count -= 1
+        log.debug('Have %d stones', len(self.stones))
         self.save()
 
     def _find_workarea(self):
