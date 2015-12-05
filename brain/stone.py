@@ -10,6 +10,7 @@ import numpy as np
 
 from log import log
 from utils import *
+from art import art_step
 
 class Stone(object):
 
@@ -199,13 +200,19 @@ class StoneMap(object):
             d = {'stones': self.stones, 'size': self.size, 'workarea': self.workarea}
             serialization.dump(d, f)
 
+
 if __name__ == '__main__':
     m = StoneMap('stonemap_random')
     if len(m.stones) == 0:
         m.randomize()
-    img_map = np.zeros((m.size[1]/4, m.size[0]/4, 3), np.uint8)
     while True:
+        img_map = np.zeros((m.size[1]/4, m.size[0]/4, 3), np.uint8)
         m.image(img_map, 4)
         cv2.imshow('map', img_map)
         if cv2.waitKey(1) == ord('q'):
             break
+        i, nc, na = art_step(m)
+        if nc:
+            m.stones[i].center = nc
+        if na:
+            m.stones[i].angle = na
