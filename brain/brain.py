@@ -126,7 +126,6 @@ class Brain(object):
         f()
 
     def scan(self):
-
         log.debug('Begin scanning')
         self.c.pickup_top()
         self.c.go(e=90)
@@ -166,11 +165,6 @@ class Brain(object):
                 self.map.add_stone(s1)
         self.map.save()
 
-
-    def demo_random_map(self):
-        self.map.randomize()
-        self.map.image()
-
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
@@ -189,5 +183,4 @@ class Brain(object):
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    # brain.run('demo_random_map')
     # brain.run('scan')

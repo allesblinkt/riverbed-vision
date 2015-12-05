@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # import pickle as serialization
 import serpent as serialization
 from random import uniform
@@ -42,13 +44,13 @@ class Stone(object):
 
 class StoneMap(object):
 
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, name):
+        self.name = name
         self.stones = {}
-        self.size = 1000, 1000 # TODO: should be: 4000, 2000
+        self.size = 4000, 2000
         self.workarea = None
         try:
-            with open(self.filename, 'rb') as f:
+            with open('{}.data'.format(self.name), 'rb') as f:
                 d = serialization.load(f)
                 self.stones = d['stones']
                 self.size = d['size']
@@ -61,7 +63,7 @@ class StoneMap(object):
         log.debug('Generating random map of %d stones', count)
         self.stones = {}
         for i in range(count):
-            center = (uniform(50, self.size[0] - 50), uniform(50, self.size[1] - 50))
+            center = (uniform(1000 + 50, self.size[0] - 50), uniform(50, self.size[1] - 50))
             a = uniform(10, 30)
             b = uniform(10, 30)
             if b > a:
@@ -111,8 +113,7 @@ class StoneMap(object):
                 else:
                     c[y] = 0
 
-        # method #3
-        def mrp(a):
+        def mrp_method3(a):
             best_ll = Point(-1, -1)
             best_ur = Point(-1, -1)
             N, M = a.shape
@@ -127,9 +128,8 @@ class StoneMap(object):
             return best_ll, best_ur
 
 
-        """
-        # method #4 - has a bug :-(
-        def mrp(a):
+        # has a bug :-(
+        def mrp_method4(a):
             best_ll = Point(-1, -1)
             best_ur = Point(-1, -1)
             N, M = a.shape
@@ -155,7 +155,6 @@ class StoneMap(object):
                         if width != 0:
                             stack.append((y0, width))
             return best_ll, best_ur
-        """
 
         log.debug('Finding workarea')
         scale = 10 # work on less precise scale
@@ -168,7 +167,7 @@ class StoneMap(object):
                 for y in range(int(math.floor(b/scale)), int(math.floor(d/scale) + 1)):
                     usage[x][y] = True
         # find workarea
-        ll, ur = mrp(usage)
+        ll, ur = mrp_method3(usage)
         wa = (ll.X * scale, ll.Y * scale, ur.X * scale, ur.Y * scale)
         return wa
 
@@ -184,13 +183,18 @@ class StoneMap(object):
             draw.bitmap((s.center[0] - t.size[0] / 2.0, s.center[1] - t.size[1] / 2.0), t)
         if self.workarea:
             draw.rectangle(self.workarea, outline='red')
-        im.save('map.png')
+        im.save('{}.png'.format(self.name))
 
     # functions also as replace
     def add_stone(self, stone):
         self.stones[stone.id] = stone
 
     def save(self):
-        with open(self.filename, 'wb') as f:
+        with open('{}.data'.format(self.name), 'wb') as f:
             d = {'stones': self.stones, 'size': self.size, 'workarea': self.workarea}
             serialization.dump(d, f)
+
+if __name__ == '__main__':
+    m = StoneMap('stonemap_random.data')
+    m.randomize()
+    m.image()
