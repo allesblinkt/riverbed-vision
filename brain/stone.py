@@ -14,7 +14,7 @@ from art import art_step
 
 class Stone(object):
 
-    def __init__(self, center, size, angle, color, structure, rank=0.0):
+    def __init__(self, center, size, angle, color, structure):
         self.center = center
         if size[1] > size[0]:
             size = size[1], size[0]
@@ -23,7 +23,9 @@ class Stone(object):
         self.angle = angle % 180
         self.color = color
         self.structure = structure
-        self.rank = rank
+
+    def copy(self):
+        return Stone(self.center, self.size, self.angle, self.color, self.structure)
 
     # checks whether stone overlaps with another stone
     def overlaps(self, stone):
@@ -57,12 +59,14 @@ class StoneMap(object):
                 self.stones = d['stones']
                 self.size = d['size']
                 self.workarea = d['workarea']
-                self.stones = [ Stone(v['center'], v['size'], v['angle'], v['color'], v['structure'], v['rank']) for v in d['stones'] ]
+                self.stones = [ Stone(v['center'], v['size'], v['angle'], v['color'], v['structure']) for v in d['stones'] ]
         except:
             self.save()
+        for i, s in enumerate(self.stones):
+            s.index = i
 
     # can we put stone to position center?
-    def can_put(self, stone, center):
+    def can_put(self, stone):
         for s in self.stones:
             if stone.overlaps(s):
                 return False
@@ -83,7 +87,7 @@ class StoneMap(object):
             c = uniform(0, 255), uniform(42, 226), uniform(20, 223)
             s = [ uniform(0.001, 0.02) for i in range(40) ] + [ uniform(0.15, 0.3), uniform(0.2, 0.4) ]
             s = Stone(center, (a, b), r, c, s)
-            good = self.can_put(s, s.center)
+            good = self.can_put(s)
             if not good:
                 failures += 1
             else:
@@ -191,7 +195,7 @@ class StoneMap(object):
             center, size, angle = s.center, s.size, s.angle
             center = int(center[0] / scale), int(center[1] / scale)
             size = int(size[0] / scale), int(size[1] / scale)
-            color = s.color
+            color = 3 * [s.color[0]]
             structure = s.structure
             cv2.ellipse(img, center, size, angle, 0, 360, color, -1)
         if self.workarea:
@@ -206,18 +210,18 @@ class StoneMap(object):
 
 
 if __name__ == '__main__':
-    m = StoneMap('stonemap_random')
-    if len(m.stones) == 0:
-        m.randomize()
+    map = StoneMap('stonemap_random')
+    if len(map.stones) == 0:
+        map.randomize()
     while True:
-        img_map = np.zeros((m.size[1]/4, m.size[0]/4, 3), np.uint8)
-        m.image(img_map, 4)
+        img_map = np.zeros((map.size[1]/4, map.size[0]/4, 3), np.uint8)
+        map.image(img_map, 4)
         cv2.imshow('map', img_map)
         if cv2.waitKey(1) == ord('q'):
             break
-        i, nc, na = art_step(m)
+        i, nc, na = art_step(map)
         if i is not None:
             if nc is not None:
-                m.stones[i].center = nc
+                map.stones[i].center = nc
             if na is not None:
-                m.stones[i].angle = na
+                map.stones[i].angle = na

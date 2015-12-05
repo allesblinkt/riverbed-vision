@@ -142,6 +142,7 @@ class Brain(object):
                 s = self.machine.cam.grab_extract()
                 s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
                 s.size = self.machine.cam.size_to_mm(s.size)
+                s.rank = 0.0
                 stones.append(s)
         log.debug('End scanning')
         # select correct stones
