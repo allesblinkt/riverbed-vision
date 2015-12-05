@@ -4,8 +4,9 @@
 import serpent as serialization
 from random import uniform
 from collections import namedtuple
-from PIL import Image, ImageDraw
 import math
+import cv2
+import numpy as np
 
 from log import log
 from utils import *
@@ -50,16 +51,18 @@ class StoneMap(object):
         self.size = 4000, 2000
         self.workarea = None
         try:
-            with open('{}.data'.format(self.name), 'rb') as f:
+            with open('map/{}.data'.format(self.name), 'rb') as f:
                 d = serialization.load(f)
                 self.stones = d['stones']
                 self.size = d['size']
                 self.workarea = d['workarea']
+                for k, v in self.stones.iteritems():
+                    self.stones[k] = Stone(v['id'], v['center'], v['size'], v['angle'], v['color'], v['structure'])
         except:
             self.save()
 
     # populate the map with random stones
-    def randomize(self, count=2000):
+    def randomize(self, count=100):
         log.debug('Generating random map of %d stones', count)
         self.stones = {}
         for i in range(count):
@@ -171,30 +174,36 @@ class StoneMap(object):
         wa = (ll.X * scale, ll.Y * scale, ur.X * scale, ur.Y * scale)
         return wa
 
-    def image(self):
+    def image(self, img, scale):
         log.debug('Creating map image')
-        im = Image.new('RGB', self.size)
-        draw = ImageDraw.Draw(im)
         for s in self.stones.values():
-            size = int(math.ceil(s.size[0] * 2.0)), int(math.ceil(s.size[1] * 2.0))
-            t = Image.new('RGBA', size)
-            ImageDraw.Draw(t).ellipse(((0, 0), size), fill='white')
-            t = t.rotate(s.angle, resample=Image.BILINEAR, expand=True)
-            draw.bitmap((s.center[0] - t.size[0] / 2.0, s.center[1] - t.size[1] / 2.0), t)
+            center, size, angle = s.center, s.size, s.angle
+            center = int(center[0] / scale), int(center[1] / scale)
+            size = int(size[0] / scale), int(size[1] / scale)
+            color = s.color
+            structure = s.structure
+            cv2.ellipse(img, center, size, angle, 0, 360, color, -1)
         if self.workarea:
-            draw.rectangle(self.workarea, outline='red')
-        im.save('{}.png'.format(self.name))
+            a, b, c, d = self.workarea
+            a, b, c, d = a / scale, b / scale, c / scale, d / scale
+            cv2.rectangle(img, (a,b), (c,d), color=(255, 0, 0))
 
     # functions also as replace
     def add_stone(self, stone):
         self.stones[stone.id] = stone
 
     def save(self):
-        with open('{}.data'.format(self.name), 'wb') as f:
+        with open('map/{}.data'.format(self.name), 'wb') as f:
             d = {'stones': self.stones, 'size': self.size, 'workarea': self.workarea}
             serialization.dump(d, f)
 
 if __name__ == '__main__':
     m = StoneMap('stonemap_random.data')
-    m.randomize()
-    m.image()
+    if len(m.stones) == 0:
+        m.randomize()
+    img_map = np.zeros((m.size[1]/4, m.size[0]/4, 3), np.uint8)
+    while True:
+        m.image(img_map, 4)
+        cv2.imshow('map', img_map)
+        if cv2.waitKey(1) == ord('q'):
+            break
