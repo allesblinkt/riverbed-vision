@@ -61,6 +61,13 @@ class StoneMap(object):
         except:
             self.save()
 
+    # can we put stone to position center?
+    def can_put(self, stone, center):
+        for s in self.stones:
+            if stone.overlaps(s):
+                return False
+        return True
+
     # populate the map with random stones
     def randomize(self, count=2000):
         log.debug('Generating random map of %d stones', count)
@@ -76,14 +83,11 @@ class StoneMap(object):
             c = uniform(0, 255), uniform(42, 226), uniform(20, 223)
             s = [ uniform(0.001, 0.02) for i in range(40) ] + [ uniform(0.15, 0.3), uniform(0.2, 0.4) ]
             s = Stone(center, (a, b), r, c, s)
-            bad = False
-            for s2 in self.stones:
-                if s.overlaps(s2):
-                    bad = True
-                    failures += 1
-                    break
-            if not bad:
-                log.debug('%d left, %d tries', count, failures)
+            good = self.can_put(s, s.center)
+            if not good:
+                failures += 1
+            else:
+                log.debug('Placing stones: %d left, %d tries', count, failures)
                 self.stones.append(s)
                 failures = 0
                 count -= 1
@@ -212,7 +216,8 @@ if __name__ == '__main__':
         if cv2.waitKey(1) == ord('q'):
             break
         i, nc, na = art_step(m)
-        if nc:
-            m.stones[i].center = nc
-        if na:
-            m.stones[i].angle = na
+        if i is not None:
+            if nc is not None:
+                m.stones[i].center = nc
+            if na is not None:
+                m.stones[i].angle = na
