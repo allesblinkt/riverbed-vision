@@ -5,6 +5,7 @@ import time
 import sys
 
 from coloranalysis import find_dominant_color
+from structure import lbp_histogram
 from log import log
 
 blank = cv2.imread('blank.png')
@@ -173,7 +174,7 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
     cropped = cv2.merge((b,g,r,a))
     color = find_dominant_color(cropped)
-    structure = 1
+    structure = lbp_histogram(cropped)
 
     if result_img is not None:
         cv2.drawContours(result_img, [contour], 0, color, -1)

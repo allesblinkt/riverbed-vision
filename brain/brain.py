@@ -103,7 +103,7 @@ class Camera(object):
         f = self.grab()
         if f is None:
             return []
-        s = process_image(f)
+        s = process_image('grab_{:03d}_{:03d}'.format(self.machine.x, self.machine.y), f)
         return s
 
 

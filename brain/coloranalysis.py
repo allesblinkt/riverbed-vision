@@ -29,18 +29,13 @@ def kmeans_quantization(img, n_clusters):
     center = np.uint8(centers)
 
     res = center[labels.flatten()]
-    res2 = res.reshape((color.shape))
-    res2 = cv2.cvtColor(res2, cv2.COLOR_LAB2BGR)
 
     hist = centroid_histogram(labels)
     hist[exclude_idx] = 0.0
 
     dominant = center[np.argmax(hist)]
 
-    dummy = np.array([np.array([dominant])])
-    dominant = cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]
-
-    return dominant, hist, res2
+    return dominant, hist, res
 
 
 def centroid_histogram(labels):
@@ -59,7 +54,7 @@ def find_dominant_color(img):
     small_img = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
 
     dominant, hist, processed = kmeans_quantization(small_img, n_clusters=3)
-    return dominant.tolist()
+    return dominant
 
 
 if __name__ == '__main__':
@@ -83,7 +78,11 @@ if __name__ == '__main__':
 
         t = time.time()
         dominant = find_dominant_color(image)
-        cv2.circle(image, (w / 2, h / 2), w / 8, dominant, -1)
+
+        dummy = np.array([np.array([dominant])])
+        rgb_dominant = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
+
+        cv2.circle(image, (w / 2, h / 2), w / 8, rgb_dominant, -1)
         print('Time taken: %.3f' % (time.time() - t))
 
         cv2.imshow('image', image)
