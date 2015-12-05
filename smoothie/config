@@ -55,7 +55,7 @@ gamma_current                                nc               # CHANGED. Z stepp
 gamma_max_rate                               10000.0            # mm/min
 
 # Serial communications configuration ( baud rate default to 9600 if undefined )
-uart0.baud_rate                              19200            # Baud rate for the default hardware serial port
+uart0.baud_rate                              19200           # Baud rate for the default hardware serial port
 second_usb_serial_enable                     false            # This enables a second usb serial port (to have both pronterface
                                                               # and a terminal connected)
 #leds_disable                                true             # disable using leds after config loaded
@@ -242,7 +242,7 @@ gamma_max                                    38               # CHANGED.
 
 # optional order in which axis will home, default is they all home at the same time,
 # if this is set it will force each axis to home one at a time in the specified order
-homing_order                                 ZYX              # x axis followed by y then z last
+homing_order                                 ZXY              # x axis followed by y then z last
 
 # optional enable limit switches, actions will stop if any enabled limit switch is triggered
 #alpha_limit_enable                          false            # set to true to enable X min and max limit switches
