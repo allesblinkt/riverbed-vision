@@ -9,12 +9,15 @@ STAGE = 0
 
 MAX_STAGE = 2
 
+MAX_Y = 1730
+MAX_X = 3770
+
 flower_seeds = [
-    (3000 + 666.0,  333.0), (3000 + 333.0 , 333.0),
-    (3000 + 666.0,  666.0), (3000 + 333.0,  666.0),
-    (3000 + 666.0,  999.0), (3000 + 333.0,  999.0),
-    (3000 + 666.0, 1333.0), (3000 + 333.0, 1333.0),
-    (3000 + 666.0, 1666.0), (3000 + 333.0, 1666.0),
+    (MAX_X - 333.0,  333.0), (MAX_X - 666.0 , 295.0),
+    (MAX_X - 333.0,  590.0), (MAX_X - 666.0,  590.0),
+    (MAX_X - 333.0,  885.0), (MAX_X - 666.0,  885.0),
+    (MAX_X - 333.0, 1180.0), (MAX_X - 666.0, 1180.0),
+    (MAX_X - 333.0, 1475.0), (MAX_X - 666.0, 1475.0),
 ]
 
 def find_flower_pos(map, stone, center):
@@ -32,7 +35,7 @@ def find_flower_pos(map, stone, center):
             radius += 10.0
 
 def in_workarea(stone):
-    return stone.center[0] >= 3000
+    return stone.center[0] > MAX_X - 999.0
 
 stage1_x = None
 stage1_last = None
@@ -46,10 +49,10 @@ def art_step(map):
     index, new_center, new_angle = None, None, None
 
     # clean unusable holes
-    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[1] + h.size <= 2000 - (map.maxstonesize + 10) * stage_step]
+    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[1] + h.size <= MAX_Y - (map.maxstonesize + 10) * stage_step]
 
     if STAGE == 0:
-        sel = [s for s in map.stones if not in_workarea(s) and s.center[1] + s.size[0] > 2000 - (map.maxstonesize + 10) * stage_step and not s.done]
+        sel = [s for s in map.stones if not in_workarea(s) and s.center[1] + s.size[0] > MAX_Y - (map.maxstonesize + 10) * stage_step and not s.done]
         if sel:
             s = sel[0]
             index = s.index
@@ -57,11 +60,11 @@ def art_step(map):
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif STAGE == 1:
-        sel = [s for s in map.stones if in_workarea(s) or s.center[1] + s.size[0] <= 2000 - (map.maxstonesize + 10) * stage_step]
+        sel = [s for s in map.stones if in_workarea(s) or s.center[1] + s.size[0] <= MAX_Y - (map.maxstonesize + 10) * stage_step]
         if sel:
             if stage1_x is None:
                 # first run of this stage
-                stage1_x = 3000
+                stage1_x = MAX_X - 999.0
                 # pick random stone
                 s = choice(sel)
                 stage1_last = s
@@ -71,10 +74,10 @@ def art_step(map):
             s.done = True
             index = s.index
             new_angle = 90
-            y = 2000 - (map.maxstonesize + 10) * (stage_step - 0.5)
+            y = MAX_Y - (map.maxstonesize + 10) * (stage_step - 0.5)
             new_center = stage1_x, y
             stage1_x -= s.size[1] * 2.0 + 5 # TODO: fixme - not entirely correct
-            if stage1_x < 100:
+            if stage1_x < 200:
                 stage1_x = None
                 stage_step += 1
                 STAGE = 0

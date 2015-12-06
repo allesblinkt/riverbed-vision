@@ -60,7 +60,7 @@ class StoneMap(object):
         self.name = name
         self.stones = []
         self.holes = []
-        self.size = 4000, 2000
+        self.size = 3770, 1730
         self.workarea = None
         try:
             with open('map/{}.data'.format(self.name), 'rb') as f:
