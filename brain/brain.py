@@ -114,7 +114,7 @@ class Camera(object):
         if frame is None:
             log.warning('Failed to grab the image')
             return []
-        fn = 'grab_{:04d}_{:04d}'.format(self.machine.x, self.machine.y)
+        fn = 'grab_{:04d}_{:04d}'.format(int(self.machine.x), int(self.machine.y))
         if save:
             log.debug('Saving {}.jpg'.format(fn))
             cv2.imwrite('map/{}.jpg'.format(fn), frame)
