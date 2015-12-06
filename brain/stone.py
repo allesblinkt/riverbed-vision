@@ -17,7 +17,6 @@ class Stone(object):
     def __init__(self, center, size, angle, color, structure):
         self.center = center
         if size[1] > size[0]:
-            size = size[1], size[0]
             angle += 90
         self.size = size
         self.angle = angle % 180
@@ -62,8 +61,16 @@ class StoneMap(object):
                 self.stones = [ Stone(v['center'], v['size'], v['angle'], v['color'], v['structure']) for v in d['stones'] ]
         except:
             self.save()
+        self._metadata()
+
+    # precompute useful info, but don't store it
+    def _metadata(self):
+        self.maxstonesize = 0
         for i, s in enumerate(self.stones):
             s.index = i
+            if s.size[0] > self.maxstonesize:
+                self.maxstonesize = s.size[0]
+        self.maxstonesize *= 2.0
 
     # can we put stone to position center?
     def can_put(self, stone):
@@ -78,7 +85,7 @@ class StoneMap(object):
         self.stones = []
         failures = 0
         while count > 0 and failures < 100:
-            center = (uniform(1000 + 30, self.size[0] - 30), uniform(30, self.size[1] - 30))
+            center = (uniform(30, self.size[0] - 1000 - 30), uniform(30, self.size[1] - 30))
             a = uniform(6, 30)
             b = uniform(6, 20)
             if b > a:
@@ -97,6 +104,7 @@ class StoneMap(object):
                 count -= 1
         log.debug('Have %d stones', len(self.stones))
         self.save()
+        self._metadata()
 
     def _find_workarea(self):
 
@@ -193,9 +201,10 @@ class StoneMap(object):
         log.debug('Creating map image')
         for s in self.stones:
             center, size, angle = s.center, s.size, s.angle
-            center = int(center[0] / scale), int(center[1] / scale)
+            center = int((self.size[0] - center[0]) / scale), int(center[1] / scale)
             size = int(size[0] / scale), int(size[1] / scale)
-            color = 3 * [s.color[0]]
+            dummy = np.array([np.array([s.color], dtype=np.uint8)])
+            color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
             structure = s.structure
             cv2.ellipse(img, center, size, angle, 0, 360, color, -1)
         if self.workarea:
@@ -225,3 +234,4 @@ if __name__ == '__main__':
                 map.stones[i].center = nc
             if na is not None:
                 map.stones[i].angle = na
+    # map.save()
