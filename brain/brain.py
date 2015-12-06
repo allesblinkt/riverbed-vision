@@ -148,10 +148,11 @@ class Brain(object):
         self.c.go(e=90)
         self.c.block()
         step = 100
-        x, y = self.map.size
         stones = []
-        for i in range(0, x + 1, step):
-            for j in range(0, y + 1, step):
+        x, y = self.map.size
+        stepx, stepy = self.machine.cam.viewx, self.machine.cam.viewy
+        for i in range(0, x + 1, stepx):
+            for j in range(0, y + 1, stepy):
                 self.c.go(x=i, y=j)
                 self.c.block()
                 s = self.machine.cam.grab_extract(save=True)
