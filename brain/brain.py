@@ -53,7 +53,7 @@ class Machine(object):
         if not angle:
             angle = self.e
         angle = math.radians(angle)
-        return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
+        return (0.0 + length * math.cos(angle) , 0.0 + length * math.sin(angle))
 
 
 class Camera(object):
@@ -168,6 +168,11 @@ class Brain(object):
             self._move_stone_absolute((0, 0), 0, (500, 250), 90)
             self._move_stone_absolute((500, 250), 90, (0, 0), 0)
 
+    def demo2(self):
+        while True:
+            self._move_stone((100, 100), 30, (100, 100), 120)
+            self._move_stone((100, 100), 120, (100, 100), 30)
+
     def _move_stone_absolute(c1, a1, c2, a2):
         self.c.go(e=a1)
         self.c.go(x=c1[0], y=c1[1])
@@ -177,11 +182,21 @@ class Brain(object):
         self.m.lift_down(h)
 
     def _move_stone(c1, a1, c2, a2):
-        # TODO: finish relative calculations
-        self._move_stone_absolute(c1, a1, c2, a2)
-        # TODO: save map
+        da = a1 - a2
+        if da < 0.0:
+            da = 180.0 + da
+        da = da % 180
+        sa = 0.0 # start angle
+        ea = da # end angle
+        h1, h2 = self.machine.head_delta(sa), self.machine.head_delta(ea)
+        c1 = c1[0] - h1[0], c1[1] - h1[1]
+        c2 = c2[0] - h2[0], c2[1] - h2[1]
+        self._move_stone_absolute(c1, 0, c2, da)
+        # TODO: save map ?
 
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
     brain.run('scan')
+    # brain.run('demo1')
+    # brain.run('demo2')
