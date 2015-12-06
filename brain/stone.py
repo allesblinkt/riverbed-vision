@@ -68,12 +68,21 @@ class StoneMap(object):
         self.maxstonesize = 0
         for i, s in enumerate(self.stones):
             s.index = i
+            s.done = False
             if s.size[0] > self.maxstonesize:
                 self.maxstonesize = s.size[0]
         self.maxstonesize *= 2.0
 
     # can we put stone to position center?
     def can_put(self, stone):
+        if stone.center[0] - stone.size[0] <= 0:
+            return False
+        if stone.center[1] - stone.size[0] <= 0:
+            return False
+        if stone.center[0] + stone.size[0] >= self.size[0]:
+            return False
+        if stone.center[1] + stone.size[0] >= self.size[1]:
+            return False
         for s in self.stones:
             if stone.overlaps(s):
                 return False
@@ -206,7 +215,7 @@ class StoneMap(object):
             dummy = np.array([np.array([s.color], dtype=np.uint8)])
             color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
             structure = s.structure
-            cv2.ellipse(img, center, size, angle, 0, 360, color, -1)
+            cv2.ellipse(img, center, size, 360 - angle, 0, 360, color, -1)
         if self.workarea:
             a, b, c, d = self.workarea
             a, b, c, d = a / scale, b / scale, c / scale, d / scale

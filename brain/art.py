@@ -1,7 +1,9 @@
 from log import log
 import math
 import numpy as np
-from random import uniform
+from random import uniform, choice
+from coloranalysis import compare_colors
+from structure import compare_histograms
 
 STAGE = 0
 
@@ -24,26 +26,27 @@ def find_flower_pos(map, stone, center):
         stone2.angle = angle % 180
         if map.can_put(stone2):
             return (x, y), angle % 180
-        angle += 137.508
+        angle += 137.50776405
         if angle > 360:
             angle -= 360
-            radius += 1.0
+            radius += 10.0
 
 def in_workarea(stone):
     return stone.center[0] >= 3000
 
 stage1_x = None
+stage1_last = None
 stage_step = 1
 
 def art_step(map):
     global STAGE
-    global stage1_x
+    global stage1_x, stage1_last
     global stage_step
 
     index, new_center, new_angle = None, None, None
 
     if STAGE == 0:
-        sel = [s for s in map.stones if not in_workarea(s) and s.center[1] + s.size[0] > 2000 - (map.maxstonesize + 10) * stage_step and not hasattr(s, 'DONE')]
+        sel = [s for s in map.stones if not in_workarea(s) and s.center[1] + s.size[0] > 2000 - (map.maxstonesize + 10) * stage_step and not s.done]
         if sel:
             s = sel[0]
             index = s.index
@@ -53,15 +56,21 @@ def art_step(map):
     if STAGE == 1:
         sel = [s for s in map.stones if in_workarea(s) or s.center[1] + s.size[0] <= 2000 - (map.maxstonesize + 10) * stage_step]
         if sel:
-            s = min(sel, key=lambda x: x.color[0])
-            s.DONE = True # TODO: hack
+            if stage1_x is None:
+                # first run of this stage
+                stage1_x = 3000
+                # pick random stone
+                s = choice(sel)
+                stage1_last = s
+            else:
+                s = min(sel, key=lambda x: compare_colors(x.color, stage1_last.color) * compare_histograms(x.structure, stage1_last.structure) )
+                stage1_last = s
+            s.done = True
             index = s.index
             new_angle = 90
             y = 2000 - (map.maxstonesize + 10) * (stage_step - 0.5)
-            if stage1_x is None:
-                stage1_x = 3000
             new_center = stage1_x, y
-            stage1_x -= s.size[1] * 2 + 5
+            stage1_x -= s.size[1] * 2.0 + 5 # TODO: fixme - not entirely correct
             if stage1_x < 100:
                 stage1_x = None
                 stage_step += 1
