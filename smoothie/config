@@ -205,7 +205,7 @@ switch.led.output_type                      digital          # just an on or off
 
 # Rotation limit input. CHANGED
 switch.rlimit.enable                           true             #
-switch.rlimit.input_pin_behavior               momentary        #
+# switch.rlimit.output_on_command                M18              # if the switch is hit, disable 
 switch.rlimit.input_pin                        0.21^             #
 
 
