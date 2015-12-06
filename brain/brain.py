@@ -47,6 +47,14 @@ class Machine(object):
         self.control.pickup_top()
         self.last_pickup_height = None
 
+    def head_delta(self, angle=None):
+        # length of rotating head (in mm)
+        length = 40.0
+        if not angle:
+            angle = self.e
+        angle = math.radians(angle)
+        return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
+
 
 class Camera(object):
 
@@ -60,8 +68,9 @@ class Camera(object):
 
     # calc distance of perceived pixel from center of the view (in cnc units = mm)
     def pos_to_mm(self, pos, offset=(0, 0)):
-        x = self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
-        y = self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
+        dx, dy = +69.23, +1.88 # distance offset from camera center to head center
+        x = dx + self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
+        y = dy + self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
         return x, y
 
     # calc size of perceived pixels (in cnc units = mm)
@@ -69,18 +78,6 @@ class Camera(object):
         w = self.viewx * size[0] / self.resx
         h = self.viewy * size[1] / self.resy
         return w, h
-
-    '''
-    Compute difference between center of the vacuum head and center of camera view.
-    Relative to camera center. In CNC units = milimeters.
-    '''
-    def vision_delta(self):
-        # length of rotating head (in mm)
-        length = 40.0 # distance of vacuum tool to rotation axis (Z center)
-        # distance between center of Z axis and center of camera view (both in mm)
-        dx, dy = -69.23, -1.88
-        angle = math.radians(self.machine.e)
-        return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
 
     def grab(self):
         log.debug('Taking picture at coords {},{}'.format(self.machine.x, self.machine.y))
@@ -168,10 +165,10 @@ class Brain(object):
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
-            self._move_stone(0, 0, 0, 500, 250, 90)
-            self._move_stone(500, 250, 90, 0, 0, 0)
+            self._move_stone_absolute(0, 0, 0, 500, 250, 90)
+            self._move_stone_absolute(500, 250, 90, 0, 0, 0)
 
-    def _move_stone(x1, y1, e1, x2, y2, e2):
+    def _move_stone_absolute(x1, y1, e1, x2, y2, e2):
         self.c.go(e=e1)
         self.c.go(x=x1, y=y1)
         h = self.m.lift_up()
