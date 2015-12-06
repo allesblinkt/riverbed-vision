@@ -11,7 +11,7 @@ mm_per_arc_segment                           0.5              # Arcs are cut int
 # Arm solution configuration : Cartesian robot. Translates mm positions into stepper positions
 alpha_steps_per_mm                           51.282051282               # CHANGED. Steps per mm for alpha stepper
 beta_steps_per_mm                            51.282051282               # CHANGED. Steps per mm for beta stepper
-gamma_steps_per_mm                           22.22             # CHANGED. Steps per mm for gamma stepper
+gamma_steps_per_mm                           88.88             # CHANGED. Steps per mm for gamma stepper
 
 # Planner module configuration : Look-ahead and acceleration configuration
 planner_queue_size                           32               # DO NOT CHANGE THIS UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING
@@ -71,7 +71,7 @@ kill_button_pin                              2.12             # kill button pin.
 
 # Extruder module configuration
 extruder.hotend.enable                          true             # Whether to activate the extruder module at all. All configuration is ignored if false
-extruder.hotend.steps_per_mm                    6.66666          # CHANGED. Steps per mm for extruder stepper
+extruder.hotend.steps_per_mm                    26.66666          # CHANGED. Steps per mm for extruder stepper
 extruder.hotend.default_feed_rate               800              # Default rate ( mm/minute ) for moves where only the extruder moves
 extruder.hotend.acceleration                    500              # Acceleration for the stepper motor mm/sec²
 extruder.hotend.max_speed                       800              # mm/s
