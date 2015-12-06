@@ -194,9 +194,11 @@ class Brain(object):
         self.c.go(x=c2[0], y=c2[1])
         self.m.lift_down(h)
 
-    def _turn_stone_calc(h1, sa, h2, ea):
-        h1, h2 = self.machine.head_delta(sa), self.machine.head_delta(ea)
+    def _turn_stone_calc(c1, sa, c2, ea):
+        h1 = self.machine.head_delta(sa)
         c1 = c1[0] - h1[0], c1[1] - h1[1]
+
+        h2 = self.machine.head_delta(ea)
         c2 = c2[0] - h2[0], c2[1] - h2[1]
 
         return c1, c2
@@ -208,13 +210,13 @@ class Brain(object):
         da = da % 180
 
         # Case 1
-        c1, c2 = _turn_stone_calc(c1, 0.0, c2, da)
+        nc1, nc2 = _turn_stone_calc(c1, 0.0, c2, da)
 
         if c1[0] >= 0 and c2[0] >= 0 and c1[0] <= art.MAX_X and c2[0] <= art.MAX_X:
-            self._move_stone_absolute(c1, 0, c2, da)
-        else:
-            c1, c2 = _turn_stone_calc(c1, 180.0, c2, da)
-            self._move_stone_absolute(c1, 180.0, c2, da)
+            self._move_stone_absolute(nc1, 0, nc2, da)
+        else:   # Case 2
+            nc1, nc2 = _turn_stone_calc(c1, 180.0, c2, da)
+            self._move_stone_absolute(nc1, 180.0, nc2, da)
         # TODO: save map ?
 
 if __name__ == '__main__':
