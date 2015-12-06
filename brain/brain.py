@@ -70,12 +70,6 @@ class Camera(object):
         self.viewy = 69.0 * 2.0  # view height (in cnc units = mm). Transposed!
         self.flipall = True
 
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4467'])
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_auto=0'])
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_absolute=19'])
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'brightness=30'])
-
     # calc distance of perceived pixel from center of the view (in cnc units = mm)
     def pos_to_mm(self, pos, offset=(0, 0)):
         dx, dy = -3.0, +66.00  # distance offset from head center to camera center
@@ -99,6 +93,12 @@ class Camera(object):
             cam.set(cv2.cv.CV_CAP_PROP_FPS, 15)
             # cam.set(cv2.cv.CV_CAP_PROP_EXPOSURE, 19)
             # cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 30)
+
+            subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
+            subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4467'])
+            subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_auto=1'])  # means disable
+            subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_absolute=19'])
+            subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'brightness=30'])
 
             ret, frame = cam.read()
             cam.release()
