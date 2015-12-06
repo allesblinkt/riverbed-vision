@@ -134,9 +134,9 @@ class MachineController(object):
         log.debug('Sending command "%s"', cmd_str)
         if self.serial_port:
             with self.serial_mutex:
-                self.serial_port.write(cmd_str + NEWLINE)
                 self.serial_port.flushInput()
-                self.serial_port.flushOutput()
+                self.serial_port.write(cmd_str + NEWLINE)
+                # self.serial_port.flushOutput()
                 line = self.serial_port.readline()
                 log.debug('Received line "%s"', line.rstrip())
                 if read_result:
