@@ -70,13 +70,13 @@ def art_step(map):
                 stage1_last = s
             else:
                 s = min(sel, key=lambda x: compare_colors(x.color, stage1_last.color) * compare_histograms(x.structure, stage1_last.structure) )
+                stage1_x -= stage1_last.size[1] + s.size[1] + 5
                 stage1_last = s
             s.done = True
             index = s.index
             new_angle = 90
             y = MAX_Y - (map.maxstonesize + 10) * (stage_step - 0.5)
             new_center = stage1_x, y
-            stage1_x -= s.size[1] * 2.0 + 5 # TODO: fixme - not entirely correct
             if stage1_x < 200:
                 stage1_x = None
                 stage_step += 1
