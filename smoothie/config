@@ -208,6 +208,11 @@ switch.rlimit.enable                           true             #
 # switch.rlimit.output_on_command                M18              # if the switch is hit, disable 
 switch.rlimit.input_pin                        0.21^             #
 
+# Fault limit input. CHANGED
+switch.fault.enable                           true             #
+switch.fault.output_on_command                M112              # if the switch is hit, disable 
+switch.fault.input_pin                        1.10^!             #
+
 
 # automatically toggle a switch at a specified temperature. Different ones of these may be defined to monitor different temperatures and switch different swithxes
 # useful to turn on a fan or water pump to cool the hotend
