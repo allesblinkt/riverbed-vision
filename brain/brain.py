@@ -67,6 +67,9 @@ class Camera(object):
         self.viewx = 69.0 * 2.0  # view width (in cnc units = mm)
         self.viewy = 39.0 * 2.0  # view height (in cnc units = mm)
 
+        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
+        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4467'])
+
     # calc distance of perceived pixel from center of the view (in cnc units = mm)
     def pos_to_mm(self, pos, offset=(0, 0)):
         dx, dy = -3.0, +66.00  # distance offset from head center to camera center
