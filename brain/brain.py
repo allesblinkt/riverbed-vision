@@ -5,7 +5,7 @@ import Pyro4
 import cv2
 import numpy as np
 import subprocess
-import art
+from art import MAX_X, MAX_Y
 from extract import process_image
 
 from utils import *
@@ -212,7 +212,7 @@ class Brain(object):
         # Case 1
         nc1, nc2 = _turn_stone_calc(c1, 0.0, c2, da)
 
-        if c1[0] >= 0 and c2[0] >= 0 and c1[0] <= art.MAX_X and c2[0] <= art.MAX_X:
+        if c1[0] >= 0 and c2[0] >= 0 and c1[0] <= MAX_X and c2[0] <= MAX_X:
             self._move_stone_absolute(nc1, 0, nc2, da)
         else:   # Case 2
             nc1, nc2 = _turn_stone_calc(c1, 180.0, c2, da)
