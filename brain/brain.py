@@ -93,8 +93,8 @@ class Camera(object):
             cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 1280)
             cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 720)
             cam.set(cv2.cv.CV_CAP_PROP_FPS, 15)
+            cam.set(cv2.cv.CV_CAP_PROP_EXPOSURE, 19)
             cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 30)
-            cam.set(cv2.cv.CV_CAP_PROP_EXPOSURE, 39)
 
             ret, frame = cam.read()
             cam.release()
