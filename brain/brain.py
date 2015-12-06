@@ -66,6 +66,7 @@ class Camera(object):
         self.resy = 720.0  # image height (in pixels)
         self.viewx = 69.0 * 2.0  # view width (in cnc units = mm)
         self.viewy = 39.0 * 2.0  # view height (in cnc units = mm)
+        self.flipall = True
 
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4467'])
@@ -91,10 +92,14 @@ class Camera(object):
             cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 1280)
             cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 720)
             cam.set(cv2.cv.CV_CAP_PROP_FPS, 15)
-            cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 39)
+            cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 30)
+            cam.set(cv2.cv.CV_CAP_PROP_EXPOSURE, 39)
+
             ret, frame = cam.read()
             cam.release()
             if ret:
+                if self.flipall:
+                    frame = cv2.flip(frame, -1)
                 ret = frame
         except:
             ret = None
