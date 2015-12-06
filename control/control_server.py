@@ -134,7 +134,7 @@ class MachineController(object):
         cmd_str = 'M112'
         self._command(cmd_str)
 
-     def reset_emergency(self):
+    def reset_emergency(self):
         cmd_str = 'M999'
         self._command(cmd_str)
 
