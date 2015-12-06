@@ -18,7 +18,9 @@ class Stone(object):
         self.center = center
         if size[1] > size[0]:
             angle += 90
-        self.size = size
+            self.size = size[1], size[0]
+        else:
+            self.size = size
         self.angle = angle % 180
         self.color = color
         self.structure = structure
@@ -45,11 +47,19 @@ class Stone(object):
         return 1.0 - max([dc / 20.0, ds / 20.0, da / 20.0])
 
 
+class StoneHole(object):
+
+    def __init__(self, stone):
+        self.center = stone.center
+        self.size = min(stone.size)
+
+
 class StoneMap(object):
 
     def __init__(self, name):
         self.name = name
         self.stones = []
+        self.holes = []
         self.size = 4000, 2000
         self.workarea = None
         try:
@@ -216,6 +226,10 @@ class StoneMap(object):
             color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
             structure = s.structure
             cv2.ellipse(img, center, size, 360 - angle, 0, 360, color, -1)
+        for h in self.holes:
+            center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
+            size = int(h.size / scale)
+            cv2.circle(img, center, size, (255, 255, 255))
         if self.workarea:
             a, b, c, d = self.workarea
             a, b, c, d = a / scale, b / scale, c / scale, d / scale
@@ -239,6 +253,7 @@ if __name__ == '__main__':
             break
         i, nc, na = art_step(map)
         if i is not None:
+            map.holes.append(StoneHole(map.stones[i]))
             if nc is not None:
                 map.stones[i].center = nc
             if na is not None:

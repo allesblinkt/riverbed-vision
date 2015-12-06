@@ -45,6 +45,9 @@ def art_step(map):
 
     index, new_center, new_angle = None, None, None
 
+    # clean unusable holes
+    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[1] + h.size <= 2000 - (map.maxstonesize + 10) * stage_step]
+
     if STAGE == 0:
         sel = [s for s in map.stones if not in_workarea(s) and s.center[1] + s.size[0] > 2000 - (map.maxstonesize + 10) * stage_step and not s.done]
         if sel:
@@ -53,7 +56,7 @@ def art_step(map):
             bucket = int(s.color[0] * 10 / 255)
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
-    if STAGE == 1:
+    elif STAGE == 1:
         sel = [s for s in map.stones if in_workarea(s) or s.center[1] + s.size[0] <= 2000 - (map.maxstonesize + 10) * stage_step]
         if sel:
             if stage1_x is None:
@@ -76,7 +79,7 @@ def art_step(map):
                 stage_step += 1
                 STAGE = 0
 
-    if STAGE == 2:
+    elif STAGE == 2:
         pass
 
     if index is not None:
