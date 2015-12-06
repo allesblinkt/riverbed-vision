@@ -204,7 +204,7 @@ class Brain(object):
         c1 = c1[0] - h1[0], c1[1] - h1[1]
         c2 = c2[0] - h2[0], c2[1] - h2[1]
         self._move_stone_absolute(c1, 0, c2, da)
-        # TODO: save map ?
+        self.map.save() # TODO: do we really want to save?
 
 if __name__ == '__main__':
     brain = Brain()
