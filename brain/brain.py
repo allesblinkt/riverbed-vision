@@ -63,10 +63,10 @@ class Camera(object):
         self.machine = machine
         self.index = index
         self.videodev = '/dev/video' + str(index)
-        self.resx = 1280.0  # image width (in pixels)
-        self.resy = 720.0  # image height (in pixels)
-        self.viewx = 69.0 * 2.0  # view width (in cnc units = mm)
-        self.viewy = 39.0 * 2.0  # view height (in cnc units = mm)
+        self.resx = 720.0  # image width (in pixels). Transposed!
+        self.resy = 1280.0  # image height (in pixels). Transposed!
+        self.viewx = 39.0 * 2.0  # view width (in cnc units = mm). Transposed!
+        self.viewy = 69.0 * 2.0  # view height (in cnc units = mm). Transposed!
         self.flipall = True
 
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
@@ -99,6 +99,7 @@ class Camera(object):
             ret, frame = cam.read()
             cam.release()
             if ret:
+                frame = cv2.transpose(frame)
                 if self.flipall:
                     frame = cv2.flip(frame, -1)
                 ret = frame
