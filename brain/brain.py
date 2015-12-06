@@ -12,8 +12,8 @@ from utils import *
 from log import log
 from stone import Stone, StoneMap
 
-CONTROL_HOSTNAME = 'localhost'
-# CONTROL_HOSTNAME = '192.168.0.27'
+# CONTROL_HOSTNAME = 'localhost'
+CONTROL_HOSTNAME = '192.168.0.29'
 
 '''
 High-level operations on CNC
