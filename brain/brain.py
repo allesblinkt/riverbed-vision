@@ -35,7 +35,7 @@ class Machine(object):
         self.control.vacuum(True)
         time.sleep(1.0)
         h = self.control.pickup()
-        assert h
+        assert h # TODO: fixme - try picking up 3 times, then fail?
         self.last_pickup_height = h
 
     def lift_down(self):
@@ -165,17 +165,21 @@ class Brain(object):
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
-            self._move_stone_absolute(0, 0, 0, 500, 250, 90)
-            self._move_stone_absolute(500, 250, 90, 0, 0, 0)
+            self._move_stone_absolute((0, 0), 0, (500, 250), 90)
+            self._move_stone_absolute((500, 250), 90, (0, 0), 0)
 
-    def _move_stone_absolute(x1, y1, e1, x2, y2, e2):
-        self.c.go(e=e1)
-        self.c.go(x=x1, y=y1)
+    def _move_stone_absolute(c1, a1, c2, a2):
+        self.c.go(e=a1)
+        self.c.go(x=c1[0], y=c1[1])
         h = self.m.lift_up()
-        self.c.go(e=e2)
-        self.c.go(x=x2, y=y2)
+        self.c.go(e=a2)
+        self.c.go(x=c2[0], y=c2[1])
         self.m.lift_down(h)
 
+    def _move_stone(c1, a1, c2, a2):
+        # TODO: finish relative calculations
+        self._move_stone_absolute(c1, a1, c2, a2)
+        # TODO: save map
 
 if __name__ == '__main__':
     brain = Brain()
