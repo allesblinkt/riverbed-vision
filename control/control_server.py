@@ -6,7 +6,7 @@ import logging
 import Pyro4
 import netifaces
 
-NEWLINE = '\r\n'
+NEWLINE = '\n'
 DEVICE  = '/dev/ttyAMA0'
 PORT    = 5001
 
