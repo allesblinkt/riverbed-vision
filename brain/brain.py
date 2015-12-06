@@ -35,7 +35,7 @@ class Machine(object):
         self.control.vacuum(True)
         time.sleep(1.0)
         h = self.control.pickup()
-        assert h
+        assert h # TODO: fixme - try picking up 3 times, then fail?
         self.last_pickup_height = h
 
     def lift_down(self):
@@ -46,6 +46,14 @@ class Machine(object):
         time.sleep(0.1)
         self.control.pickup_top()
         self.last_pickup_height = None
+
+    def head_delta(self, angle=None):
+        # length of rotating head (in mm)
+        length = 40.0
+        if not angle:
+            angle = self.e
+        angle = math.radians(angle)
+        return (0.0 + length * math.cos(angle) , 0.0 + length * math.sin(angle))
 
 
 class Camera(object):
@@ -60,8 +68,9 @@ class Camera(object):
 
     # calc distance of perceived pixel from center of the view (in cnc units = mm)
     def pos_to_mm(self, pos, offset=(0, 0)):
-        x = self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
-        y = self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
+        dx, dy = +69.23, +1.88 # distance offset from camera center to head center
+        x = dx + self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
+        y = dy + self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
         return x, y
 
     # calc size of perceived pixels (in cnc units = mm)
@@ -70,19 +79,8 @@ class Camera(object):
         h = self.viewy * size[1] / self.resy
         return w, h
 
-    '''
-    Compute difference between center of the vacuum head and center of camera view.
-    Relative to camera center. In CNC units = milimeters.
-    '''
-    def vision_delta(self):
-        # length of rotating head (in mm)
-        length = 40.0 # distance of vacuum tool to rotation axis (Z center)
-        # distance between center of Z axis and center of camera view (both in mm)
-        dx, dy = -69.23, -1.88
-        angle = math.radians(self.machine.e)
-        return (dx + length * math.cos(angle) , dy + length * math.sin(angle))
-
     def grab(self):
+        log.debug('Taking picture at coords {},{}'.format(self.machine.x, self.machine.y))
         self.machine.control.light(True)
         try:
             cam = cv2.VideoCapture(self.index)
@@ -99,19 +97,28 @@ class Camera(object):
         self.machine.control.light(False)
         return ret
 
-    def grab_extract(self):
-        f = self.grab()
-        if f is None:
+    def grab_extract(self, save=False):
+        frame = self.grab()
+        if frame is None:
+            log.warning('Failed to grab the image')
             return []
-        s = process_image('grab_{:03d}_{:03d}'.format(self.machine.x, self.machine.y), f)
-        return s
+        fn = 'grab_{:04d}_{:04d}'.format(self.machine.x, self.machine.y)
+        if save:
+            log.debug('Saving {}.jpg'.format(fn))
+            cv2.imwrite('map/{}.jpg'.format(fn), frame)
+        stones, result_image = process_image(fn, frame, save_stones='png')
+        if save:
+            log.debug('Saving {}-processed.jpg'.format(fn))
+            cv2.imwrite('map/{}-processed.jpg'.format(fn), result_image)
+        log.debug('Found {} stones'.format(len(stones)))
+        return stones
 
 
 class Brain(object):
 
     def __init__(self):
         self.machine = Machine(CONTROL_HOSTNAME)
-        self.map = StoneMap('stonemap.data')
+        self.map = StoneMap('stonemap')
         # shortcuts for convenience
         self.m = self.machine
         self.c = self.machine.control
@@ -130,7 +137,6 @@ class Brain(object):
         self.c.pickup_top()
         self.c.go(e=90)
         self.c.block()
-        self.c.feedrate(30000)
         step = 100
         x, y = self.map.size
         stones = []
@@ -138,49 +144,59 @@ class Brain(object):
             for j in range(0, y + 1, step):
                 self.c.go(x=i, y=j)
                 self.c.block()
-                log.debug('Taking picture at coords {},{}'.format(i, j))
-                s = self.machine.cam.grab_extract()
-                s['center'] = self.machine.cam.pos_to_mm(s['center'], offset=(i, j))
-                s['size'] = self.machine.cam.size_to_mm(s['size'])
+                s = self.machine.cam.grab_extract(save=True)
+                s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
+                s.size = self.machine.cam.size_to_mm(s.size)
+                s.rank = 0.0
                 stones.append(s)
-                log.debug('Found {} stones'.format(len(stones)))
         log.debug('End scanning')
         # select correct stones
         log.debug('Begin selecting/reducing stones')
         for i in range(len(stones)):
-            stones[i]['rank'] = 0.0
-        for i in range(len(stones)):
             for j in range(i + 1, len(stones)):
                 s = stones[i].similarity(stones[j])
-                stones[i]['rank'] += s
-                stones[j]['rank'] -= s
+                stones[i].rank += s
+                stones[j].rank -= s
         log.debug('End selecting/reducing stones')
         # copy selected stones to storage
-        id = 0
-        self.map.stones = {}
-        for s in stones:
-            if s['rank'] > 1.5:
-                s1 = Stone(id, s['center'], s['size'], s['angle'], s['color'], s['structure'])
-                id += 1
-                self.map.add_stone(s1)
+        self.map.stones = [ s for s in stones if s.rank >= 1.5 ]
         self.map.save()
 
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
-            self._move_stone(0, 0, 0, 500, 250, 90)
-            self._move_stone(500, 250, 90, 0, 0, 0)
+            self._move_stone_absolute((0, 0), 0, (500, 250), 90)
+            self._move_stone_absolute((500, 250), 90, (0, 0), 0)
 
-    def _move_stone(x1, y1, e1, x2, y2, e2):
-        self.c.go(e=e1)
-        self.c.go(x=x1, y=y1)
+    def demo2(self):
+        while True:
+            self._move_stone((100, 100), 30, (100, 100), 120)
+            self._move_stone((100, 100), 120, (100, 100), 30)
+
+    def _move_stone_absolute(c1, a1, c2, a2):
+        self.c.go(e=a1)
+        self.c.go(x=c1[0], y=c1[1])
         h = self.m.lift_up()
-        self.c.go(e=e2)
-        self.c.go(x=x2, y=y2)
+        self.c.go(e=a2)
+        self.c.go(x=c2[0], y=c2[1])
         self.m.lift_down(h)
 
+    def _move_stone(c1, a1, c2, a2):
+        da = a1 - a2
+        if da < 0.0:
+            da = 180.0 + da
+        da = da % 180
+        sa = 0.0 # start angle
+        ea = da # end angle
+        h1, h2 = self.machine.head_delta(sa), self.machine.head_delta(ea)
+        c1 = c1[0] - h1[0], c1[1] - h1[1]
+        c2 = c2[0] - h2[0], c2[1] - h2[1]
+        self._move_stone_absolute(c1, 0, c2, da)
+        # TODO: save map ?
 
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    # brain.run('scan')
+    brain.run('scan')
+    # brain.run('demo1')
+    # brain.run('demo2')

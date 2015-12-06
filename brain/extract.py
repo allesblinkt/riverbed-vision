@@ -43,6 +43,7 @@ def analyze_contour_cuts(contour, step=7):
         dot = mag_a * mag_b
 
         angle_cos = (v_a[0] * v_b[0] + v_a[1] * v_b[1]) / dot
+        angle_cos = max(-1.0, min(angle_cos, 1.0)) # clamp for float inaccuracy
         angle = np.arccos(angle_cos)
 
         if angle_cos < 0:
@@ -197,6 +198,7 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
 
 def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
+    log.debug('Start processing image: %s', frame_desc)
     start_time = time.time()
 
     # subtract blank vignette
@@ -295,7 +297,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     elapsed_time = time.time() - start_time
 
-    log.debug('Analysis took: {:0.3f}s'.format(elapsed_time))
+    log.debug('End processing image: %s, Analysis took: %0.3fs', frame_desc, elapsed_time)
 
     if debug_draw:
         cv2.imshow('color with debug', color_img)
@@ -307,14 +309,13 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
         if key == ord('q'):
             sys.exit(1)
 
-    return stones
+    return stones, result_img
 
 
 def main():
     for i in range(13, 30+1):
         frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
-        s = process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
-        print s
+        s, img = process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
 
 if __name__ == "__main__":
     main()

@@ -56,7 +56,7 @@ class MachineController(object):
 
     def _check_movement(self, **kwargs):
         if 'x' in kwargs and kwargs['x'] is not None:
-            if kwargs['x'] < 0 or kwargs['x'] > 1000:
+            if kwargs['x'] < 0 or kwargs['x'] > 3770:
                 log.warn('Invalid movement: X=%f', kwargs['x'])
                 return False
         if 'y' in kwargs and kwargs['y'] is not None:

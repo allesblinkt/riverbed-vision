@@ -10,19 +10,23 @@ import numpy as np
 
 from log import log
 from utils import *
+from art import art_step
 
 class Stone(object):
 
-    def __init__(self, id, center, size, angle, color, structure):
-        self.id = id
+    def __init__(self, center, size, angle, color, structure):
         self.center = center
         if size[1] > size[0]:
-            size = size[1], size[0]
             angle += 90
-        self.size = size
+            self.size = size[1], size[0]
+        else:
+            self.size = size
         self.angle = angle % 180
         self.color = color
         self.structure = structure
+
+    def copy(self):
+        return Stone(self.center, self.size, self.angle, self.color, self.structure)
 
     # checks whether stone overlaps with another stone
     def overlaps(self, stone):
@@ -43,12 +47,20 @@ class Stone(object):
         return 1.0 - max([dc / 20.0, ds / 20.0, da / 20.0])
 
 
+class StoneHole(object):
+
+    def __init__(self, stone):
+        self.center = stone.center
+        self.size = min(stone.size)
+
+
 class StoneMap(object):
 
     def __init__(self, name):
         self.name = name
-        self.stones = {}
-        self.size = 4000, 2000
+        self.stones = []
+        self.holes = []
+        self.size = 3770, 1730
         self.workarea = None
         try:
             with open('map/{}.data'.format(self.name), 'rb') as f:
@@ -56,32 +68,62 @@ class StoneMap(object):
                 self.stones = d['stones']
                 self.size = d['size']
                 self.workarea = d['workarea']
-                for k, v in self.stones.iteritems():
-                    self.stones[k] = Stone(v['id'], v['center'], v['size'], v['angle'], v['color'], v['structure'])
+                self.stones = [ Stone(v['center'], v['size'], v['angle'], v['color'], v['structure']) for v in d['stones'] ]
         except:
             self.save()
+        self._metadata()
+
+    # precompute useful info, but don't store it
+    def _metadata(self):
+        self.maxstonesize = 0
+        for i, s in enumerate(self.stones):
+            s.index = i
+            s.done = False
+            if s.size[0] > self.maxstonesize:
+                self.maxstonesize = s.size[0]
+        self.maxstonesize *= 2.0
+
+    # can we put stone to position center?
+    def can_put(self, stone):
+        if stone.center[0] - stone.size[0] <= 0:
+            return False
+        if stone.center[1] - stone.size[0] <= 0:
+            return False
+        if stone.center[0] + stone.size[0] >= self.size[0]:
+            return False
+        if stone.center[1] + stone.size[0] >= self.size[1]:
+            return False
+        for s in self.stones:
+            if stone.overlaps(s):
+                return False
+        return True
 
     # populate the map with random stones
-    def randomize(self, count=100):
+    def randomize(self, count=2000):
         log.debug('Generating random map of %d stones', count)
-        self.stones = {}
-        for i in range(count):
-            center = (uniform(1000 + 50, self.size[0] - 50), uniform(50, self.size[1] - 50))
-            a = uniform(10, 30)
-            b = uniform(10, 30)
+        self.stones = []
+        failures = 0
+        while count > 0 and failures < 100:
+            center = (uniform(30, self.size[0] - 1000 - 30), uniform(30, self.size[1] - 30))
+            a = uniform(6, 30)
+            b = uniform(6, 20)
             if b > a:
                 a, b = b, a
             r = uniform(-90, 90)
-            c, d = ((uniform(96, 160), uniform(96, 160), uniform(96, 160)), uniform(10, 40))
-            s = Stone(i, center, (a, b), r, c, d)
-            bad = False
-            for s2 in self.stones.values():
-                if s.overlaps(s2):
-                    bad = True
-                    break
-            if not bad:
-                self.add_stone(s)
+            c = uniform(0, 255), uniform(42, 226), uniform(20, 223)
+            s = [ uniform(0.001, 0.02) for i in range(40) ] + [ uniform(0.15, 0.3), uniform(0.2, 0.4) ]
+            s = Stone(center, (a, b), r, c, s)
+            good = self.can_put(s)
+            if not good:
+                failures += 1
+            else:
+                log.debug('Placing stones: %d left, %d tries', count, failures)
+                self.stones.append(s)
+                failures = 0
+                count -= 1
+        log.debug('Have %d stones', len(self.stones))
         self.save()
+        self._metadata()
 
     def _find_workarea(self):
 
@@ -163,7 +205,7 @@ class StoneMap(object):
         scale = 10 # work on less precise scale
         usage = np.zeros((int(math.ceil(self.size[0]/scale)), int(math.ceil(self.size[1]/scale))), dtype=np.bool)
         # calculate usage
-        for s in self.stones.values():
+        for s in self.stones:
             a, b = s.center[0] - s.size[0], s.center[1] - s.size[0]
             c, d = s.center[0] + s.size[0], s.center[1] + s.size[0]
             for x in range(int(math.floor(a/scale)), int(math.floor(c/scale) + 1)):
@@ -176,34 +218,44 @@ class StoneMap(object):
 
     def image(self, img, scale):
         log.debug('Creating map image')
-        for s in self.stones.values():
+        for s in self.stones:
             center, size, angle = s.center, s.size, s.angle
-            center = int(center[0] / scale), int(center[1] / scale)
+            center = int((self.size[0] - center[0]) / scale), int(center[1] / scale)
             size = int(size[0] / scale), int(size[1] / scale)
-            color = s.color
+            dummy = np.array([np.array([s.color], dtype=np.uint8)])
+            color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
             structure = s.structure
-            cv2.ellipse(img, center, size, angle, 0, 360, color, -1)
+            cv2.ellipse(img, center, size, 360 - angle, 0, 360, color, -1)
+        for h in self.holes:
+            center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
+            size = int(h.size / scale)
+            cv2.circle(img, center, size, (255, 255, 255))
         if self.workarea:
             a, b, c, d = self.workarea
             a, b, c, d = a / scale, b / scale, c / scale, d / scale
             cv2.rectangle(img, (a,b), (c,d), color=(255, 0, 0))
-
-    # functions also as replace
-    def add_stone(self, stone):
-        self.stones[stone.id] = stone
 
     def save(self):
         with open('map/{}.data'.format(self.name), 'wb') as f:
             d = {'stones': self.stones, 'size': self.size, 'workarea': self.workarea}
             serialization.dump(d, f)
 
+
 if __name__ == '__main__':
-    m = StoneMap('stonemap_random.data')
-    if len(m.stones) == 0:
-        m.randomize()
-    img_map = np.zeros((m.size[1]/4, m.size[0]/4, 3), np.uint8)
+    map = StoneMap('stonemap_random')
+    if len(map.stones) == 0:
+        map.randomize()
     while True:
-        m.image(img_map, 4)
+        img_map = np.zeros((map.size[1]/4, map.size[0]/4, 3), np.uint8)
+        map.image(img_map, 4)
         cv2.imshow('map', img_map)
         if cv2.waitKey(1) == ord('q'):
             break
+        i, nc, na = art_step(map)
+        if i is not None:
+            map.holes.append(StoneHole(map.stones[i]))
+            if nc is not None:
+                map.stones[i].center = nc
+            if na is not None:
+                map.stones[i].angle = na
+    # map.save()
