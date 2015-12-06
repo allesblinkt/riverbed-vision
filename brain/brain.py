@@ -5,6 +5,7 @@ import Pyro4
 import cv2
 import numpy as np
 import subprocess
+import art
 from extract import process_image
 
 from utils import *
@@ -193,17 +194,27 @@ class Brain(object):
         self.c.go(x=c2[0], y=c2[1])
         self.m.lift_down(h)
 
-    def _move_stone(c1, a1, c2, a2):
-        da = a1 - a2
-        if da < 0.0:
-            da = 180.0 + da
-        da = da % 180
-        sa = 0.0 # start angle
-        ea = da # end angle
+    def _turn_stone_calc(h1, sa, h2, ea):
         h1, h2 = self.machine.head_delta(sa), self.machine.head_delta(ea)
         c1 = c1[0] - h1[0], c1[1] - h1[1]
         c2 = c2[0] - h2[0], c2[1] - h2[1]
-        self._move_stone_absolute(c1, 0, c2, da)
+
+        return c1, c2
+
+    def _move_stone(c1, a1, c2, a2):
+        da = a1 - a2
+        if da < 0.0:
+            da = 360.0 + da
+        da = da % 180
+
+        # Case 1
+        c1, c2 = _turn_stone_calc(c1, 0.0, c2, da)
+
+        if c1[0] >= 0 and c2[0] >= 0 and c1[0] <= art.MAX_X and c2[0] <= art.MAX_X:
+            self._move_stone_absolute(c1, 0, c2, da)
+        else:
+            c1, c2 = _turn_stone_calc(c1, 180.0, c2, da)
+            self._move_stone_absolute(c1, 180.0, c2, da)
         # TODO: save map ?
 
 if __name__ == '__main__':
