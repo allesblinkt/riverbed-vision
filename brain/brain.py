@@ -4,6 +4,7 @@ import math
 import Pyro4
 import cv2
 import numpy as np
+import subprocess
 from extract import process_image
 
 from utils import *
