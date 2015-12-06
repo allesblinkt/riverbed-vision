@@ -130,6 +130,14 @@ class MachineController(object):
         cmd_str = 'M108' if state else 'M109'
         self._command(cmd_str)
 
+    def emergency(self):
+        cmd_str = 'M112'
+        self._command(cmd_str)
+
+     def reset_emergency(self):
+        cmd_str = 'M999'
+        self._command(cmd_str)
+
     def raw(self, cmd_str):
         self._command(cmd_str)
 
