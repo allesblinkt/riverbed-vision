@@ -61,10 +61,11 @@ class Camera(object):
     def __init__(self, machine, index=0):
         self.machine = machine
         self.index = index
-        self.resx = 1280.0 # image width (in pixels)
-        self.resy = 720.0 # image height (in pixels)
-        self.viewx = 128.0 # view width (in cnc units = mm) # FIXME: put real value
-        self.viewy = 72.0 # view height (in cnc units = mm) # FIXME: put real value
+        self.videodev = '/dev/video' + str(index)
+        self.resx = 1280.0  # image width (in pixels)
+        self.resy = 720.0  # image height (in pixels)
+        self.viewx = 69.0 * 2.0  # view width (in cnc units = mm)
+        self.viewy = 39.0 * 2.0  # view height (in cnc units = mm)
 
     # calc distance of perceived pixel from center of the view (in cnc units = mm)
     def pos_to_mm(self, pos, offset=(0, 0)):
