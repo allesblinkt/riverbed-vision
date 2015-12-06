@@ -150,7 +150,7 @@ class Brain(object):
         step = 100
         stones = []
         x, y = self.map.size
-        stepx, stepy = self.machine.cam.viewx, self.machine.cam.viewy
+        stepx, stepy = self.machine.cam.viewx / 2.0, self.machine.cam.viewy / 2.0
         for i in range(0, x + 1, stepx):
             for j in range(0, y + 1, stepy):
                 self.c.go(x=i, y=j)

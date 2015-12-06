@@ -137,13 +137,13 @@ def draw_normal(img, pt, normal, angle, scale=10.0):
 def preselect_stone(shape, ec, es):
 
     # too close to the edge
-    if ec[0] < 128 or ec[0] > shape[0] - 128:
+    if ec[0] < 100 or ec[0] > shape[0] - 100:
         return False
-    if ec[1] < 128 or ec[1] > shape[1] - 128:
+    if ec[1] < 100 or ec[1] > shape[1] - 100:
         return False
 
     # too small
-    if es[0] < 64 and es[1] < 64:
+    if es[0] < 50 and es[1] < 50:
         return False
 
     return True
