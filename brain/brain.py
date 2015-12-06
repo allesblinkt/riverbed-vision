@@ -65,24 +65,23 @@ class Camera(object):
         self.videodev = '/dev/video' + str(index)
         self.resx = 1280.0  # image width (in pixels)
         self.resy = 720.0  # image height (in pixels)
-        self.viewx = 69.0 * 2.0  # view width (in cnc units = mm)
-        self.viewy = 39.0 * 2.0  # view height (in cnc units = mm)
+        self.width = 69.0 * 2.0  # view width (in cnc units = mm)
+        self.height = 39.0 * 2.0  # view height (in cnc units = mm)
         self.flipall = True
-
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4467'])
 
     # calc distance of perceived pixel from center of the view (in cnc units = mm)
     def pos_to_mm(self, pos, offset=(0, 0)):
         dx, dy = -3.0, +66.00  # distance offset from head center to camera center
-        x = dx + self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
-        y = dy + self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
+        x = dx + self.height * (pos[1] / self.resy - 0.5) + offset[0]
+        y = dy + self.width * (pos[0] / self.resx - 0.5) + offset[1]
         return x, y
 
     # calc size of perceived pixels (in cnc units = mm)
     def size_to_mm(self, size):
-        w = self.viewx * size[0] / self.resx
-        h = self.viewy * size[1] / self.resy
+        w = self.height * size[1] / self.resy
+        h = self.width * size[0] / self.resx
         return w, h
 
     def grab(self):
@@ -147,16 +146,17 @@ class Brain(object):
         self.c.pickup_top()
         self.c.go(e=90)
         self.c.block()
-        step = 100
         x, y = self.map.size
         stones = []
-        for i in range(0, x + 1, step):
-            for j in range(0, y + 1, step):
+        stepx, stepy = self.machine.cam.height, self.machine.cam.width
+        for i in range(0, x + 1, stepx):
+            for j in range(0, y + 1, stepy):
                 self.c.go(x=i, y=j)
                 self.c.block()
                 s = self.machine.cam.grab_extract(save=True)
                 s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
                 s.size = self.machine.cam.size_to_mm(s.size)
+                s.angle += 90.0
                 s.rank = 0.0
                 stones.append(s)
         log.debug('End scanning')
