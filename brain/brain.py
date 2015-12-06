@@ -31,6 +31,17 @@ class Machine(object):
         except:
             self.control = None
 
+    def go(self, x=None, y=None, z=None, e=None):
+        self.control.go(x=x, y=y, z=z, e=e)
+        if x is not None:
+            self.x = x
+        if y is not None:
+            self.y = y
+        if z is not None:
+            self.z = z
+        if e is not None:
+            self.e = e
+
     def lift_up(self):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
@@ -43,7 +54,7 @@ class Machine(object):
     def lift_down(self):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
-        self.control.go(z=max(self.last_pickup_height - 3, 0))
+        self.go(z=max(self.last_pickup_height - 3, 0))
         self.control.vacuum(False)
         time.sleep(0.1)
         self.control.pickup_top()
@@ -150,7 +161,8 @@ class Brain(object):
     def scan(self):
         log.debug('Begin scanning')
         self.c.pickup_top()
-        self.c.go(e=90)
+        self.z = self.c.pickup_z # TODO: fix, so we don't need to do this after pickup top
+        self.go(e=90)
         self.c.block()
         step = 100
         stones = []
@@ -159,7 +171,7 @@ class Brain(object):
         stepy = int(self.machine.cam.viewy / 2.0)
         for i in range(0, x + 1, stepx):
             for j in range(0, y + 1, stepy):
-                self.c.go(x=i, y=j)
+                self.go(x=i, y=j)
                 self.c.block()
                 s = self.machine.cam.grab_extract(save=True)
                 s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
@@ -191,11 +203,11 @@ class Brain(object):
             self._move_stone((100, 100), 120, (100, 100), 30)
 
     def _move_stone_absolute(c1, a1, c2, a2):
-        self.c.go(e=a1)
-        self.c.go(x=c1[0], y=c1[1])
+        self.go(e=a1)
+        self.go(x=c1[0], y=c1[1])
         h = self.m.lift_up()
-        self.c.go(e=a2)
-        self.c.go(x=c2[0], y=c2[1])
+        self.go(e=a2)
+        self.go(x=c2[0], y=c2[1])
         self.m.lift_down(h)
 
     def _turn_stone_calc(c1, sa, c2, ea):
