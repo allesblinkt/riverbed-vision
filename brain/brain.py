@@ -100,13 +100,21 @@ class Camera(object):
         self.machine.control.light(False)
         return ret
 
-    def grab_extract(self):
-        f = self.grab()
-        if f is None:
+    def grab_extract(self, save=False):
+        frame = self.grab()
+        if frame is None:
+            log.warning('Failed to grab the image')
             return []
-        s = process_image('grab_{:03d}_{:03d}'.format(self.machine.x, self.machine.y), f, save_stones='png')
-        log.debug('Found {} stones'.format(len(s)))
-        return s
+        fn = 'grab_{:04d}_{:04d}'.format(self.machine.x, self.machine.y)
+        if save:
+            log.debug('Saving {}.jpg'.format(fn))
+            cv2.imwrite('map/{}.jpg'.format(fn), frame)
+        stones, result_image = process_image(fn, frame, save_stones='png')
+        if save:
+            log.debug('Saving {}-processed.jpg'.format(fn))
+            cv2.imwrite('map/{}-processed.jpg'.format(fn), result_image)
+        log.debug('Found {} stones'.format(len(stones)))
+        return stones
 
 
 class Brain(object):
@@ -139,7 +147,7 @@ class Brain(object):
             for j in range(0, y + 1, step):
                 self.c.go(x=i, y=j)
                 self.c.block()
-                s = self.machine.cam.grab_extract()
+                s = self.machine.cam.grab_extract(save=True)
                 s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
                 s.size = self.machine.cam.size_to_mm(s.size)
                 s.rank = 0.0
