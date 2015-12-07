@@ -220,15 +220,18 @@ class Brain(object):
         import re
         import os
         import fnmatch
+        import pickle as serialization
 
         log.debug('Begin scanning')
 
         cam = Camera(None)
-       
-        stones = []       
+
+        stones = []
         p = "map_offline/"   # looks here for pngs...
 
         pngfiles = []
+
+        bins = []
 
         for file in os.listdir(p):
             if fnmatch.fnmatch(file, 'grab*.jpg'):
@@ -242,27 +245,62 @@ class Brain(object):
 
             xp, yp = float(m.group(1)), float(m.group(2))
 
-            print "Reading", xp, yp
+            print "Reading file at {} {}".format(xp, yp)
 
-            st = cam.grab_extract(xp, yp, img=image, save=True)
+            localstones = []
+
+            st = cam.grab_extract(xp, yp, img=image, save=False)
             for s in st:
                 s.center = cam.pos_to_mm(s.center, offset=(xp, yp))
                 s.size = cam.size_to_mm(s.size)
                 s.rank = 0.0
                 stones.append(s)
-       
+                localstones.append(s)
+
+            bin = {'x': xp, 'y': yp, 'stones': localstones}
+            bins.append(bin)
+
+        with open('map/intermediate.data', 'wb') as f:
+            serialization.dump(bins, f)
+
+        log.debug('Found {} stones in {} bins'.format(len(stones), len(bins)))
+
         log.debug('End scanning')
+        chosen_stones = []
         if analyze:
             # select correct stones
             log.debug('Begin selecting/reducing stones')
-            for i in range(len(stones)):
-                for j in range(i + 1, len(stones)):
-                    s = stones[i].similarity(stones[j])
-                    stones[i].rank += s
-                    stones[j].rank -= s
+            for bi in range(len(bins)):
+                bin_a = bins[bi]
+                stones_a = bin_a['stones']
+
+                other_stones = []
+
+                for bj in range(bi + 1, len(bins)):
+                    bin_b = bins[bj]
+                    stones_b = bin_b['stones']
+
+                    d_x = abs(bin_b['x'] - bin_a['x'])
+                    d_y = abs(bin_b['y'] - bin_a['y'])
+
+                    if d_x > cam.viewx * 2.0 or d_y > cam.viewy * 2.0:
+                        continue
+
+                    other_stones += stones_b
+
+                for this_stone in stones_a:
+                    for other_stone in other_stones:
+                        if this_stone.coincides(other_stone):
+                            other_stone.bogus = True
+
+                    if not this_stone.bogus:
+                        chosen_stones.append(this_stone)
+
             log.debug('End selecting/reducing stones')
             # copy selected stones to storage
-            self.map.stones = [ s for s in stones if s.rank >= 1.5 ]
+            self.map.stones = [ s for s in chosen_stones ]
+            log.debug('Reduced from {} to {} stones'.format(len(stones), len(self.map.stones)))
+
             self.map.save()
 
     def demo1(self):
