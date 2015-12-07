@@ -166,7 +166,7 @@ class Brain(object):
         log.debug('Begin scanning')
         self.c.pickup_top()
         self.z = 38.0 # TODO: properly get
-        self.go(e=90)
+        self.m.go(e=90)
         self.c.block()
         step = 100
         stones = []
@@ -175,7 +175,7 @@ class Brain(object):
         stepy = int(self.machine.cam.viewy / 2.0)
         for i in range(0, x + 1, stepx):
             for j in range(0, y + 1, stepy):
-                self.go(x=i, y=j)
+                self.m.go(x=i, y=j)
                 self.c.block()
                 s = self.machine.cam.grab_extract(save=True)
                 s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
@@ -207,11 +207,11 @@ class Brain(object):
             self._move_stone((100, 100), 120, (100, 100), 30)
 
     def _move_stone_absolute(c1, a1, c2, a2):
-        self.go(e=a1)
-        self.go(x=c1[0], y=c1[1])
+        self.m.go(e=a1)
+        self.m.go(x=c1[0], y=c1[1])
         h = self.m.lift_up()
-        self.go(e=a2)
-        self.go(x=c2[0], y=c2[1])
+        self.m.go(e=a2)
+        self.m.go(x=c2[0], y=c2[1])
         self.m.lift_down(h)
 
     def _turn_stone_calc(c1, sa, c2, ea):
