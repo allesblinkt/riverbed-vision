@@ -49,8 +49,8 @@ class Machine(object):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
         # try lifting up 6 times
-        jit_mag = 3
-        for i in range(8):
+        jit_mag = 5
+        for i in range(5):
 
             self.control.light(True)
             self.control.vacuum(True)
