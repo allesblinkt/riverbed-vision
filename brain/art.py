@@ -44,7 +44,7 @@ def art_step(map):
 
     if map.stage is not None:
         STAGE, stage_step, stage1_y, stage1_last_index = map.stage
-        stage1_last = map.stones[stage1_last_index]
+        stage1_last = map.stones[stage1_last_index] if stage1_last_index is not None else None
 
     # Color range
     global min_l, max_l
@@ -76,7 +76,7 @@ def art_step(map):
     map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
 
     if STAGE == 0:
-        sel = [s for s in map.stones if not in_workarea(s) and s.center[0] + s.size[0] > THRESH - (map.maxstonesize + 10) * (stage_step + 1) and not s.done]
+        sel = [s for s in map.stones if not in_workarea(s) and s.center[0] + s.size[0] > THRESH - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step) ]
         if sel:
             s = sel[0]
             index = s.index
@@ -98,7 +98,6 @@ def art_step(map):
                 s = min(sel, key=lambda x: compare_colors(x.color, stage1_last.color) * compare_histograms(x.structure, stage1_last.structure) )
                 stage1_y += stage1_last.size[1] + s.size[1] + 5
                 stage1_last = s
-            s.done = True
             index = s.index
             new_angle = 0
             x = THRESH - (map.maxstonesize + 10) * (stage_step + 0.5)
@@ -117,6 +116,6 @@ def art_step(map):
         STAGE = min(STAGE + 1, MAX_STAGE)
         log.debug('Art stage %d: None', STAGE)
 
-    map.stage = STAGE, stage_step, stage1_y, stage1_last.index
+    map.stage = STAGE, stage_step, stage1_y, stage1_last.index is not None if stage1_last else None
 
     return index, new_center, new_angle
