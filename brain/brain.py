@@ -156,8 +156,7 @@ class Brain(object):
         # shortcuts for convenience
         self.m = self.machine
         self.c = self.machine.control
-        # go home (also test if the machine is initialized and working)
-        # self.c.home()
+        self.c.reset()
 
     def start(self):
         pass
