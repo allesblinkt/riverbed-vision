@@ -28,7 +28,8 @@ def kmeans_quantization(img, n_clusters):
     try:
         ret, labels, centers = cv2.kmeans(flab, n_clusters, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
     except Exception, e:
-        return np.array([128, 128, 128])
+        print img.shape
+        return np.array([128, 0, 0])
 
     exclude_idx = np.where(centers[:, -1] < 0)[0]
     center = np.uint8(centers)
