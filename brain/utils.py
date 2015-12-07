@@ -7,3 +7,15 @@ def distance2(a, b):
 
 def distance(a, b):
     return np.sqrt(distance2(a, b))
+
+
+def constrain(value, lower, upper):
+    return max(lower, min(value, upper))
+
+
+def map_value(value, start1, stop1, start2, stop2):
+    """
+        Simple scaling function
+    """
+    return start2 + (stop2 - start2) * ((value - start1) / float(stop1 - start1))
+        
