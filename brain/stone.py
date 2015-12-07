@@ -241,4 +241,4 @@ if __name__ == '__main__':
                 map.update_idx(i)
             if na is not None:
                 map.stones[i].angle = na
-    map.save(meta=true)
+    map.save()
