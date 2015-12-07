@@ -324,10 +324,13 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
 def main():
     global blank
-    blank = cv2.transpose(blank)
-    for i in range(13, 30+1):
-        frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
-        process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
+
+    frame = cv2.imread('grab_0000_0000.jpg')
+    s, img = process_image('bla', frame, save_stones='png', debug_draw=True)
+
+    # for i in range(13, 30+1):
+    #     frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
+    #     process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
 
 if __name__ == "__main__":
     main()
