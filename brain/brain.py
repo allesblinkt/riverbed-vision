@@ -62,7 +62,7 @@ class Machine(object):
 
             jit_x = uniform(-jit_mag, jit_mag)
             jit_y = uniform(-jit_mag, jit_mag)
-            self.m.go(x=x + jit_x, y=y + jit_y)
+            self.go(x=x + jit_x, y=y + jit_y)
             self.c.block()
         raise Exception('Failed to pick up stone (6 times in a row)')
 
