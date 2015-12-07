@@ -4,6 +4,7 @@ import numpy as np
 from random import uniform, choice
 from coloranalysis import compare_colors
 from structure import compare_histograms
+from utils import map_value, constrain
 
 STAGE = 0
 
@@ -12,13 +13,26 @@ MAX_STAGE = 2
 MAX_Y = 1730
 MAX_X = 3770
 
-flower_seeds = [
-    (MAX_X - 333.0,  333.0), (MAX_X - 666.0 , 295.0),
-    (MAX_X - 333.0,  590.0), (MAX_X - 666.0,  590.0),
-    (MAX_X - 333.0,  885.0), (MAX_X - 666.0,  885.0),
-    (MAX_X - 333.0, 1180.0), (MAX_X - 666.0, 1180.0),
-    (MAX_X - 333.0, 1475.0), (MAX_X - 666.0, 1475.0),
-]
+
+flower_seeds = []
+
+for i in range(9):
+    y = map_value(i, 0, 8, 300, MAX_Y - 300)
+
+    if i % 2 == 0:
+        x = MAX_X - 300.0
+    else:
+        x = MAX_X - 800.0
+
+    flower_seeds.append((x, y))
+
+# flower_seeds = [
+#     (MAX_X - 333.0,  333.0), (MAX_X - 666.0 , 295.0),
+#     (MAX_X - 333.0,  590.0), (MAX_X - 666.0,  590.0),
+#     (MAX_X - 333.0,  885.0), (MAX_X - 666.0,  885.0),
+#     (MAX_X - 333.0, 1180.0), (MAX_X - 666.0, 1180.0),
+#     (MAX_X - 333.0, 1475.0), (MAX_X - 666.0, 1475.0),
+# ]
 
 def find_flower_pos(map, stone, center):
     radius, angle = 0.0, 0
