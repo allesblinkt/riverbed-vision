@@ -258,6 +258,7 @@ class Brain(object):
                 self._move_stone(self, s.center, s.angle, nc, na)
                 s.center = nc
                 s.angle = na
+                self.map.save()
             else:
                 time.sleep(1)
 
