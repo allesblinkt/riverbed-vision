@@ -300,6 +300,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     if debug_draw:
         cv2.imshow('color with debug', color_img)
+        cv2.imshow('distance threshold', dist_thresh_img)
         cv2.imshow('curvature weighting', weight_img)
         cv2.imshow('curvature weighting threshold', weight_thresh_img)
         cv2.imshow('markers', markers_img * 256)
