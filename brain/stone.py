@@ -46,6 +46,10 @@ class Stone(object):
             return 0.0
         return 1.0 - max([dc / 20.0, ds / 20.0, da / 20.0])
 
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            serialization.dump(self, f)
+
 
 class StoneHole(object):
 
