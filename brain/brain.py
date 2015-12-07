@@ -141,7 +141,7 @@ class Camera(object):
             log.debug('Saving {}-processed.jpg'.format(fn))
             cv2.imwrite('map/{}-processed.jpg'.format(fn), result_image)
             cv2.imwrite('map/{}-threshold.jpg'.format(fn), thresh_image)
-            cv2.imwrite('map/{}-weight.jpg'.format(fn), weight_image)
+            cv2.imwrite('map/{}-weight.jpg'.format(fn), weight_image * 255)
         log.debug('Found {} stones'.format(len(stones)))
         return stones
 
