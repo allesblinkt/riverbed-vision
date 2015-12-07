@@ -5,7 +5,7 @@ import Pyro4
 import cv2
 import numpy as np
 import subprocess
-from art import MAX_X, MAX_Y
+from art import art_step, MAX_X, MAX_Y
 from extract import process_image
 
 from utils import *
@@ -46,7 +46,6 @@ class Machine(object):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
         self.control.vacuum(True)
-        time.sleep(1.0)
         h = self.control.pickup()
         assert h # TODO: fixme - try picking up 3 times, then fail?
         self.last_pickup_height = h
@@ -56,17 +55,16 @@ class Machine(object):
             raise Exception('lift_down called without calling lift_up first')
         self.go(z=max(self.last_pickup_height - 3, 0))
         self.control.vacuum(False)
-        time.sleep(0.1)
         self.control.pickup_top()
         self.last_pickup_height = None
 
     def head_delta(self, angle=None):
         # length of rotating head (in mm)
         length = 40.0
-        if not angle:
+        if angle is None:
             angle = self.e
         angle = math.radians(angle)
-        return (0.0 + length * math.cos(angle) , 0.0 + length * math.sin(angle))
+        return (0.0 + length * math.sin(angle) , 0.0 + length * math.cos(angle))
 
 
 class Camera(object):
@@ -164,11 +162,17 @@ class Brain(object):
 
         self.map = StoneMap('stonemap')
         # shortcuts for convenience
+<<<<<<< HEAD
         if self.machine:
             self.m = self.machine
             self.c = self.machine.control
         # go home (also test if the machine is initialized and working)
         # self.c.home()
+=======
+        self.m = self.machine
+        self.c = self.machine.control
+        self.c.reset()
+>>>>>>> 98cdfb5c52cfad576d8f1f2db0a199d5b186a7fc
 
     def start(self):
         pass
@@ -185,7 +189,7 @@ class Brain(object):
         self.c.block()
         step = 100
         stones = []
-        x, y = 300, 300 # self.map.size
+        x, y = self.map.size
         stepx = int(self.machine.cam.viewx / 2.0)
         stepy = int(self.machine.cam.viewy / 2.0)
         for i in range(0, x + 1, stepx):
@@ -306,46 +310,60 @@ class Brain(object):
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
-            self._move_stone_absolute((0, 0), 0, (500, 250), 90)
-            self._move_stone_absolute((500, 250), 90, (0, 0), 0)
+            self._move_stone_absolute((3500, 1000),  0, (3500, 1250), 90)
+            self._move_stone_absolute((3500, 1250), 90, (3500, 1000),  0)
 
     def demo2(self):
         while True:
-            self._move_stone((100, 100), 30, (100, 100), 120)
-            self._move_stone((100, 100), 120, (100, 100), 30)
+            self._move_stone((3500, 1000),  30, (3500, 1000), 120)
+            self._move_stone((3500, 1000), 120, (3500, 1000),  30)
 
-    def _move_stone_absolute(c1, a1, c2, a2):
-        self.m.go(e=a1)
-        self.m.go(x=c1[0], y=c1[1])
+    def _move_stone_absolute(self, c1, a1, c2, a2):
+        log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
+        self.m.go(x=c1[0], y=c1[1], e=a1)
         h = self.m.lift_up()
-        self.m.go(e=a2)
-        self.m.go(x=c2[0], y=c2[1])
-        self.m.lift_down(h)
+        self.m.go(x=c2[0], y=c2[1], e=a2)
+        self.m.lift_down()
 
-    def _turn_stone_calc(c1, sa, c2, ea):
-        h1 = self.machine.head_delta(sa)
+    def _turn_stone_calc(self, c1, sa, c2, ea):
+        h1 = self.machine.head_delta(angle=sa)
         c1 = c1[0] - h1[0], c1[1] - h1[1]
-
-        h2 = self.machine.head_delta(ea)
+        h2 = self.machine.head_delta(angle=ea)
         c2 = c2[0] - h2[0], c2[1] - h2[1]
-
         return c1, c2
 
-    def _move_stone(c1, a1, c2, a2):
+    def _move_stone(self, c1, a1, c2, a2):
+        log.debug('Moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
         da = a1 - a2
         if da < 0.0:
             da = 360.0 + da
         da = da % 180
 
         # Case 1
-        nc1, nc2 = _turn_stone_calc(c1, 0.0, c2, da)
+        nc1, nc2 = self._turn_stone_calc(c1, 0.0, c2, da)
 
         if c1[0] >= 0 and c2[0] >= 0 and c1[0] <= MAX_X and c2[0] <= MAX_X:
             self._move_stone_absolute(nc1, 0, nc2, da)
         else:   # Case 2
-            nc1, nc2 = _turn_stone_calc(c1, 180.0, c2, da)
+            nc1, nc2 = self._turn_stone_calc(c1, 180.0, c2, da)
             self._move_stone_absolute(nc1, 180.0, nc2, da)
         # TODO: save map ?
+
+    def performance(self):
+        while True:
+            i, nc, na = art_step(self.map)
+            if i is not None:
+                s = self.map.stones[i]
+                if nc is None:
+                    nc = s.center
+                if na is None:
+                    na = s.angle
+                self._move_stone(self, s.center, s.angle, nc, na)
+                s.center = nc
+                s.angle = na
+                self.map.save()
+            else:
+                time.sleep(1)
 
 if __name__ == '__main__':
     # brain = Brain()
@@ -355,6 +373,8 @@ if __name__ == '__main__':
     brain = Brain(use_machine=False)
     brain.start()
     brain.scan_from_files()
+
+    # brain.scan()
     # brain.scan(analyze=False)
     # brain.demo1()
-    # brain.demo2()
+    brain.demo2()

@@ -10,9 +10,7 @@ STAGE = 0
 
 MAX_STAGE = 2
 
-MAX_Y = 1730
-MAX_X = 3770
-
+THRESH = 2500
 
 flower_seeds = []
 
@@ -26,13 +24,6 @@ for i in range(9):
 
     flower_seeds.append((x, y))
 
-# flower_seeds = [
-#     (MAX_X - 333.0,  333.0), (MAX_X - 666.0 , 295.0),
-#     (MAX_X - 333.0,  590.0), (MAX_X - 666.0,  590.0),
-#     (MAX_X - 333.0,  885.0), (MAX_X - 666.0,  885.0),
-#     (MAX_X - 333.0, 1180.0), (MAX_X - 666.0, 1180.0),
-#     (MAX_X - 333.0, 1475.0), (MAX_X - 666.0, 1475.0),
-# ]
 
 def find_flower_pos(map, stone, center):
     radius, angle = 0.0, 0
@@ -49,16 +40,16 @@ def find_flower_pos(map, stone, center):
             radius += 2.0
 
 def in_workarea(stone):
-    return stone.center[0] > MAX_X - 999.0
+    return stone.center[0] > THRESH
 
-stage1_x = None
+stage1_y = None
 stage1_last = None
 stage_step = 0
 min_l, max_l = None, None
 
 def art_step(map):
     global STAGE
-    global stage1_x, stage1_last
+    global stage1_y, stage1_last
     global stage_step
 
     if map.stage:
@@ -74,38 +65,42 @@ def art_step(map):
     index, new_center, new_angle = None, None, None
 
     # clean unusable holes
-    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[1] + h.size <= MAX_Y - (map.maxstonesize + 10) * (stage_step + 1)]
+    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
 
     if STAGE == 0:
-        sel = [s for s in map.stones if not in_workarea(s) and s.center[1] + s.size[0] > MAX_Y - (map.maxstonesize + 10) * (stage_step + 1) and not s.done]
+        sel = [s for s in map.stones if not in_workarea(s) and s.center[0] + s.size[0] > THRESH - (map.maxstonesize + 10) * (stage_step + 1) and not s.done]
         if sel:
             s = sel[0]
             index = s.index
+<<<<<<< HEAD
 
             bucket = map_value(s.color[0], min_l, max_l, 0, len(flower_seeds) + 1)
             bucket = constrain(int(bucket), 0, len(flower_seeds) - 1)
+=======
+            bucket = int(s.color[0] * 7 / 255)
+>>>>>>> 98cdfb5c52cfad576d8f1f2db0a199d5b186a7fc
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif STAGE == 1:
-        sel = [s for s in map.stones if in_workarea(s) or s.center[1] + s.size[0] <= MAX_Y - (map.maxstonesize + 10) * (stage_step + 1)]
+        sel = [s for s in map.stones if in_workarea(s) or s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
         if sel:
-            if stage1_x is None:
+            if stage1_y is None:
                 # first run of this stage
-                stage1_x = MAX_X - 999.0
+                stage1_y = 50
                 # pick random stone
                 s = choice(sel)
                 stage1_last = s
             else:
                 s = min(sel, key=lambda x: compare_colors(x.color, stage1_last.color) * compare_histograms(x.structure, stage1_last.structure) )
-                stage1_x -= stage1_last.size[1] + s.size[1] + 5
+                stage1_y += stage1_last.size[1] + s.size[1] + 5
                 stage1_last = s
             s.done = True
             index = s.index
-            new_angle = 90
-            y = MAX_Y - (map.maxstonesize + 10) * (stage_step + 0.5)
-            new_center = stage1_x, y
-            if stage1_x < 200:
-                stage1_x = None
+            new_angle = 0
+            x = THRESH - (map.maxstonesize + 10) * (stage_step + 0.5)
+            new_center = x, stage1_y
+            if stage1_y > 1650:
+                stage1_y = None
                 stage_step += 1
                 STAGE = 0
 
