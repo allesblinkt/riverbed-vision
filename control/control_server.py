@@ -30,7 +30,7 @@ class MachineController(object):
         self.serial_mutex = threading.Lock()
         self.serial_port = None
         self.port_name = port_name
-        self.pickup_z = 38.0
+        self.pickup_z = 40.0
 
         if port_name:
             log.info('Opening serial port %s at %d bps', port_name, baudrate)
@@ -61,6 +61,9 @@ class MachineController(object):
         self._command('G28 Z0')
         self.block()
 
+    def get_pickup_z(self):
+        return self.pickup_z
+
     def _check_movement(self, **kwargs):
         if 'x' in kwargs and kwargs['x'] is not None:
             if kwargs['x'] < 0 or kwargs['x'] > 3770:
@@ -71,7 +74,7 @@ class MachineController(object):
                 log.warn('Invalid movement: Y=%f', kwargs['y'])
                 return False
         if 'z' in kwargs and kwargs['z'] is not None:
-            if kwargs['z'] < 0 or kwargs['z'] > 38:
+            if kwargs['z'] < 0 or kwargs['z'] > self.pickup_z:
                 log.warn('Invalid movement: Z=%f', kwargs['z'])
                 return False
         if 'e' in kwargs and kwargs['e'] is not None:

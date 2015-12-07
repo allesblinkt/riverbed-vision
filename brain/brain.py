@@ -33,6 +33,7 @@ class Machine(object):
 
     def go(self, x=None, y=None, z=None, e=None):
         self.control.go(x=x, y=y, z=z, e=e)
+        self.control.block()
         if x is not None:
             self.x = x
         if y is not None:
@@ -185,7 +186,7 @@ class Brain(object):
     def scan(self, analyze=True):
         log.debug('Begin scanning')
         self.c.pickup_top()
-        self.z = 38.0 # TODO: properly get
+        self.z = self.c.get_pickup_z()
         self.m.go(e=90)
         self.c.block()
         step = 100
