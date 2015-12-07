@@ -126,12 +126,17 @@ class MachineController(object):
         self.pickup_top()
 
         has_picked = False
-        pick_z = 35.0
+        pick_z = 30.0
         while pick_z > 0.0 and not has_picked:
             pick_z = max(0.0, pick_z - 2.0)
 
             self.go(z=pick_z)
             self.block()
+
+            if pick_z < 0.05:
+                self.dwell(400)
+                self.block()
+
             result = self._command('M119', read_result=True)
 
             if result.find('Probe: 1') > -1:
