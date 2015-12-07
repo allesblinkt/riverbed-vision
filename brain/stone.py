@@ -97,14 +97,29 @@ class StoneMap(object):
         #self.idx = index.Index()
 
         try:
+            meta = False
             with open('map/{}.data'.format(self.name), 'rb') as f:
                 d = serialization.load(f)
-                self.stones = d['stones']
                 self.size = d['size']
-                self.stones = [ Stone(v['center'], v['size'], v['angle'], v['color'], v['structure']) for v in d['stones'] ]
                 self.stage = d['stage']
+                if d.has_key('stones'):
+                    log.debug('Loading stones from OLD format')
+                    self.stones = d['stones']
+                else:
+                    log.debug('Loading stones from NEW format #1')
+                    self.stones = d['stones1']
+                    meta = True
+            if meta:
+                with open('map/{}.data2'.format(self.name), 'rb') as f:
+                    d = serialization.load(f)
+                    log.debug('Loading stones from NEW format #2')
+                    sm = d['stones2']
+                    assert len(self.stones) == len(sm)
+                    for i in range(len(sm)):
+                        self.stones[i].color = sm[i]['color']
+                        self.stones[i].structure = sm[i]['structure']
         except:
-            self.save()
+            self.save(meta=True)
 
         c = 0
         for i in range(len(self.stones)):
@@ -171,7 +186,7 @@ class StoneMap(object):
                 failures = 0
                 count -= 1
         log.debug('Have %d stones', len(self.stones))
-        self.save()
+        self.save(meta=True)
         self._metadata()
 
     def image(self, img, scale):
@@ -195,11 +210,16 @@ class StoneMap(object):
             cv2.rectangle(img, (a,b), (c,d), color=(255, 0, 0))
         """
 
-    def save(self):
+    def save(self, meta=False):
         with open('map/{}.data'.format(self.name), 'wb') as f:
-            d = {'stones': self.stones, 'size': self.size, 'stage': self.stage}
+            s = [ Stone(x.center, x.size, x.angle, None, None) for x in self.stones ]
+            d = {'stones1': s, 'size': self.size, 'stage': self.stage}
             serialization.dump(d, f)
-
+        if meta:
+            with open('map/{}.data2'.format(self.name), 'wb') as f:
+                s = [ {'color': x.color, 'structure': x.structure} for x in self.stones ]
+                d = {'stones2': s}
+                serialization.dump(d, f)
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
@@ -220,4 +240,4 @@ if __name__ == '__main__':
                 map.update_idx(i)
             if na is not None:
                 map.stones[i].angle = na
-    # map.save()
+    map.save()
