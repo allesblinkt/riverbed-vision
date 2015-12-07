@@ -131,12 +131,16 @@ class Camera(object):
             cv2.imwrite('map/{}.jpg'.format(fn), ret)
         return ret
 
-    def grab_extract(self, save=False):
-        frame = self.grab()
+    def grab_extract(self, x, y, img=None, save=False):
+        if img is None:
+            frame = self.grab()
+        else:
+            frame = img
+
         if frame is None:
             log.warning('Failed to grab the image')
             return []
-        fn = 'grab_{:04d}_{:04d}'.format(int(self.machine.x), int(self.machine.y))
+        fn = 'grab_{:04d}_{:04d}'.format(int(x), int(y))
         if save:
             log.debug('Saving {}.jpg'.format(fn))
             cv2.imwrite('map/{}.jpg'.format(fn), frame)
@@ -152,12 +156,17 @@ class Camera(object):
 
 class Brain(object):
 
-    def __init__(self):
-        self.machine = Machine(CONTROL_HOSTNAME)
+    def __init__(self, use_machine=True):
+        if use_machine:
+            self.machine = Machine(CONTROL_HOSTNAME)
+        else:
+            self.machine = None
+
         self.map = StoneMap('stonemap')
         # shortcuts for convenience
-        self.m = self.machine
-        self.c = self.machine.control
+        if self.machine:
+            self.m = self.machine
+            self.c = self.machine.control
         # go home (also test if the machine is initialized and working)
         # self.c.home()
 
@@ -184,7 +193,7 @@ class Brain(object):
                 self.m.go(x=i, y=j)
                 self.c.block()
                 if analyze:
-                    st = self.machine.cam.grab_extract(save=True)
+                    st = self.machine.cam.grab_extract(i, j, save=True)
                     for s in st:
                         s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
                         s.size = self.machine.cam.size_to_mm(s.size)
@@ -192,6 +201,56 @@ class Brain(object):
                         stones.append(s)
                 else:
                     self.machine.cam.grab(save=True)
+        log.debug('End scanning')
+        if analyze:
+            # select correct stones
+            log.debug('Begin selecting/reducing stones')
+            for i in range(len(stones)):
+                for j in range(i + 1, len(stones)):
+                    s = stones[i].similarity(stones[j])
+                    stones[i].rank += s
+                    stones[j].rank -= s
+            log.debug('End selecting/reducing stones')
+            # copy selected stones to storage
+            self.map.stones = [ s for s in stones if s.rank >= 1.5 ]
+            self.map.save()
+
+
+    def scan_from_files(self, analyze=True):
+        import re
+        import os
+        import fnmatch
+
+        log.debug('Begin scanning')
+
+        cam = Camera(None)
+       
+        stones = []       
+        p = "map_offline/"   # looks here for pngs...
+
+        pngfiles = []
+
+        for file in os.listdir(p):
+            if fnmatch.fnmatch(file, 'grab*.jpg'):
+                pngfiles.append(file)
+
+        for fn in pngfiles:
+            m = re.search('\w+_(\d+)_(\d+)', fn)
+
+            image = cv2.imread(os.path.join(p, fn), -1)
+            (h, w) = image.shape[:2]
+
+            xp, yp = float(m.group(1)), float(m.group(2))
+
+            print "Reading", xp, yp
+
+            st = cam.grab_extract(xp, yp, img=image, save=True)
+            for s in st:
+                s.center = cam.pos_to_mm(s.center, offset=(xp, yp))
+                s.size = cam.size_to_mm(s.size)
+                s.rank = 0.0
+                stones.append(s)
+       
         log.debug('End scanning')
         if analyze:
             # select correct stones
@@ -251,9 +310,13 @@ class Brain(object):
         # TODO: save map ?
 
 if __name__ == '__main__':
-    brain = Brain()
+    # brain = Brain()
+    # brain.start()
+    # brain.scan()
+
+    brain = Brain(use_machine=False)
     brain.start()
-    brain.scan()
+    brain.scan_from_files()
     # brain.scan(analyze=False)
     # brain.demo1()
     # brain.demo2()
