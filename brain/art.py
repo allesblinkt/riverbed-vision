@@ -54,6 +54,7 @@ def in_workarea(stone):
 stage1_x = None
 stage1_last = None
 stage_step = 0
+min_l, max_l = None, None
 
 def art_step(map):
     global STAGE
@@ -62,6 +63,13 @@ def art_step(map):
 
     if map.stage:
         stage_step = map.stage
+
+    # Color range
+    global min_l, max_l
+    if min_l is None:
+        min_l = min(map.stones, key=lambda x: x.color[0]).color[0]
+    if max_l is None:
+        max_l = max(map.stones, key=lambda x: x.color[0]).color[0]
 
     index, new_center, new_angle = None, None, None
 
@@ -73,7 +81,9 @@ def art_step(map):
         if sel:
             s = sel[0]
             index = s.index
-            bucket = int(s.color[0] * 10 / 255)
+
+            bucket = map_value(s.color[0], min_l, max_l, 0, len(flower_seeds) + 1)
+            bucket = constrain(int(bucket), 0, len(flower_seeds) - 1)
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif STAGE == 1:
