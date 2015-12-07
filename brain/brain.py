@@ -33,6 +33,7 @@ class Machine(object):
 
     def go(self, x=None, y=None, z=None, e=None):
         self.control.go(x=x, y=y, z=z, e=e)
+        self.control.block()
         if x is not None:
             self.x = x
         if y is not None:
