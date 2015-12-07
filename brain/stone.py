@@ -15,7 +15,7 @@ from art import art_step
 
 class Stone(object):
 
-    def __init__(self, center, size, angle, color, structure):
+    def __init__(self, center, size, angle, color, structure, flag=False):
         self.center = center
         if size[1] > size[0]:
             angle += 90
@@ -26,9 +26,10 @@ class Stone(object):
         self.color = color
         self.structure = structure
         self.bogus = False
+        self.flag = flag
 
     def copy(self):
-        return Stone(self.center, self.size, self.angle, self.color, self.structure)
+        return Stone(self.center, self.size, self.angle, self.color, self.structure, self.flag)
 
     # checks whether stone overlaps with another stone
     def overlaps(self, stone):
@@ -212,7 +213,7 @@ class StoneMap(object):
 
     def save(self, meta=False):
         with open('map/{}.data'.format(self.name), 'wb') as f:
-            s = [ Stone(x.center, x.size, x.angle, None, None) for x in self.stones ]
+            s = [ Stone(x.center, x.size, x.angle, None, None, x.flag) for x in self.stones ]
             d = {'stones1': s, 'size': self.size, 'stage': self.stage}
             serialization.dump(d, f)
         if meta:

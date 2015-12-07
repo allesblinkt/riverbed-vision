@@ -45,7 +45,7 @@ class Machine(object):
         if e is not None:
             self.e = e
 
-    def lift_up(self, x, y):
+    def lift_up(self, x, y, tries=7):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
         # try lifting up 6 times
@@ -58,13 +58,13 @@ class Machine(object):
             self.control.light(False)
             if h is not None:
                 self.last_pickup_height = h
-                return
+                return True
 
             jit_x = uniform(-jit_mag, jit_mag)
             jit_y = uniform(-jit_mag, jit_mag)
             self.go(x=x + jit_x, y=y + jit_y)
             self.c.block()
-        raise Exception('Failed to pick up stone (6 times in a row)')
+        return False
 
     def lift_down(self):
         if self.last_pickup_height is None:
@@ -336,9 +336,15 @@ class Brain(object):
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
         self.m.go(x=c1[0], y=c1[1], e=a1)
-        h = self.m.lift_up(x=c1[0], y=c1[1])
-        self.m.go(x=c2[0], y=c2[1], e=a2)
-        self.m.lift_down()
+        ret = self.m.lift_up(x=c1[0], y=c1[1])
+
+        if ret:
+            self.m.go(x=c2[0], y=c2[1], e=a2)
+            self.m.lift_down()
+            return True
+        else:
+            return False
+
 
     def _turn_stone_calc(self, c1, sa, c2, ea):
         h1 = self.machine.head_delta(angle=sa)
@@ -361,10 +367,10 @@ class Brain(object):
 
         max_y = self.map.size[1]
         if c1[1] >= 0 and c2[1] >= 0 and c1[1] <= max_y and c2[1] <= max_y:
-            self._move_stone_absolute(nc1, 0, nc2, da)
+            return self._move_stone_absolute(nc1, 0, nc2, da)
         else:   # Case 2
             nc1, nc2 = self._turn_stone_calc(c1, 180.0, c2, da)
-            self._move_stone_absolute(nc1, 180.0, nc2, da)
+            return self._move_stone_absolute(nc1, 180.0, nc2, da)
         # TODO: save map ?
 
     def performance(self):
@@ -377,9 +383,11 @@ class Brain(object):
                     nc = s.center
                 if na is None:
                     na = s.angle
-                self._move_stone(s.center, s.angle, nc, na)
-                s.center = nc
-                s.angle = na
+                if self._move_stone(s.center, s.angle, nc, na):
+                    s.center = nc
+                    s.angle = na
+                else:
+                    s.flag = True
 
                 log.debug('Saving map...')
                 self.map.save()

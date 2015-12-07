@@ -76,7 +76,7 @@ def art_step(map):
     map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
 
     if STAGE == 0:
-        sel = [s for s in map.stones if not in_workarea(s) and s.center[0] + s.size[0] > THRESH - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step) ]
+        sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > THRESH - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step) ]
         if sel:
             s = sel[0]
             index = s.index
@@ -86,7 +86,7 @@ def art_step(map):
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif STAGE == 1:
-        sel = [s for s in map.stones if in_workarea(s) or s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
+        sel = [s for s in map.stones if not s.flag and (in_workarea(s) or s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1))]
         if sel:
             if stage1_y is None:
                 # first run of this stage
