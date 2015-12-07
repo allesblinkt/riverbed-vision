@@ -165,7 +165,7 @@ class Brain(object):
     def scan(self):
         log.debug('Begin scanning')
         self.c.pickup_top()
-        self.z = self.c.pickup_z # TODO: fix, so we don't need to do this after pickup top
+        self.z = 38.0 # TODO: properly get
         self.go(e=90)
         self.c.block()
         step = 100
