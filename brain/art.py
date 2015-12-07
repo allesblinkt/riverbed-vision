@@ -42,8 +42,9 @@ def art_step(map):
     global stage1_y, stage1_last
     global stage_step
 
-    if map.stage:
-        stage_step = map.stage
+    if map.stage is not None:
+        STAGE, stage_step, stage1_y, stage1_last_index = map.stage
+        stage1_last = map.stones[stage1_last_index]
 
     # Color range
     global min_l, max_l
@@ -116,6 +117,6 @@ def art_step(map):
         STAGE = min(STAGE + 1, MAX_STAGE)
         log.debug('Art stage %d: None', STAGE)
 
-    map.stage = stage_step
+    map.stage = STAGE, stage_step, stage1_y, stage1_last.index
 
     return index, new_center, new_angle
