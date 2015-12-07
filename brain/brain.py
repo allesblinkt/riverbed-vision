@@ -174,7 +174,7 @@ class Brain(object):
         self.c.block()
         step = 100
         stones = []
-        x, y = 300, 300 # self.map.size
+        x, y = self.map.size
         stepx = int(self.machine.cam.viewx / 2.0)
         stepy = int(self.machine.cam.viewy / 2.0)
         for i in range(0, x + 1, stepx):
