@@ -50,7 +50,7 @@ class Machine(object):
         for i in range(6):
             self.control.light(True)
             self.control.vacuum(True)
-            h = self.control.pickup()
+            h = self.control.pickup_custom()
             self.control.light(False)
             if h is not None:
                 self.last_pickup_height = h

@@ -105,7 +105,7 @@ class MachineController(object):
         self.go(z=self.pickup_z)
         self.dwell(1000)
 
-    def pickup(self):
+    def pickup_g30(self):
         self.pickup_top()
         self.set_pickup_params(max_z=self.pickup_z)
         cmd_str = 'G30'
@@ -122,11 +122,11 @@ class MachineController(object):
         self.home_z()
         return None
 
-    def pickup_sexy(self):
+    def pickup_custom(self):
         self.pickup_top()
 
         has_picked = False
-        pick_z = 30.0
+        pick_z = 26.0
         while pick_z > 0.0 and not has_picked:
             pick_z = max(0.0, pick_z - 2.0)
 
