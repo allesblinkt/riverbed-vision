@@ -308,13 +308,13 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
         if key == ord('q'):
             sys.exit(1)
 
-    return stones, result_img
+    return stones, result_img, thresh_img, weight_img
 
 
 def main():
     for i in range(13, 30+1):
         frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
-        s, img = process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
+        process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
 
 if __name__ == "__main__":
     main()
