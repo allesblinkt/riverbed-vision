@@ -115,7 +115,6 @@ class MachineController(object):
                 return z_val
         # result is "ZProbe not triggered" or something else
         # reset Z and switch off the vacuum; return nothing
-        self.vacuum(False)
         self.home_z()
         return None
 
