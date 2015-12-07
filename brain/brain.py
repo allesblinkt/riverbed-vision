@@ -221,7 +221,7 @@ class Brain(object):
         h = self.m.lift_up()
         self.m.go(e=a2)
         self.m.go(x=c2[0], y=c2[1])
-        self.m.lift_down(h)
+        self.m.lift_down()
 
     def _turn_stone_calc(self, c1, sa, c2, ea):
         h1 = self.machine.head_delta(sa)
