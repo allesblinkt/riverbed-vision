@@ -60,8 +60,10 @@ def find_dominant_color(img):
 
 
 def compare_colors(a, b):
-    return distance2(a, b)
+    a = np.array(a, dtype=np.float)
+    b = np.array(b, dtype=np.float)
 
+    return np.linalg.norm(a - b)
 
 if __name__ == '__main__':
     import os
