@@ -44,7 +44,7 @@ def analyze_contour_cuts(contour, step=7):
         dot = mag_a * mag_b
 
         angle_cos = (v_a[0] * v_b[0] + v_a[1] * v_b[1]) / dot
-        angle_cos = max(-1.0, min(angle_cos, 1.0)) # clamp for float inaccuracy
+        angle_cos = max(-1.0, min(angle_cos, 1.0))  # clamp for float inaccuracy
         angle = np.arccos(angle_cos)
 
         if angle_cos < 0:
@@ -212,11 +212,14 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     # Grayscale conversion, blurring, threshold
     hls = cv2.cvtColor(half_img, cv2.COLOR_BGR2HLS)
     h, l, s = cv2.split(hls)
-    s[ l > 220 ] = 255
-    gray_img = s
+    gray_img = l
 
-    # thresh_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 251, 3)
-    _, thresh_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    gray_img = cv2.GaussianBlur(gray_img, (5, 5), 0)
+
+    thresh_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -18)
+    thresh_img[gray_img > 248] = 0
+    #_, thresh_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    #_, thresh_img = cv2.threshold(gray_img, 235, 255, cv2.THRESH_BINARY_INV)
 
     # Cleaning
     kernel = np.ones((3, 3), np.uint8)
@@ -230,7 +233,13 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     curvature_img = np.zeros_like(gray_img, dtype=np.float)
 
     # Create and multiply the weighting image
-    weight_img = thresh_img.copy() / 255.0
+    weight_img = thresh_img.copy()
+
+    # Draw the outer contours for the distance map
+    for id in range(len(contours)):
+        cv2.drawContours(weight_img, contours, id, 255, -1)
+
+    weight_img = weight_img / 255.0
 
     for contour in contours:
         cuts = analyze_contour_cuts(contour)
@@ -243,7 +252,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
             if np.linalg.norm(cut_normal) < 0.0001:  # Normal too short
                 continue
 
-            rad = 30.0
+            rad = 60.0
 
             x = max(0, cut_point[0] - rad)
             y = max(0, cut_point[1] - rad)
@@ -299,7 +308,8 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     log.debug('End processing image: %s, Analysis took: %0.3fs', frame_desc, elapsed_time)
 
     if debug_draw:
-        cv2.imshow('color with debug', color_img)
+        cv2.imshow('color with debug', gray_img)
+        cv2.imshow('threshold', thresh_img)
         cv2.imshow('distance threshold', dist_thresh_img)
         cv2.imshow('curvature weighting', weight_img)
         cv2.imshow('curvature weighting threshold', weight_thresh_img)
