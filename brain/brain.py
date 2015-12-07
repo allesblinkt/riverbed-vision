@@ -209,13 +209,13 @@ class Brain(object):
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
-            self._move_stone_absolute((0, 0), 0, (500, 250), 90)
-            self._move_stone_absolute((500, 250), 90, (0, 0), 0)
+            self._move_stone_absolute((3500, 1000),  0, (3500, 1250), 90)
+            self._move_stone_absolute((3500, 1250), 90, (3500, 1000),  0)
 
     def demo2(self):
         while True:
-            self._move_stone((100, 100), 30, (100, 100), 120)
-            self._move_stone((100, 100), 120, (100, 100), 30)
+            self._move_stone((3500, 1000),  30, (3500, 1000), 120)
+            self._move_stone((3500, 1000), 120, (3500, 1000),  30)
 
     def _move_stone_absolute(c1, a1, c2, a2):
         self.m.go(e=a1)
@@ -253,7 +253,7 @@ class Brain(object):
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    brain.scan()
+    # brain.scan()
     # brain.scan(analyze=False)
-    # brain.demo1()
+    brain.demo1()
     # brain.demo2()
