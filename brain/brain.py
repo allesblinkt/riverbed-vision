@@ -64,7 +64,7 @@ class Machine(object):
         if not angle:
             angle = self.e
         angle = math.radians(angle)
-        return (0.0 + length * math.cos(angle) , 0.0 + length * math.sin(angle))
+        return (0.0 + length * math.sin(angle) , 0.0 + length * math.cos(angle))
 
 
 class Camera(object):
@@ -216,6 +216,7 @@ class Brain(object):
             self._move_stone((3500, 1000), 120, (3500, 1000),  30)
 
     def _move_stone_absolute(self, c1, a1, c2, a2):
+        log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
         self.m.go(e=a1)
         self.m.go(x=c1[0], y=c1[1])
         h = self.m.lift_up()
@@ -226,13 +227,12 @@ class Brain(object):
     def _turn_stone_calc(self, c1, sa, c2, ea):
         h1 = self.machine.head_delta(sa)
         c1 = c1[0] - h1[0], c1[1] - h1[1]
-
         h2 = self.machine.head_delta(ea)
         c2 = c2[0] - h2[0], c2[1] - h2[1]
-
         return c1, c2
 
     def _move_stone(self, c1, a1, c2, a2):
+        log.debug('Moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
         da = a1 - a2
         if da < 0.0:
             da = 360.0 + da
