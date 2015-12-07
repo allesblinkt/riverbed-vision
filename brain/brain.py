@@ -354,6 +354,7 @@ class Brain(object):
 
     def performance(self):
         while True:
+            log.debug('Thinking...')
             i, nc, na = art_step(self.map)
             if i is not None:
                 s = self.map.stones[i]
@@ -364,7 +365,10 @@ class Brain(object):
                 self._move_stone(s.center, s.angle, nc, na)
                 s.center = nc
                 s.angle = na
+
+                log.debug('Saving map...')
                 self.map.save()
+                log.debug('Saving map. Done.')
             else:
                 time.sleep(1)
 
