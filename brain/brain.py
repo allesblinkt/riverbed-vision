@@ -372,7 +372,7 @@ if __name__ == '__main__':
     # brain.start()
     # brain.scan()
 
-    brain = Brain(use_machine=False)
+    brain = Brain(use_machine=True)
     brain.start()
     # brain.scan_from_files()
 
