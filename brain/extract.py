@@ -179,7 +179,9 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     structure = lbp_histogram(cropped)
 
     if result_img is not None:
-        cv2.drawContours(result_img, [contour], 0, color, -1)
+        dummy = np.array([np.array([color])])
+        rgb_color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
+        cv2.drawContours(result_img, [contour], 0, rgb_color, -1)
         cv2.circle(result_img, ec, 4, (128, 0, 0))
         cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
         cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
