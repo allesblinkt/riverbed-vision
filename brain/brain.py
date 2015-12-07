@@ -217,7 +217,7 @@ class Brain(object):
             self._move_stone((3500, 1000),  30, (3500, 1000), 120)
             self._move_stone((3500, 1000), 120, (3500, 1000),  30)
 
-    def _move_stone_absolute(c1, a1, c2, a2):
+    def _move_stone_absolute(self, c1, a1, c2, a2):
         self.m.go(e=a1)
         self.m.go(x=c1[0], y=c1[1])
         h = self.m.lift_up()
@@ -225,7 +225,7 @@ class Brain(object):
         self.m.go(x=c2[0], y=c2[1])
         self.m.lift_down(h)
 
-    def _turn_stone_calc(c1, sa, c2, ea):
+    def _turn_stone_calc(self, c1, sa, c2, ea):
         h1 = self.machine.head_delta(sa)
         c1 = c1[0] - h1[0], c1[1] - h1[1]
 
@@ -234,7 +234,7 @@ class Brain(object):
 
         return c1, c2
 
-    def _move_stone(c1, a1, c2, a2):
+    def _move_stone(self, c1, a1, c2, a2):
         da = a1 - a2
         if da < 0.0:
             da = 360.0 + da
