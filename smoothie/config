@@ -243,7 +243,7 @@ gamma_min_endstop                            nc               #
 gamma_max_endstop                            0.19^            # CHANGED. 
 gamma_homing_direction                       home_to_max      # CHANGED.
 gamma_min                                    0                #
-gamma_max                                    38               # CHANGED.
+gamma_max                                    40               # CHANGED.
 
 # optional order in which axis will home, default is they all home at the same time,
 # if this is set it will force each axis to home one at a time in the specified order
@@ -271,7 +271,7 @@ gamma_homing_retract_mm                      1                # "
 zprobe.enable                                true            # CHANGED. set to true to enable a zprobe
 zprobe.probe_pin                             0.24!           # CHANGED. vacuum sense
 zprobe.slow_feedrate                         50               # mm/sec probe feed rate
-zprobe.debounce_count                        100             # CHANGED. set if noisy
+# zprobe.debounce_count                        100             # CHANGED. set if noisy
 zprobe.fast_feedrate                         1000             # move feedrate mm/sec
 zprobe.probe_height                          30               # CHANGED. how much above bed to start probe
 #gamma_min_endstop                           nc              # normally 1.28. Change to nc to prevent conflict,
