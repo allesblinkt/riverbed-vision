@@ -61,14 +61,14 @@ class StoneMap(object):
         self.stones = []
         self.holes = []
         self.size = 3770, 1730
-        self.workarea = None
+        self.stage = 0
         try:
             with open('map/{}.data'.format(self.name), 'rb') as f:
                 d = serialization.load(f)
                 self.stones = d['stones']
                 self.size = d['size']
-                self.workarea = d['workarea']
                 self.stones = [ Stone(v['center'], v['size'], v['angle'], v['color'], v['structure']) for v in d['stones'] ]
+                self.stage = d['stage']
         except:
             self.save()
         self._metadata()
@@ -230,14 +230,16 @@ class StoneMap(object):
             center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
             size = int(h.size / scale)
             cv2.circle(img, center, size, (255, 255, 255))
+        """
         if self.workarea:
             a, b, c, d = self.workarea
             a, b, c, d = a / scale, b / scale, c / scale, d / scale
             cv2.rectangle(img, (a,b), (c,d), color=(255, 0, 0))
+        """
 
     def save(self):
         with open('map/{}.data'.format(self.name), 'wb') as f:
-            d = {'stones': self.stones, 'size': self.size, 'workarea': self.workarea}
+            d = {'stones': self.stones, 'size': self.size, 'stage': self.stage}
             serialization.dump(d, f)
 
 
