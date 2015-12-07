@@ -63,7 +63,7 @@ class Machine(object):
             jit_x = uniform(-jit_mag, jit_mag)
             jit_y = uniform(-jit_mag, jit_mag)
             self.go(x=x + jit_x, y=y + jit_y)
-            self.c.block()
+            self.control.block()
         return False
 
     def lift_down(self):
