@@ -217,11 +217,9 @@ class Brain(object):
 
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
-        self.m.go(e=a1)
-        self.m.go(x=c1[0], y=c1[1])
+        self.m.go(x=c1[0], y=c1[1], e=a1)
         h = self.m.lift_up()
-        self.m.go(e=a2)
-        self.m.go(x=c2[0], y=c2[1])
+        self.m.go(x=c2[0], y=c2[1], e=a2)
         self.m.lift_down()
 
     def _turn_stone_calc(self, c1, sa, c2, ea):
