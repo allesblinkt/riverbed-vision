@@ -45,10 +45,14 @@ class Machine(object):
     def lift_up(self):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
-        self.control.vacuum(True)
-        h = self.control.pickup()
-        assert h # TODO: fixme - try picking up 3 times, then fail?
-        self.last_pickup_height = h
+        # try lifting up 3 times
+        for i in range(3):
+            self.control.vacuum(True)
+            h = self.control.pickup()
+            if h is not None:
+                self.last_pickup_height = h
+                return
+        raise Exception('Failed to pick up stone (3 times in a row)'
 
     def lift_down(self):
         if self.last_pickup_height is None:
