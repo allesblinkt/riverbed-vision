@@ -7,7 +7,7 @@ from collections import namedtuple
 import math
 import cv2
 import numpy as np
-from rtree import index
+#from rtree import index
 
 from log import log
 from utils import *
@@ -94,7 +94,7 @@ class StoneMap(object):
         self.size = 3770, 1730
         self.stage = 0
 
-        self.idx = index.Index()
+        #self.idx = index.Index()
 
         try:
             with open('map/{}.data'.format(self.name), 'rb') as f:
@@ -126,7 +126,7 @@ class StoneMap(object):
 
     def update_idx(self, i):
         s = self.stones[i]
-        self.idx.insert(i, (s.center[0], s.center[1], s.center[0], s.center[1]))
+        # self.idx.insert(i, (s.center[0], s.center[1], s.center[0], s.center[1]))
 
 
     # can we put stone to position center?
@@ -141,7 +141,7 @@ class StoneMap(object):
             return False
 
         sr = 50
-        print list(self.idx.intersection((stone.center[0] - sr, stone.center[1] - sr, stone.center[0] + sr, stone.center[1] + sr)))
+        #print list(self.idx.intersection((stone.center[0] - sr, stone.center[1] - sr, stone.center[0] + sr, stone.center[1] + sr)))
         for s in self.stones:
             if stone.overlaps(s):
                 return False
