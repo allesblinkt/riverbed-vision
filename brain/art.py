@@ -63,9 +63,9 @@ def art_step(map):
             y = map_value(i, 0, 8, 300, max_y - 300)
 
             if i % 2 == 0:
-                x = max_x - 300.0
+                x = max_x - 340.0
             else:
-                x = max_x - 800.0
+                x = max_x - 880.0
 
             flower_seeds.append((x, y))
 
