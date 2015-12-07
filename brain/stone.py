@@ -135,6 +135,10 @@ class StoneMap(object):
         self.maxstonesize = 0
         for i, s in enumerate(self.stones):
             s.index = i
+
+            if not hasattr(s, 'flag'):
+                s.flag = False
+
             if s.size[0] > self.maxstonesize:
                 self.maxstonesize = s.size[0]
         self.maxstonesize *= 2.0
