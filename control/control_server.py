@@ -74,7 +74,7 @@ class MachineController(object):
                 log.warn('Invalid movement: Y=%f', kwargs['y'])
                 return False
         if 'z' in kwargs and kwargs['z'] is not None:
-            if kwargs['z'] < 0 or kwargs['z'] > 38:
+            if kwargs['z'] < 0 or kwargs['z'] > self.pickup_z:
                 log.warn('Invalid movement: Z=%f', kwargs['z'])
                 return False
         if 'e' in kwargs and kwargs['e'] is not None:
