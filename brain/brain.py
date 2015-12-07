@@ -253,5 +253,5 @@ if __name__ == '__main__':
     brain.start()
     # brain.scan()
     # brain.scan(analyze=False)
-    brain.demo1()
-    # brain.demo2()
+    # brain.demo1()
+    brain.demo2()
