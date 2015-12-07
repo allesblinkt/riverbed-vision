@@ -12,11 +12,13 @@ MAX_STAGE = 2
 THRESH = 2500
 
 flower_seeds = [
-    (3000,  295.0), (3400,  295.0),
-    (3000,  590.0), (3400,  590.0),
-    (3000,  885.0), (3400,  885.0),
-    (3000, 1180.0), (3400, 1180.0),
-    (3000, 1475.0), (3400, 1475.0),
+    (3500, 200),
+    (2800, 150),
+    (3150, 500),
+    (3400, 1100),
+    (2800, 900),
+    (3500, 1400),
+    (2900, 1400),
 ]
 
 def find_flower_pos(map, stone, center):
@@ -58,7 +60,7 @@ def art_step(map):
         if sel:
             s = sel[0]
             index = s.index
-            bucket = int(s.color[0] * 10 / 255)
+            bucket = int(s.color[0] * 7 / 255)
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif STAGE == 1:
