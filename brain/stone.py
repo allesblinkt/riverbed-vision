@@ -210,7 +210,7 @@ if __name__ == '__main__':
         img_map = np.zeros((map.size[1]/2, map.size[0]/2, 3), np.uint8)
         map.image(img_map, 2)
         cv2.imshow('map', img_map)
-        if cv2.waitKey(1) == ord('q'):
+        if cv2.waitKey(1000) == ord('q'):
             break
         i, nc, na = art_step(map)
         if i is not None:
