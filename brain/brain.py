@@ -360,7 +360,7 @@ class Brain(object):
                     nc = s.center
                 if na is None:
                     na = s.angle
-                self._move_stone(self, s.center, s.angle, nc, na)
+                self._move_stone(s.center, s.angle, nc, na)
                 s.center = nc
                 s.angle = na
                 self.map.save()
