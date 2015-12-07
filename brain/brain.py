@@ -7,6 +7,8 @@ import numpy as np
 import subprocess
 from art import art_step
 from extract import process_image
+from random import uniform
+
 
 from utils import *
 from log import log
@@ -43,11 +45,13 @@ class Machine(object):
         if e is not None:
             self.e = e
 
-    def lift_up(self):
+    def lift_up(self, x, y):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
         # try lifting up 6 times
-        for i in range(6):
+        jit_mag = 3
+        for i in range(8):
+
             self.control.light(True)
             self.control.vacuum(True)
             h = self.control.pickup_custom()
@@ -55,6 +59,11 @@ class Machine(object):
             if h is not None:
                 self.last_pickup_height = h
                 return
+
+            jit_x = uniform(-jit_mag, jit_mag)
+            jit_y = uniform(-jit_mag, jit_mag)
+            self.m.go(x=x + jit_x, y=y + jit_y)
+            self.c.block()
         raise Exception('Failed to pick up stone (6 times in a row)')
 
     def lift_down(self):
@@ -73,7 +82,7 @@ class Machine(object):
         if angle is None:
             angle = self.e
         angle = math.radians(angle)
-        return (0.0 + length * math.sin(angle) , 0.0 + length * math.cos(angle))
+        return (0.0 + length * math.sin(angle), 0.0 + length * math.cos(angle))
 
 
 class Camera(object):
@@ -327,7 +336,7 @@ class Brain(object):
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
         self.m.go(x=c1[0], y=c1[1], e=a1)
-        h = self.m.lift_up()
+        h = self.m.lift_up(x=c1[0], y=c1[1])
         self.m.go(x=c2[0], y=c2[1], e=a2)
         self.m.lift_down()
 
