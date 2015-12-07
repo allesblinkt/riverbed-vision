@@ -5,7 +5,7 @@ import Pyro4
 import cv2
 import numpy as np
 import subprocess
-from art import art_step, MAX_X, MAX_Y
+from art import art_step
 from extract import process_image
 
 from utils import *
@@ -162,17 +162,14 @@ class Brain(object):
 
         self.map = StoneMap('stonemap')
         # shortcuts for convenience
-<<<<<<< HEAD
+
         if self.machine:
             self.m = self.machine
             self.c = self.machine.control
-        # go home (also test if the machine is initialized and working)
-        # self.c.home()
-=======
-        self.m = self.machine
-        self.c = self.machine.control
-        self.c.reset()
->>>>>>> 98cdfb5c52cfad576d8f1f2db0a199d5b186a7fc
+            self.c.reset()
+
+            # go home (also test if the machine is initialized and working)
+            # self.c.home()
 
     def start(self):
         pass
@@ -342,7 +339,8 @@ class Brain(object):
         # Case 1
         nc1, nc2 = self._turn_stone_calc(c1, 0.0, c2, da)
 
-        if c1[0] >= 0 and c2[0] >= 0 and c1[0] <= MAX_X and c2[0] <= MAX_X:
+        max_y = self.map.size[1]
+        if c1[1] >= 0 and c2[1] >= 0 and c1[1] <= max_y and c2[1] <= max_y:
             self._move_stone_absolute(nc1, 0, nc2, da)
         else:   # Case 2
             nc1, nc2 = self._turn_stone_calc(c1, 180.0, c2, da)
@@ -372,9 +370,9 @@ if __name__ == '__main__':
 
     brain = Brain(use_machine=False)
     brain.start()
-    brain.scan_from_files()
+    # brain.scan_from_files()
 
     # brain.scan()
     # brain.scan(analyze=False)
     # brain.demo1()
-    brain.demo2()
+    brain.perfomance()

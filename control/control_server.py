@@ -47,11 +47,18 @@ class MachineController(object):
         # M400 - Wait for the queue to be empty before answering "OK"
         self._command('M400')
 
-    def home(self, only_z=False):
-        if only_z:
-            self._command('G28 Z0')
-        else:
-            self._command('G28')
+    def reset(self):
+        self.reset_emergency()
+        self.reset_emergency()
+        self.motors(False)
+        self.motors(True)
+
+    def home(self):
+        self._command('G28')
+        self.block()
+
+    def home_z(self):
+        self._command('G28 Z0')
         self.block()
 
     def _check_movement(self, **kwargs):
@@ -87,8 +94,13 @@ class MachineController(object):
             cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
 
+    def dwell(self, ms):
+        cmd_str = 'G4 P%d' % ms
+        self._command(cmd_str)
+
     def pickup_top(self):
         self.go(z=self.pickup_z)
+        self.dwell(1000)
 
     def pickup(self):
         self.pickup_top()
@@ -104,7 +116,7 @@ class MachineController(object):
         # result is "ZProbe not triggered" or something else
         # reset Z and switch off the vacuum; return nothing
         self.vacuum(False)
-        self.home(only_z=True)
+        self.home_z()
         return None
 
     def set_pickup_params(self, slow_feed=None, fast_feed=None, return_feed=None, max_z=None, probe_height=None):
