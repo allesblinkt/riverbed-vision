@@ -24,14 +24,38 @@ class Stone(object):
         self.angle = angle % 180
         self.color = color
         self.structure = structure
+        self.bogus = False
 
     def copy(self):
         return Stone(self.center, self.size, self.angle, self.color, self.structure)
 
     # checks whether stone overlaps with another stone
     def overlaps(self, stone):
+        dx = self.center[0] - stone.center[0]
+        dy = self.center[1] - stone.center[1]
+        dsq = dx * dx + dy * dy
+        rs = (self.size[0] + stone.size[0] + 2)
+        # d = distance(self.center, stone.center)
+        return dsq < rs * rs # add 2 mm
+
+    #
+    def coincides(self, stone):
         d = distance(self.center, stone.center)
-        return d < self.size[0] + stone.size[0] + 2 # add 2 mm
+        return d < self.size[1] + stone.size[1]
+
+    # computes similarity with another stone
+    def similarity(self, stone):
+        dc = distance(self.center, stone.center)
+        ds = distance(self.size, stone.size)
+        da = abs(self.angle - stone.angle)
+        if dc > 20:
+            return 0.0
+        if ds > 20:
+            return 0.0
+        if da > 20:
+            return 0.0
+        return 1.0 - max([dc / 20.0, ds / 20.0, da / 20.0])
+
 
     # computes similarity with another stone
     def similarity(self, stone):
