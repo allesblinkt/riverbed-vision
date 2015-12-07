@@ -31,7 +31,7 @@ microseconds_per_step_pulse                  1                # Duration of step
 base_stepping_frequency                      100000           # Base frequency for stepping
 
 # Cartesian axis speed limits
-x_axis_max_speed                             30000            # mm/min
+x_axis_max_speed                             20000            # mm/min
 y_axis_max_speed                             40000            # mm/min
 z_axis_max_speed                             3000             # mm/min
 
