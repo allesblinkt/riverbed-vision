@@ -100,7 +100,7 @@ class Camera(object):
         h = self.viewy * size[1] / self.resy
         return w, h
 
-    def grab(self):
+    def grab(self, save=False):
         log.debug('Taking picture at coords {},{}'.format(self.machine.x, self.machine.y))
         self.machine.control.light(True)
         try:
@@ -125,6 +125,10 @@ class Camera(object):
         except:
             ret = None
         self.machine.control.light(False)
+        if ret is not None and save:
+            fn = 'grab_{:04d}_{:04d}'.format(int(self.machine.x), int(self.machine.y))
+            log.debug('Saving {}.jpg'.format(fn))
+            cv2.imwrite('map/{}.jpg'.format(fn), ret)
         return ret
 
     def grab_extract(self, save=False):
@@ -164,7 +168,7 @@ class Brain(object):
         f = getattr(self, prgname)
         f()
 
-    def scan(self):
+    def scan(self, analyze=True):
         log.debug('Begin scanning')
         self.c.pickup_top()
         self.z = 38.0 # TODO: properly get
@@ -179,24 +183,28 @@ class Brain(object):
             for j in range(0, y + 1, stepy):
                 self.m.go(x=i, y=j)
                 self.c.block()
-                st = self.machine.cam.grab_extract(save=True)
-                for s in st:
-                    s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
-                    s.size = self.machine.cam.size_to_mm(s.size)
-                    s.rank = 0.0
-                    stones.append(s)
+                if analyze:
+                    st = self.machine.cam.grab_extract(save=True)
+                    for s in st:
+                        s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
+                        s.size = self.machine.cam.size_to_mm(s.size)
+                        s.rank = 0.0
+                        stones.append(s)
+                else:
+                    self.machine.cam.grab(save=True)
         log.debug('End scanning')
-        # select correct stones
-        log.debug('Begin selecting/reducing stones')
-        for i in range(len(stones)):
-            for j in range(i + 1, len(stones)):
-                s = stones[i].similarity(stones[j])
-                stones[i].rank += s
-                stones[j].rank -= s
-        log.debug('End selecting/reducing stones')
-        # copy selected stones to storage
-        self.map.stones = [ s for s in stones if s.rank >= 1.5 ]
-        self.map.save()
+        if analyze:
+            # select correct stones
+            log.debug('Begin selecting/reducing stones')
+            for i in range(len(stones)):
+                for j in range(i + 1, len(stones)):
+                    s = stones[i].similarity(stones[j])
+                    stones[i].rank += s
+                    stones[j].rank -= s
+            log.debug('End selecting/reducing stones')
+            # copy selected stones to storage
+            self.map.stones = [ s for s in stones if s.rank >= 1.5 ]
+            self.map.save()
 
     def demo1(self):
         # demo program which moves stone back and forth
@@ -245,6 +253,7 @@ class Brain(object):
 if __name__ == '__main__':
     brain = Brain()
     brain.start()
-    brain.run('scan')
-    # brain.run('demo1')
-    # brain.run('demo2')
+    brain.scan()
+    # brain.scan(analyze=False)
+    # brain.demo1()
+    # brain.demo2()
