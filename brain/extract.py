@@ -264,7 +264,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     # Standard distance transform and watershed segmentation
     dist_transform = cv2.distanceTransform(weight_thresh_img, cv2.cv.CV_DIST_L2, 5)
-    _, dist_thresh_img = cv2.threshold(dist_transform, np.max(dist_transform) * 0.2, 255, cv2.THRESH_BINARY)
+    _, dist_thresh_img = cv2.threshold(dist_transform, 10, 255, cv2.THRESH_BINARY)   # Constant distance...
 
     markers_img = np.zeros((thresh_img.shape[0], thresh_img.shape[1]), dtype=np.int32)
 
