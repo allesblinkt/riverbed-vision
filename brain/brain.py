@@ -48,8 +48,10 @@ class Machine(object):
             raise Exception('lift_up called, but previous call not cleared using lift_down')
         # try lifting up 6 times
         for i in range(6):
+            self.control.light(True)
             self.control.vacuum(True)
             h = self.control.pickup()
+            self.control.light(False)
             if h is not None:
                 self.last_pickup_height = h
                 return
@@ -58,8 +60,10 @@ class Machine(object):
     def lift_down(self):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
+        self.control.light(True)
         self.go(z=max(self.last_pickup_height - 3, 0))
         self.control.vacuum(False)
+        self.control.light(False)
         self.control.pickup_top()
         self.last_pickup_height = None
 
