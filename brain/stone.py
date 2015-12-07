@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-# import pickle as serialization
-import serpent as serialization
+import pickle as serialization
+# import serpent as serialization
 from random import uniform
 from collections import namedtuple
 import math
@@ -45,6 +45,10 @@ class Stone(object):
         if da > 20:
             return 0.0
         return 1.0 - max([dc / 20.0, ds / 20.0, da / 20.0])
+
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            serialization.dump(self, f)
 
 
 class StoneHole(object):

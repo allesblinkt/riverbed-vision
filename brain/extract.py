@@ -7,6 +7,7 @@ import sys
 from coloranalysis import find_dominant_color
 from structure import lbp_histogram
 from log import log
+from stone import Stone
 
 blank = cv2.imread('blank.png')
 
@@ -178,7 +179,9 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     structure = lbp_histogram(cropped)
 
     if result_img is not None:
-        cv2.drawContours(result_img, [contour], 0, color, -1)
+        dummy = np.array([np.array([color])])
+        rgb_color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
+        cv2.drawContours(result_img, [contour], 0, rgb_color, -1)
         cv2.circle(result_img, ec, 4, (128, 0, 0))
         cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
         cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
@@ -187,12 +190,11 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     if not preselect_stone((resx, resy), ec, es):
         return None
 
-    ret = {'center': ec, 'size': es, 'angle': ea, 'color': color, 'structure': structure}
+    ret = Stone(ec, es, ea, color, structure)
 
     if save_stones:
         cv2.imwrite('stones/stone_{}_{:03d}.{}'.format(frame_desc, id, save_stones), cropped)
-        with open('stones/stone_{}_{:03d}.txt'.format(frame_desc, id), 'w') as f:
-            f.write(str(ret))
+        ret.save('stones/stone_{}_{:03d}.data'.format(frame_desc, id))
 
     return ret
 
@@ -241,7 +243,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
             if np.linalg.norm(cut_normal) < 0.0001:  # Normal too short
                 continue
 
-            rad = 90.0
+            rad = 60.0
 
             x = max(0, cut_point[0] - rad)
             y = max(0, cut_point[1] - rad)
@@ -283,10 +285,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     # Find individual stones and draw them
     stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
 
-    if debug_draw:
-        result_img = np.zeros_like(color_img)
-    else:
-        result_img = None
+    result_img = np.zeros_like(color_img)
 
     stones = []
     for id, contour in enumerate(stones_contours):
