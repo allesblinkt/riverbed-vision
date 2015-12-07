@@ -52,7 +52,7 @@ class Machine(object):
             if h is not None:
                 self.last_pickup_height = h
                 return
-        raise Exception('Failed to pick up stone (3 times in a row)'
+        raise Exception('Failed to pick up stone (3 times in a row)')
 
     def lift_down(self):
         if self.last_pickup_height is None:
