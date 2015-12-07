@@ -24,7 +24,11 @@ def kmeans_quantization(img, n_clusters):
         flab[np.where(mask == 0)[0]] = (-255, -255, -255)  # Mask off alpha areas
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    ret, labels, centers = cv2.kmeans(flab, n_clusters, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+
+    try:
+        ret, labels, centers = cv2.kmeans(flab, n_clusters, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    except Exception, e:
+        return np.array([128, 128, 128])
 
     exclude_idx = np.where(centers[:, -1] < 0)[0]
     center = np.uint8(centers)
