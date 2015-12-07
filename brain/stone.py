@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-# import pickle as serialization
-import serpent as serialization
+import pickle as serialization
+# import serpent as serialization
 from random import uniform
 from collections import namedtuple
 import math
