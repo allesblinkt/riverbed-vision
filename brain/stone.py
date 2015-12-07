@@ -125,7 +125,7 @@ class StoneMap(object):
         for i in range(len(self.stones)):
             self.update_idx(i)
 
-        log.debug('Loaded %d stones', len(self.stone))
+        log.debug('Loaded %d stones', len(self.stones))
         self._metadata()
 
 
