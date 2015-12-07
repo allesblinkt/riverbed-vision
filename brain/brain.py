@@ -46,7 +46,6 @@ class Machine(object):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
         self.control.vacuum(True)
-        time.sleep(1.0)
         h = self.control.pickup()
         assert h # TODO: fixme - try picking up 3 times, then fail?
         self.last_pickup_height = h
@@ -56,7 +55,6 @@ class Machine(object):
             raise Exception('lift_down called without calling lift_up first')
         self.go(z=max(self.last_pickup_height - 3, 0))
         self.control.vacuum(False)
-        time.sleep(0.1)
         self.control.pickup_top()
         self.last_pickup_height = None
 

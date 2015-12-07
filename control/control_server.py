@@ -87,8 +87,13 @@ class MachineController(object):
             cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
 
+    def dwell(self, ms):
+        cmd_str = 'G4 P%d' % ms
+        self._command(cmd_str)
+
     def pickup_top(self):
         self.go(z=self.pickup_z)
+        self.dwell(1000)
 
     def pickup(self):
         self.pickup_top()
