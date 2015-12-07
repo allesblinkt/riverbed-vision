@@ -11,6 +11,7 @@ MAX_STAGE = 2
 
 MAX_Y = 1730
 MAX_X = 3770
+THRESH = 1000
 
 flower_seeds = [
     (MAX_X - 333.0,  333.0), (MAX_X - 666.0 , 295.0),
@@ -35,15 +36,15 @@ def find_flower_pos(map, stone, center):
             radius += 10.0
 
 def in_workarea(stone):
-    return stone.center[0] > MAX_X - 999.0
+    return stone.center[0] > MAX_X - THRESH
 
-stage1_x = None
+stage1_y = None
 stage1_last = None
 stage_step = 0
 
 def art_step(map):
     global STAGE
-    global stage1_x, stage1_last
+    global stage1_y, stage1_last
     global stage_step
 
     if map.stage:
@@ -52,10 +53,10 @@ def art_step(map):
     index, new_center, new_angle = None, None, None
 
     # clean unusable holes
-    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[1] + h.size <= MAX_Y - (map.maxstonesize + 10) * (stage_step + 1)]
+    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= MAX_X - THRESH - (map.maxstonesize + 20) * (stage_step + 1)]
 
     if STAGE == 0:
-        sel = [s for s in map.stones if not in_workarea(s) and s.center[1] + s.size[0] > MAX_Y - (map.maxstonesize + 10) * (stage_step + 1) and not s.done]
+        sel = [s for s in map.stones if not in_workarea(s) and s.center[0] + s.size[0] > MAX_X - THRESH - (map.maxstonesize + 20) * (stage_step + 1) and not s.done]
         if sel:
             s = sel[0]
             index = s.index
@@ -63,25 +64,25 @@ def art_step(map):
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif STAGE == 1:
-        sel = [s for s in map.stones if in_workarea(s) or s.center[1] + s.size[0] <= MAX_Y - (map.maxstonesize + 10) * (stage_step + 1)]
+        sel = [s for s in map.stones if in_workarea(s) or s.center[0] + s.size[0] <= MAX_X - THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
         if sel:
-            if stage1_x is None:
+            if stage1_y is None:
                 # first run of this stage
-                stage1_x = MAX_X - 999.0
+                stage1_y = 50
                 # pick random stone
                 s = choice(sel)
                 stage1_last = s
             else:
                 s = min(sel, key=lambda x: compare_colors(x.color, stage1_last.color) * compare_histograms(x.structure, stage1_last.structure) )
-                stage1_x -= stage1_last.size[1] + s.size[1] + 5
+                stage1_y += stage1_last.size[1] + s.size[1] + 5
                 stage1_last = s
             s.done = True
             index = s.index
-            new_angle = 90
-            y = MAX_Y - (map.maxstonesize + 10) * (stage_step + 0.5)
-            new_center = stage1_x, y
-            if stage1_x < 200:
-                stage1_x = None
+            new_angle = 0
+            x = MAX_X - THRESH - (map.maxstonesize + 10) * (stage_step + 0.5)
+            new_center = x, stage1_y
+            if stage1_y > 1650:
+                stage1_y = None
                 stage_step += 1
                 STAGE = 0
 
