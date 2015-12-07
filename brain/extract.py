@@ -170,6 +170,10 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
         ea += 90
     ea = ea % 180
 
+    resy, resx, _ = src_img.shape
+    if not preselect_stone((resx, resy), ec, es):
+        return None
+
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
     b, g, r = cv2.split(cutout)
     a = np.zeros_like(b, dtype=np.uint8)
@@ -185,10 +189,6 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
         cv2.circle(result_img, ec, 4, (128, 0, 0))
         cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
         cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
-
-    resy, resx, _ = src_img.shape
-    if not preselect_stone((resx, resy), ec, es):
-        return None
 
     ret = Stone(ec, es, ea, color, structure)
 
@@ -243,7 +243,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
             if np.linalg.norm(cut_normal) < 0.0001:  # Normal too short
                 continue
 
-            rad = 60.0
+            rad = 30.0
 
             x = max(0, cut_point[0] - rad)
             y = max(0, cut_point[1] - rad)
@@ -309,13 +309,15 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
         if key == ord('q'):
             sys.exit(1)
 
-    return stones, result_img
+    return stones, result_img, thresh_img, weight_img
 
 
 def main():
+    global blank
+    blank = cv2.transpose(blank)
     for i in range(13, 30+1):
         frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
-        s, img = process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
+        process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
 
 if __name__ == "__main__":
     main()
