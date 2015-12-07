@@ -248,7 +248,7 @@ class StoneMap(object):
 
 
 if __name__ == '__main__':
-    map = StoneMap('stonemap_random')
+    map = StoneMap('stonemap')
     if len(map.stones) == 0:
         map.randomize()
     while True:
