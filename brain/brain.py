@@ -5,7 +5,7 @@ import Pyro4
 import cv2
 import numpy as np
 import subprocess
-from art import MAX_X, MAX_Y
+from art import art_step, MAX_X, MAX_Y
 from extract import process_image
 
 from utils import *
@@ -245,6 +245,21 @@ class Brain(object):
             nc1, nc2 = self._turn_stone_calc(c1, 180.0, c2, da)
             self._move_stone_absolute(nc1, 180.0, nc2, da)
         # TODO: save map ?
+
+    def performance(self):
+        while True:
+            i, nc, na = art_step(self.map)
+            if i is not None:
+                s = self.map.stones[i]
+                if nc is None:
+                    nc = s.center
+                if na is None:
+                    na = s.angle
+                self._move_stone(self, s.center, s.angle, nc, na)
+                s.center = nc
+                s.angle = na
+            else:
+                time.sleep(1)
 
 if __name__ == '__main__':
     brain = Brain()
