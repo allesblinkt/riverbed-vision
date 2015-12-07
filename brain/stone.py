@@ -7,6 +7,7 @@ from collections import namedtuple
 import math
 import cv2
 import numpy as np
+from rtree import index
 
 from log import log
 from utils import *
@@ -84,12 +85,17 @@ class StoneHole(object):
 
 class StoneMap(object):
 
+
+
     def __init__(self, name):
         self.name = name
         self.stones = []
         self.holes = []
         self.size = 3770, 1730
         self.stage = 0
+
+        self.idx = index.Index()
+
         try:
             with open('map/{}.data'.format(self.name), 'rb') as f:
                 d = serialization.load(f)
@@ -99,7 +105,13 @@ class StoneMap(object):
                 self.stage = d['stage']
         except:
             self.save()
+
+        c = 0
+        for i in range(len(self.stones)):
+            self.update_idx(i)
+           
         self._metadata()
+
 
     # precompute useful info, but don't store it
     def _metadata(self):
@@ -111,6 +123,12 @@ class StoneMap(object):
                 self.maxstonesize = s.size[0]
         self.maxstonesize *= 2.0
 
+
+    def update_idx(self, i):
+        s = self.stones[i]
+        self.idx.insert(i, (s.center[0], s.center[1], s.center[0], s.center[1]))
+
+
     # can we put stone to position center?
     def can_put(self, stone):
         if stone.center[0] - stone.size[0] <= 0:
@@ -121,6 +139,9 @@ class StoneMap(object):
             return False
         if stone.center[1] + stone.size[0] >= self.size[1]:
             return False
+
+        sr = 50
+        print list(self.idx.intersection((stone.center[0] - sr, stone.center[1] - sr, stone.center[0] + sr, stone.center[1] + sr)))
         for s in self.stones:
             if stone.overlaps(s):
                 return False
@@ -181,12 +202,13 @@ class StoneMap(object):
 
 
 if __name__ == '__main__':
-    map = StoneMap('stonemap_random')
+    map = StoneMap('stonemap')
     if len(map.stones) == 0:
-        map.randomize()
+        # map.randomize()
+        print "No STONES!"
     while True:
-        img_map = np.zeros((map.size[1]/4, map.size[0]/4, 3), np.uint8)
-        map.image(img_map, 4)
+        img_map = np.zeros((map.size[1]/2, map.size[0]/2, 3), np.uint8)
+        map.image(img_map, 2)
         cv2.imshow('map', img_map)
         if cv2.waitKey(1) == ord('q'):
             break
@@ -195,6 +217,7 @@ if __name__ == '__main__':
             map.holes.append(StoneHole(map.stones[i]))
             if nc is not None:
                 map.stones[i].center = nc
+                map.update_idx(i)
             if na is not None:
                 map.stones[i].angle = na
     # map.save()
