@@ -243,7 +243,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
             if np.linalg.norm(cut_normal) < 0.0001:  # Normal too short
                 continue
 
-            rad = 90.0
+            rad = 60.0
 
             x = max(0, cut_point[0] - rad)
             y = max(0, cut_point[1] - rad)
