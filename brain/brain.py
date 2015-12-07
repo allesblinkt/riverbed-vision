@@ -61,7 +61,7 @@ class Machine(object):
     def head_delta(self, angle=None):
         # length of rotating head (in mm)
         length = 40.0
-        if not angle:
+        if angle is None:
             angle = self.e
         angle = math.radians(angle)
         return (0.0 + length * math.sin(angle) , 0.0 + length * math.cos(angle))
@@ -225,9 +225,9 @@ class Brain(object):
         self.m.lift_down()
 
     def _turn_stone_calc(self, c1, sa, c2, ea):
-        h1 = self.machine.head_delta(sa)
+        h1 = self.machine.head_delta(angle=sa)
         c1 = c1[0] - h1[0], c1[1] - h1[1]
-        h2 = self.machine.head_delta(ea)
+        h2 = self.machine.head_delta(angle=ea)
         c2 = c2[0] - h2[0], c2[1] - h2[1]
         return c1, c2
 
