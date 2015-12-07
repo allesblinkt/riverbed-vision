@@ -12,17 +12,7 @@ MAX_STAGE = 2
 
 THRESH = 2500
 
-flower_seeds = []
-
-for i in range(9):
-    y = map_value(i, 0, 8, 300, MAX_Y - 300)
-
-    if i % 2 == 0:
-        x = MAX_X - 300.0
-    else:
-        x = MAX_X - 800.0
-
-    flower_seeds.append((x, y))
+flower_seeds = None
 
 
 def find_flower_pos(map, stone, center):
@@ -62,6 +52,23 @@ def art_step(map):
     if max_l is None:
         max_l = max(map.stones, key=lambda x: x.color[0]).color[0]
 
+    global flower_seeds
+
+    if flower_seeds is None:
+        max_x, max_y = map.size[0], map.size[1]
+
+        flower_seeds = []
+
+        for i in range(9):
+            y = map_value(i, 0, 8, 300, max_y - 300)
+
+            if i % 2 == 0:
+                x = max_x - 300.0
+            else:
+                x = max_x - 800.0
+
+            flower_seeds.append((x, y))
+
     index, new_center, new_angle = None, None, None
 
     # clean unusable holes
@@ -72,13 +79,9 @@ def art_step(map):
         if sel:
             s = sel[0]
             index = s.index
-<<<<<<< HEAD
 
             bucket = map_value(s.color[0], min_l, max_l, 0, len(flower_seeds) + 1)
             bucket = constrain(int(bucket), 0, len(flower_seeds) - 1)
-=======
-            bucket = int(s.color[0] * 7 / 255)
->>>>>>> 98cdfb5c52cfad576d8f1f2db0a199d5b186a7fc
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif STAGE == 1:
