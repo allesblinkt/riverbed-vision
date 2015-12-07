@@ -122,8 +122,34 @@ class MachineController(object):
         self.home_z()
         return None
 
+    def pickup_sexy(self):
+        self.pickup_top()
+
+        has_picked = False
+        pick_z = 35.0
+        while pick_z > 0.0 and not has_picked:
+            pick_z = max(0.0, pick_z - 2.0)
+
+            self.go(z=pick_z)
+            self.block()
+            result = self._command('M119', read_result=True)
+
+            if result.find('Probe: 1') > -1:
+                has_picked = True
+
+        self.pickup_top()
+
+        if has_picked:
+            return pick_z
+
+        self.vacuum(False)
+        self.home_z()
+
+        # reset Z and switch off the vacuum; return nothing
+        return None
+
     def set_pickup_params(self, slow_feed=None, fast_feed=None, return_feed=None, max_z=None, probe_height=None):
-        max_z = max_z / 2 # weirdness, need to divide by 2
+        max_z = max_z / 2  # weirdness, need to divide by 2
         cmd_str = 'M670'
         cmd_feed = format_feed(s=slow_feed, k=fast_feed, r=return_feed)
         cmd_pos = format_pos(z=max_z, h=probe_height)
