@@ -48,6 +48,9 @@ class Machine(object):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
 
+        jit_x = 0
+        jit_y = 0
+
         # try lifting up tries times
         for i in range(tries):
             self.control.light(True)
@@ -58,8 +61,8 @@ class Machine(object):
                 self.last_pickup_height = h
                 return True
 
-            jit_x, jit_y = random_on_circle(jitter_rad)
             self.go(x=x + jit_x, y=y + jit_y)
+            jit_x, jit_y = random_on_circle(jitter_rad)
             self.control.block()
         return False
 
