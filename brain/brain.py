@@ -7,8 +7,6 @@ import numpy as np
 import subprocess
 from art import art_step
 from extract import process_image
-from random import uniform
-
 
 from utils import *
 from log import log
@@ -66,11 +64,11 @@ class Machine(object):
             self.control.block()
         return False
 
-    def lift_down(self):
+    def lift_down(self, extra_z_down=3.0):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
         self.control.light(True)
-        self.go(z=max(self.last_pickup_height - 3, 0))
+        self.go(z=max(self.last_pickup_height - extra_z_down, 0))
         self.control.vacuum(False)
         self.control.light(False)
         self.control.pickup_top()
