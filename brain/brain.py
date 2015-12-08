@@ -329,10 +329,11 @@ class Brain(object):
             self._move_stone((3500, 1000),  30, (3500, 1000), 120)
             self._move_stone((3500, 1000), 120, (3500, 1000),  30)
 
-   def demo3(self):
+    def demo3(self):
         while True:
             self._move_stone((3700, 1000),  30, (3700, 1000), 120)
             self._move_stone((3700, 1000), 120, (3700, 1000),  30)
+
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
         self.m.go(x=c1[0], y=c1[1], e=a1)
