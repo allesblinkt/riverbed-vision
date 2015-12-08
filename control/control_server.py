@@ -127,10 +127,10 @@ class MachineController(object):
 
         has_picked = False
         pick_z = start_z
+        self.vacuum(True)
 
         self.go(z=pick_z)
         self.block()
-        self.vacuum(True)
 
         while pick_z > 0.0 and not has_picked:
             pick_z = max(0.0, pick_z - step)
