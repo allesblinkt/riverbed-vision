@@ -416,4 +416,4 @@ if __name__ == '__main__':
     # brain.scan(analyze=False)
     # brain.demo1()
     # brain.performance()
-    brain.demo3()
+    brain.performance()
