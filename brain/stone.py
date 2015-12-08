@@ -7,6 +7,8 @@ from collections import namedtuple
 import math
 import cv2
 import numpy as np
+import time
+import shutil
 #from rtree import index
 
 from log import log
@@ -14,7 +16,6 @@ from utils import *
 from art import art_step
 
 class Stone(object):
-
     def __init__(self, center, size, angle, color, structure, flag=False):
         self.center = center
         if size[1] > size[0]:
@@ -95,6 +96,8 @@ class StoneMap(object):
         self.size = 3770, 1730
         self.stage = 0
 
+        print "Loading"
+
         #self.idx = index.Index()
 
         try:
@@ -107,6 +110,7 @@ class StoneMap(object):
                     self.stage = d['stage']
                 else:
                     self.stage = None
+
                 if d.has_key('stones'):
                     log.debug('Loading stones from OLD format')
                     self.stones = d['stones']
@@ -225,11 +229,16 @@ class StoneMap(object):
             s = [ Stone(x.center, x.size, x.angle, None, None, x.flag) for x in self.stones ]
             d = {'stones1': s, 'size': self.size, 'stage': self.stage}
             serialization.dump(d, f)
+        ts = int(time.time())
+        # backup with timestamp
+        shutil.copy('map/{}.data'.format(self.name), 'map/{}-{}.data'.format(self.name), ts)
         if meta:
             with open('map/{}.data2'.format(self.name), 'wb') as f:
                 s = [ {'color': x.color, 'structure': x.structure} for x in self.stones ]
                 d = {'stones2': s}
                 serialization.dump(d, f)
+            # backup with timestamp
+            shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data'.format(self.name), ts)
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
