@@ -357,7 +357,7 @@ class Brain(object):
         h2 = self.machine.head_delta(angle=ea)
         c2 = c2[0] - h2[0], c2[1] - h2[1]
 
-        off = (6.0, 0.0)
+        off = (0.0, 0.0)   # was 6.0, 0
         return (c1[0] + off[0], c1[1] + off[1]), (c2[0] + off[0], c2[1] + off[1])  # FIXME: Offseted
 
     def _move_stone(self, c1, a1, c2, a2):
