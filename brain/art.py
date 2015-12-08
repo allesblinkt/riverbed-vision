@@ -29,6 +29,28 @@ def find_flower_pos(map, stone, center):
             angle -= 360
             radius += 2.0
 
+
+def find_best_match(stone, selection, bucket_size_c=10, bucket_size_s=200):
+    min_colors = sorted(selection, key=lambda x: compare_colors(x.color, stone.color))
+    min_structures = sorted(selection, key=lambda x: compare_histograms(x.structure, stone.structure))
+
+    color_set = set(min_colors[:bucket_size_c])
+    structure_set = set(min_structures[:bucket_size_s])
+
+    intersection_list = list(color_set.intersection(structure_set))
+
+    if len(intersection_list) > 0:
+        print "!!!!!!!!!!!!1 Found in set intersection"
+        return choice(intersection_list)
+
+    return min_colors[0]
+
+
+def find_most_distant_color(stone, selection):
+    s = max(selection, key=lambda x: compare_colors(x.color, stone.color))
+    return s
+
+
 def in_workarea(stone):
     return stone.center[0] > THRESH
 
@@ -92,10 +114,14 @@ def art_step(map):
                 # first run of this stage
                 stage1_y = 50
                 # pick random stone
-                s = choice(sel)
+                if stage1_last is not None:
+                    s = find_most_distant_color(stage1_last, sel)
+                else:
+                    s = choice(sel)
+
                 stage1_last = s
             else:
-                s = min(sel, key=lambda x: compare_colors(x.color, stage1_last.color) * compare_histograms(x.structure, stage1_last.structure) )
+                s = find_best_match(stage1_last, sel)
                 stage1_y += stage1_last.size[1] + s.size[1] + 5
                 stage1_last = s
             index = s.index
