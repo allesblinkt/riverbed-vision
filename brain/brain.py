@@ -331,8 +331,8 @@ class Brain(object):
 
    def demo3(self):
         while True:
-            self._move_stone((3600, 1000),  30, (3600, 1000), 120)
-            self._move_stone((3600, 1000), 120, (3600, 1000),  30)
+            self._move_stone((3700, 1000),  30, (3700, 1000), 120)
+            self._move_stone((3700, 1000), 120, (3700, 1000),  30)
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
         self.m.go(x=c1[0], y=c1[1], e=a1)
@@ -407,4 +407,5 @@ if __name__ == '__main__':
     # brain.scan()
     # brain.scan(analyze=False)
     # brain.demo1()
-    brain.performance()
+    # brain.performance()
+    brain.demo3()
