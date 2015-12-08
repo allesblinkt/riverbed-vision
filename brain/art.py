@@ -142,6 +142,6 @@ def art_step(map):
         STAGE = min(STAGE + 1, MAX_STAGE)
         log.debug('Art stage %d: None', STAGE)
 
-    map.stage = STAGE, stage_step, stage1_y, stage1_last.index is not None if stage1_last else None
+    map.stage = STAGE, stage_step, stage1_y, stage1_last.index if stage1_last else None
 
     return index, new_center, new_angle
