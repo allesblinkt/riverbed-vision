@@ -102,7 +102,11 @@ class StoneMap(object):
             with open('map/{}.data'.format(self.name), 'rb') as f:
                 d = serialization.load(f)
                 self.size = d['size']
-                self.stage = d['stage']
+
+                if not isinstance(self.stage, (int, long, float, complex)):
+                    self.stage = d['stage']
+                else:
+                    self.stage = None
                 if d.has_key('stones'):
                     log.debug('Loading stones from OLD format')
                     self.stones = d['stones']
@@ -119,10 +123,11 @@ class StoneMap(object):
                     for i in range(len(sm)):
                         self.stones[i].color = sm[i]['color']
                         self.stones[i].structure = sm[i]['structure']
-        except:
+        except Exception, e:
+            log.warn('Something happened while loading')
+            log.warn(e)
             self.save(meta=True)
 
-        c = 0
         for i in range(len(self.stones)):
             self.update_idx(i)
 
