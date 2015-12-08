@@ -231,14 +231,14 @@ class StoneMap(object):
             serialization.dump(d, f)
         ts = int(time.time())
         # backup with timestamp
-        shutil.copy('map/{}.data'.format(self.name), 'map/{}-{}.data'.format(self.name), ts)
+        shutil.copy('map/{}.data'.format(self.name), 'map/{}-{}.data'.format(self.name, ts))
         if meta:
             with open('map/{}.data2'.format(self.name), 'wb') as f:
                 s = [ {'color': x.color, 'structure': x.structure} for x in self.stones ]
                 d = {'stones2': s}
                 serialization.dump(d, f)
             # backup with timestamp
-            shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data'.format(self.name), ts)
+            shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data'.format(self.name, ts))
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
