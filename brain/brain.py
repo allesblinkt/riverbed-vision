@@ -27,8 +27,9 @@ class Machine(object):
         self.x, self.y, self.z, self.e = 0.0, 0.0, 0.0, 0.0
         self.last_pickup_height = None
         try:
-            self.control.home()
+            self.control.reset()
         except:
+            log.warn('Could not initialize/reset machine')
             self.control = None
 
     def go(self, x=None, y=None, z=None, e=None):
@@ -181,6 +182,7 @@ class Brain(object):
             self.m = self.machine
             self.c = self.machine.control
             self.c.reset()
+            self.c.home()
 
             # go home (also test if the machine is initialized and working)
             # self.c.home()
