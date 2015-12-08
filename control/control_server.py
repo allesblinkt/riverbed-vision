@@ -122,19 +122,24 @@ class MachineController(object):
         self.home_z()
         return None
 
-    def pickup_custom(self):
+    def pickup_custom(self, start_z=26.0, end_z=0.0, step=2.0):
         self.pickup_top()
 
         has_picked = False
-        pick_z = 26.0
+        pick_z = start_z
+
+        self.go(z=pick_z)
+        self.block()
+        self.vacuum(True)
+
         while pick_z > 0.0 and not has_picked:
-            pick_z = max(0.0, pick_z - 2.0)
+            pick_z = max(0.0, pick_z - step)
 
             self.go(z=pick_z)
             self.block()
 
             if pick_z < 0.05:
-                self.dwell(400)
+                self.dwell(600)
                 self.block()
 
             result = self._command('M119', read_result=True)
@@ -142,13 +147,13 @@ class MachineController(object):
             if result.find('Probe: 1') > -1:
                 has_picked = True
 
-        self.pickup_top()
-
         if has_picked:
-            return pick_z
+            self.pickup_top()
 
-        self.vacuum(False)
-        self.home_z()
+            return pick_z
+        else:
+            self.vacuum(False)
+            self.home_z()
 
         # reset Z and switch off the vacuum; return nothing
         return None
