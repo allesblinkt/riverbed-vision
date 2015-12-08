@@ -43,23 +43,21 @@ class Machine(object):
         if e is not None:
             self.e = e
 
-    def lift_up(self, x, y, tries=7):
+    def lift_up(self, x, y, tries=5, jitter_rad=5):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
-        # try lifting up 6 times
-        jit_mag = 5
-        for i in range(5):
 
+        # try lifting up tries times
+        for i in range(tries):
             self.control.light(True)
-            self.control.vacuum(True)
+            # self.control.vacuum(True)   # Turned on in pickup routine
             h = self.control.pickup_custom()
             self.control.light(False)
             if h is not None:
                 self.last_pickup_height = h
                 return True
 
-            jit_x = uniform(-jit_mag, jit_mag)
-            jit_y = uniform(-jit_mag, jit_mag)
+            jit_x, jit_y = random_on_circle(jitter_rad)
             self.go(x=x + jit_x, y=y + jit_y)
             self.control.block()
         return False
