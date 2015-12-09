@@ -98,7 +98,7 @@ class StoneMap(object):
 
         print "Loading"
 
-        #self.idx = index.Index()
+        # self.idx = index.Index()
 
         try:
             meta = False
@@ -106,7 +106,7 @@ class StoneMap(object):
                 d = serialization.load(f)
                 self.size = d['size']
 
-                if not isinstance(self.stage, (int, long, float, complex)):
+                if not isinstance(d['stage'], (int, long, float, complex)):
                     self.stage = d['stage']
                 else:
                     self.stage = None
