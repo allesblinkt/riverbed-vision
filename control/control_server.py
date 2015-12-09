@@ -50,8 +50,11 @@ class MachineController(object):
     def reset(self):
         self.reset_emergency()
         self.reset_emergency()
+        self.reset_emergency()
+
         self.motors(False)
         self.motors(True)
+        self._command('G92 E0')   # Assume the head is set
 
     def home(self):
         self._command('G28')
