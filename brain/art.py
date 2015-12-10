@@ -18,11 +18,14 @@ flower_seeds = None
 def find_flower_pos(map, stone, center):
     radius, angle = 0.0, 0
     stone2 = stone.copy()
+
+    workarea_sel = [s for s in map.stones if in_workarea(s)]
+
     while True:
         x, y = center[0] + math.cos(math.radians(angle)) * radius, center[1] + math.sin(math.radians(angle)) * radius
         stone2.center = x, y
         stone2.angle = angle % 180
-        if map.can_put(stone2): # TODO: optimize by checking only against workarea stones?
+        if map.can_put_list(stone2, workarea_sel):
             return (x, y), angle % 180
         angle += 137.50776405
         if angle > 360:
@@ -58,6 +61,7 @@ stage1_y = None
 stage1_last = None
 stage_step = 0
 min_l, max_l = None, None
+
 
 def art_step(map):
     global STAGE
