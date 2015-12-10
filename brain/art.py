@@ -112,7 +112,16 @@ def art_step(map):
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif STAGE == 1:
-        sel = [s for s in map.stones if not s.flag and (in_workarea(s) or s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1))]
+        untouched_sel = [s for s in map.stones if s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
+        workarea_sel = [s for s in map.stones if in_workarea(s)]
+
+        if len(workarea_sel) > 1000:    # If the workarea gets pretty full...
+            total_sel = workarea_sel
+        else:
+            total_sel = workarea_sel + untouched_sel
+
+        sel = [s for s in total_sel if not s.flag]
+
         if sel:
             if stage1_y is None:
                 # first run of this stage
