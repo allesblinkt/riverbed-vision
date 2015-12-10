@@ -40,7 +40,7 @@ def find_best_match(stone, selection, bucket_size_c=10, bucket_size_s=200):
     intersection_list = list(color_set.intersection(structure_set))
 
     if len(intersection_list) > 0:
-        print "!!!!!!!!!!!!1 Found in set intersection"
+        log.debug('Found in intersection set')
         return choice(intersection_list)
 
     return min_colors[0]
