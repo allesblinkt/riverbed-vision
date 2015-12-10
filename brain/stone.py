@@ -157,9 +157,8 @@ class StoneMap(object):
         s = self.stones[i]
         # self.idx.insert(i, (s.center[0], s.center[1], s.center[0], s.center[1]))
 
-
-    # can we put stone to position center?
-    def can_put(self, stone):
+    # Can we put a stone, compare against the given list of stones
+    def can_put_list(self, stone, stones):
         if stone.center[0] - stone.size[0] <= 0:
             return False
         if stone.center[1] - stone.size[0] <= 0:
@@ -170,11 +169,14 @@ class StoneMap(object):
             return False
 
         sr = 50
-        #print list(self.idx.intersection((stone.center[0] - sr, stone.center[1] - sr, stone.center[0] + sr, stone.center[1] + sr)))
-        for s in self.stones:
+        for s in stones:
             if stone.overlaps(s):
                 return False
         return True
+
+    # can we put stone to position center?
+    def can_put(self, stone):
+        return can_put_list(stone, self.stones)
 
     # populate the map with random stones
     def randomize(self, count=2000):
