@@ -156,15 +156,15 @@ class MachineController(object):
                 has_picked = True
 
         if has_picked:
-            self.pickup_top()
+            self.pickup_top()  # This also homes...
 
             return pick_z
-        else:
+        else:   # reset Z and switch off the vacuum; return nothing
             self.vacuum(False)
+            self.pickup_top(offset=9.0)   # Come near the homing, so it will be faster...
             self.home_z()
 
-        # reset Z and switch off the vacuum; return nothing
-        return None
+            return None
 
     def set_pickup_params(self, slow_feed=None, fast_feed=None, return_feed=None, max_z=None, probe_height=None):
         max_z = max_z / 2  # weirdness, need to divide by 2
