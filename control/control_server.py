@@ -237,8 +237,10 @@ class MachineController(object):
 class StateException(Exception):
     pass
 
+
 class CommunicationException(Exception):
     pass
+
 
 class SerialOpenError(Exception):
     def __init__(self, port, baud):
