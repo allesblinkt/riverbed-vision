@@ -48,6 +48,11 @@ class MachineController(object):
         self._command('M400')
 
     def reset(self):
+        # send newlines to clear noise
+        if self.serial_port:
+            with self.serial_mutex:
+                self.serial_port.flushInput()
+                self.serial_port.write(NEWLINE * 3)
         self.reset_emergency()
         self.reset_emergency()
         self.reset_emergency()
