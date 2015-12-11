@@ -104,9 +104,14 @@ class MachineController(object):
         cmd_str = 'G4 P%d' % ms
         self._command(cmd_str)
 
-    def pickup_top(self):
-        self.go(z=self.pickup_z)
-        self.dwell(1000)
+    def pickup_top(self, offset=0):
+        """ Goes to the top position, also homes for additional safety.
+            If offset is specified, it will stay the offset away from the top position
+        """
+        z = min(self.pickup_z, max(0.0, self.pickup_z - offset))
+        self.go(z=z)
+        self.dwell(500)
+        self.home_z()   # Also home for safety
 
     def pickup_g30(self):
         self.pickup_top()
