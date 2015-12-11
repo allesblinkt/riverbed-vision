@@ -118,7 +118,7 @@ class MachineController(object):
         self.set_pickup_params(max_z=self.pickup_z)
         cmd_str = 'G30'
         result = self._command(cmd_str, read_result=True)
-        if result.startswith('Z:'): # Z:20.0270 C:445 - parse as z_delta
+        if result.startswith('Z:'):  # Z:20.0270 C:445 - parse as z_delta
             m = re.search('Z:(\d+\.\d+)', result)
             if len(m.groups()) >= 1:
                 z_delta = float(m.group(1))
