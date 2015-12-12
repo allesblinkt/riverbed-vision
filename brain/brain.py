@@ -404,16 +404,9 @@ class Brain(object):
                 time.sleep(1)
 
 if __name__ == '__main__':
-    # brain = Brain()
-    # brain.start()
-    # brain.scan()
-
     brain = Brain(use_machine=True)
     brain.start()
     # brain.scan_from_files()
-
-    # brain.scan()
-    # brain.scan(analyze=False)
+    # brain.scan(startx=2769, analyze=False)
     # brain.demo1()
-    # brain.performance()
     brain.performance()
