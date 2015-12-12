@@ -147,6 +147,13 @@ def preselect_stone(shape, ec, es):
     if es[0] < 50 and es[1] < 50:
         return False
 
+    small_side = min(shape[0], shape[1])
+    max_axis = small_side * 0.8
+
+    # too big
+    if es[0] > max_axis or es[1] > max_axis:
+        return False
+
     return True
 
 
