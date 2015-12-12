@@ -197,7 +197,7 @@ class Brain(object):
         f = getattr(self, prgname)
         f()
 
-    def scan(self, analyze=True):
+    def scan(self, startx=0, starty=0, analyze=True):
         log.debug('Begin scanning')
         self.c.pickup_top()
         self.z = self.c.get_pickup_z()
@@ -208,8 +208,8 @@ class Brain(object):
         x, y = self.map.size
         stepx = int(self.machine.cam.viewx / 2.0)
         stepy = int(self.machine.cam.viewy / 2.0)
-        for i in range(0, x + 1, stepx):
-            for j in range(0, y + 1, stepy):
+        for i in range(int(startx), x + 1, stepx):
+            for j in range(int(starty), y + 1, stepy):
                 self.m.go(x=i, y=j)
                 self.c.block()
                 if analyze:
