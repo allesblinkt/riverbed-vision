@@ -136,7 +136,6 @@ def draw_normal(img, pt, normal, angle, scale=10.0):
 
 
 def preselect_stone(shape, ec, es):
-
     # too close to the edge
     if ec[0] < 100 or ec[0] > shape[0] - 100:
         return False
@@ -225,8 +224,8 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     thresh_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -18)
     thresh_img[gray_img > 248] = 0
-    #_, thresh_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    #_, thresh_img = cv2.threshold(gray_img, 235, 255, cv2.THRESH_BINARY_INV)
+    # _, thresh_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    # _, thresh_img = cv2.threshold(gray_img, 235, 255, cv2.THRESH_BINARY_INV)
 
     # Cleaning
     kernel = np.ones((3, 3), np.uint8)
