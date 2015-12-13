@@ -11,7 +11,7 @@ mm_per_arc_segment                           0.5              # Arcs are cut int
 # Arm solution configuration : Cartesian robot. Translates mm positions into stepper positions
 alpha_steps_per_mm                           51.282051282               # CHANGED. Steps per mm for alpha stepper
 beta_steps_per_mm                            51.282051282               # CHANGED. Steps per mm for beta stepper
-gamma_steps_per_mm                           88.88             # CHANGED. Steps per mm for gamma stepper
+gamma_steps_per_mm                           44.44             # CHANGED. Steps per mm for gamma stepper
 
 # Planner module configuration : Look-ahead and acceleration configuration
 planner_queue_size                           32               # DO NOT CHANGE THIS UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING
@@ -243,7 +243,7 @@ gamma_min_endstop                            nc               #
 gamma_max_endstop                            0.19^            # CHANGED. 
 gamma_homing_direction                       home_to_max      # CHANGED.
 gamma_min                                    0                #
-gamma_max                                    40               # CHANGED.
+gamma_max                                    47               # CHANGED.
 
 # optional order in which axis will home, default is they all home at the same time,
 # if this is set it will force each axis to home one at a time in the specified order
