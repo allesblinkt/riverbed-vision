@@ -223,7 +223,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     gray_img = cv2.GaussianBlur(gray_img, (5, 5), 0)
 
     thresh_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -18)
-    thresh_img[gray_img > 248] = 0
+    thresh_img[gray_img > 235] = 0
     # _, thresh_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # _, thresh_img = cv2.threshold(gray_img, 235, 255, cv2.THRESH_BINARY_INV)
 
