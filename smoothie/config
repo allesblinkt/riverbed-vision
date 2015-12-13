@@ -71,7 +71,7 @@ kill_button_pin                              1.9^!             # kill button pin
 
 # Extruder module configuration
 extruder.hotend.enable                          true             # Whether to activate the extruder module at all. All configuration is ignored if false
-extruder.hotend.steps_per_mm                    26.66666          # CHANGED. Steps per mm for extruder stepper
+extruder.hotend.steps_per_mm                    24.59            # CHANGED. Steps per mm for extruder stepper
 extruder.hotend.default_feed_rate               800              # Default rate ( mm/minute ) for moves where only the extruder moves
 extruder.hotend.acceleration                    500              # Acceleration for the stepper motor mm/sec²
 extruder.hotend.max_speed                       800              # mm/s
