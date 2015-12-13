@@ -27,7 +27,7 @@ def find_flower_pos(map, stone, center):
         stone2.angle = angle % 180
         if in_workarea(stone2) and map.can_put_list(stone2, workarea_sel):
             return (x, y), angle % 180
-        angle += 137.50776405
+        angle += (137.50776405 / 5.0)
         if angle > 360:
             angle -= 360
             radius += 2.0
