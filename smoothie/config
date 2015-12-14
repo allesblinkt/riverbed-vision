@@ -49,7 +49,7 @@ beta_current                                 nc               # CHANGED. Y stepp
 beta_max_rate                                120000.0          # mm/min
 
 gamma_step_pin                               2.2o!            # Pin for gamma stepper step signal
-gamma_dir_pin                                0.20o!           # Pin for gamma stepper direction
+gamma_dir_pin                                0.20o            # Pin for gamma stepper direction
 gamma_en_pin                                 nc               # CHANGED. Pin for gamma enable
 gamma_current                                nc               # CHANGED. Z stepper motor current
 gamma_max_rate                               10000.0            # mm/min
