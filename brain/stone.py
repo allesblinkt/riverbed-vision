@@ -44,7 +44,7 @@ class Stone(object):
     #
     def coincides(self, stone):
         d = distance(self.center, stone.center)
-        return d < self.size[1] + stone.size[1]
+        return d < (self.size[1] + stone.size[1]) * 0.5
 
     # computes similarity with another stone
     def similarity(self, stone):
