@@ -147,9 +147,9 @@ def preselect_stone(shape, ec, es):
         return False
 
     small_side = min(shape[0], shape[1])
-    max_axis = small_side * 0.8
+    max_axis = small_side * 0.95 * 0.5
 
-    # too big
+    # too big, machine sees carriage
     if es[0] > max_axis or es[1] > max_axis:
         return False
 

@@ -39,7 +39,7 @@ class Stone(object):
         dsq = dx * dx + dy * dy
         rs = (self.size[0] + stone.size[0] + 2)
         # d = distance(self.center, stone.center)
-        return dsq < rs * rs # add 2 mm
+        return dsq < rs * rs  # add 2 mm
 
     #
     def coincides(self, stone):
