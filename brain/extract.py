@@ -184,7 +184,7 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     b, g, r = cv2.split(cutout)
     a = np.zeros_like(b, dtype=np.uint8)
     cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
-    cropped = cv2.merge((b,g,r,a))
+    cropped = cv2.merge((b, g, r, a))
     color = find_dominant_color(cropped)
     structure = lbp_histogram(cropped)
 
