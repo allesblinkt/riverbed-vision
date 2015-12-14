@@ -151,7 +151,7 @@ class StoneMap(object):
             if s.size[0] > self.maxstonesize:
                 self.maxstonesize = s.size[0]
         self.maxstonesize *= 2.0
-        self.maxstonesize = 39.8666666667 * 2.0  # Manual, so we can resume with different scan
+        self.maxstonesize = 38.0 * 2.0  # Manual, so we can resume with different scan
 
 
     def update_idx(self, i):
