@@ -1,7 +1,7 @@
 from log import log
 import math
 import numpy as np
-from random import uniform, choice
+from random import uniform, choice, random
 from coloranalysis import compare_colors
 from structure import compare_histograms
 from utils import map_value, constrain
@@ -115,7 +115,10 @@ def art_step(map):
         untouched_sel = [s for s in map.stones if s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
         workarea_sel = [s for s in map.stones if in_workarea(s)]
 
-        if len(workarea_sel) > 1000:    # If the workarea gets pretty full...
+        max_fill = 100
+        rand_thresh = max(max_fill - len(workarea_sel), 0) / float(max_fill)
+
+        if len(workarea_sel) > max_fill * 0.5 and random() > rand_thresh:
             total_sel = workarea_sel
         else:
             total_sel = workarea_sel + untouched_sel
