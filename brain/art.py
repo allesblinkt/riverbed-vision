@@ -115,13 +115,16 @@ def art_step(map):
         untouched_sel = [s for s in map.stones if s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
         workarea_sel = [s for s in map.stones if in_workarea(s)]
 
-        max_fill = 100
+        max_fill = 2000
         rand_thresh = max(max_fill - len(workarea_sel), 0) / float(max_fill)
 
+        # print len(workarea_sel), rand_thresh
         if len(workarea_sel) > max_fill * 0.5 and random() > rand_thresh:
             total_sel = workarea_sel
         else:
             total_sel = workarea_sel + untouched_sel
+
+        total_sel = workarea_sel + untouched_sel
 
         sel = [s for s in total_sel if not s.flag]
 
