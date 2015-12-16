@@ -38,6 +38,9 @@ class MachineController(object):
                 self.serial_port = serial.Serial(port_name)
                 # self.serial_port.setTimeout(1.0)
                 self.serial_port.baudrate = baudrate
+                self.serial_port.write(NEWLINE)
+                self.serial_port.write(NEWLINE)
+                self.serial_port.write(NEWLINE)
             except SerialOpenError:
                 raise SerialOpenError(port_name, baudrate)
         else:
@@ -52,7 +55,9 @@ class MachineController(object):
         if self.serial_port:
             with self.serial_mutex:
                 self.serial_port.flushInput()
-                self.serial_port.write(NEWLINE * 3)
+                self.serial_port.write(NEWLINE)
+                self.serial_port.write(NEWLINE)
+                self.serial_port.write(NEWLINE)
         self.reset_emergency()
         self.reset_emergency()
         self.reset_emergency()
