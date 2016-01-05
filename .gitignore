@@ -22,3 +22,8 @@ venv/**
 
 ## Stone photos
 stone_photo*
+
+## Data
+brain/stones/**
+brain/map/**
+brain/map_offline/**
