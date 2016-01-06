@@ -53,17 +53,21 @@ class Machine(object):
 
         # try lifting up tries times
         for i in range(tries):
+            log.info('Pickup try {} of {}'.format(i + 1, tries))
             self.control.light(True)
             # self.control.vacuum(True)   # Turned on in pickup routine
             h = self.control.pickup_custom()
             self.control.light(False)
             if h is not None:
+                log.info('Picked up at height {}'.format(h, ))
                 self.last_pickup_height = h
                 return True
 
             self.go(x=x + jit_x, y=y + jit_y)
             jit_x, jit_y = random_on_circle(jitter_rad)
             self.control.block()
+
+        log.info('Pickup failed after {} tries'.format(tries, ))
         return False
 
     def lift_down(self, extra_z_down=3.0):
@@ -401,7 +405,10 @@ class Brain(object):
                     s.center = nc
                     s.angle = na
                     self.map.stage = stage  # Commit stage
+
+                    log.info('Placement worked')
                 else:  # Fail, flag
+                    log.info('Placement failed')
                     s.flag = True
 
                 self.save_map()  # TODO: save while moving
