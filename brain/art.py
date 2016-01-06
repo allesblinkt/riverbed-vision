@@ -5,13 +5,12 @@ from coloranalysis import compare_colors
 from structure import compare_histograms
 from utils import map_value, constrain
 
-STAGE = 0
 
-MAX_STAGE = 2
-
+MAX_STAGE_MODE = 2  # How many stages / modes can we do (+1)
 THRESH = 2500
 
 flower_seeds = None
+min_l, max_l = None, None    # Cache luma calculations
 
 
 def find_flower_pos(map, stone, center):
@@ -56,20 +55,16 @@ def find_most_distant_color(stone, selection):
 def in_workarea(stone):
     return stone.center[0] > THRESH
 
-stage1_y = None
-stage1_last = None
-stage_step = 0
-min_l, max_l = None, None
-
 
 def art_step(map):
-    global STAGE
-    global stage1_y, stage1_last
-    global stage_step
-
     if map.stage is not None:
-        STAGE, stage_step, stage1_y, stage1_last_index = map.stage
+        stage_mode, stage_step, stage1_y, stage1_last_index = map.stage
         stage1_last = map.stones[stage1_last_index] if stage1_last_index is not None else None
+    else:
+        stage_mode = 0
+        stage1_y = None
+        stage1_last = None
+        stage_step = 0
 
     # Color range
     global min_l, max_l
@@ -100,7 +95,7 @@ def art_step(map):
     # clean unusable holes
     map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
 
-    if STAGE == 0:
+    if stage_mode == 0:   # Clear area
         sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > THRESH - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step) ]
         if sel:
             s = sel[0]
@@ -110,7 +105,7 @@ def art_step(map):
             bucket = constrain(int(bucket), 0, len(flower_seeds) - 1)
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
-    elif STAGE == 1:
+    elif stage_mode == 1:  # Fill line
         untouched_sel = [s for s in map.stones if s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
         workarea_sel = [s for s in map.stones if in_workarea(s)]
 
@@ -148,17 +143,19 @@ def art_step(map):
             if stage1_y > 1650:
                 stage1_y = None
                 stage_step += 1
-                STAGE = 0
+                stage_mode = 0
 
-    elif STAGE == 2:
+    elif stage_mode == 2:   # Done
         pass
 
     if index is not None:
-        log.debug('Art stage %d: stone %s => new center: %s, new angle: %s', STAGE, index, str(new_center), str(new_angle))
+        force_advance = False
+        log.debug('Art stage mode %d: stone %s => new center: %s, new angle: %s', stage_mode, index, str(new_center), str(new_angle))
     else:
-        STAGE = min(STAGE + 1, MAX_STAGE)
-        log.debug('Art stage %d: None', STAGE)
+        force_advance = True
+        stage_mode = min(stage_mode + 1, MAX_STAGE_MODE)
+        log.debug('Art stage mode %d: None', stage_mode)
 
-    map.stage = STAGE, stage_step, stage1_y, stage1_last.index if stage1_last else None
+    stage = stage_mode, stage_step, stage1_y, stage1_last.index if stage1_last else None   # Do not store in map
 
-    return index, new_center, new_angle
+    return index, new_center, new_angle, stage, force_advance

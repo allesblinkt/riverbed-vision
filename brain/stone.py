@@ -223,21 +223,37 @@ class StoneMap(object):
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
+    # map.stage = (0, 10, None, None)  # NOTE: use this to override the current state
+
+    map.save(meta=True)
+
     if len(map.stones) == 0:
         # map.randomize()
         print "No STONES!"
     while True:
-        img_map = np.zeros((map.size[1]/2, map.size[0]/2, 3), np.uint8)
+        img_map = np.zeros((map.size[1] / 2, map.size[0] / 2, 3), np.uint8)
         map.image(img_map, 2)
         cv2.imshow('map', img_map)
         if cv2.waitKey(1) == ord('q'):
             break
-        i, nc, na = art_step(map)
-        if i is not None:
+        i, nc, na, stage, force = art_step(map)
+
+        do_fail = random() > 0.05   # Simulates that 5% of stones cannot be picked up
+
+        if i is not None and not do_fail:  # TODO: remove failing simulation
+            stone = map.stones[i]
+
             map.holes.append(StoneHole(map.stones[i]))
             if nc is not None:
-                map.stones[i].center = nc
-                map.update_idx(i)
+                stone.center = nc
             if na is not None:
-                map.stones[i].angle = na
+                stone.angle = na
+
+            map.stage = stage
+        elif i is not None:
+            stone = map.stones[i]
+            stone.flag = True
+        elif force:
+            map.stage = stage
+
     map.save()

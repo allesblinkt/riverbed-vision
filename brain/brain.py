@@ -202,6 +202,7 @@ class Brain(object):
         self.z = self.c.get_pickup_z()
         self.m.go(e=90)
         self.c.block()
+
         stones = []
         x, y = self.map.size
         stepx = int(self.machine.cam.viewx / 2.0)
@@ -232,7 +233,6 @@ class Brain(object):
             # copy selected stones to storage
             self.map.stones = [s for s in stones if s.rank >= 1.5]
             self.map.save()
-
 
     def scan_from_files(self, analyze=True):
         import re
@@ -351,7 +351,6 @@ class Brain(object):
         else:
             return False
 
-
     def _turn_stone_calc(self, c1, sa, c2, ea):
         h1 = self.machine.head_delta(angle=sa)
         c1 = c1[0] - h1[0], c1[1] - h1[1]
@@ -377,27 +376,38 @@ class Brain(object):
         else:   # Case 2
             nc1, nc2 = self._turn_stone_calc(c1, 180.0, c2, da)
             return self._move_stone_absolute(nc1, 180.0, nc2, da)
-        # TODO: save map ?
+        # TODO: save map here ?
+
+    def save_map(self):
+        log.debug('Saving map...')
+        self.map.save()
+        log.debug('Saving map. Done.')
 
     def performance(self):
         while True:
             log.debug('Thinking...')
-            i, nc, na = art_step(self.map)
+            i, nc, na, stage, force = art_step(self.map)
+
             if i is not None:
                 s = self.map.stones[i]
+
                 if nc is None:
                     nc = s.center
+
                 if na is None:
                     na = s.angle
-                if self._move_stone(s.center, s.angle, nc, na):
+
+                if self._move_stone(s.center, s.angle, nc, na):   # Pickup worked
                     s.center = nc
                     s.angle = na
-                else:
+                    self.map.stage = stage  # Commit stage
+                else:  # Fail, flag
                     s.flag = True
 
-                log.debug('Saving map...')
-                self.map.save()
-                log.debug('Saving map. Done.')
+                self.save_map()  # TODO: save while moving
+            elif force:  # Art wants us to advance anyhow
+                self.map.stage = stage  # Commit stage
+                self.save_map()
             else:
                 time.sleep(1)
 
