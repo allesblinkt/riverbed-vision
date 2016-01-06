@@ -9,8 +9,8 @@ import cv2
 from art import art_step
 from extract import process_image
 
-from utils import *
-from stone import Stone, StoneMap
+from utils import random_on_circle
+from stone import StoneMap
 from log import log
 
 # CONTROL_HOSTNAME = 'localhost'
@@ -263,7 +263,7 @@ class Brain(object):
 
             xp, yp = float(m.group(1)), float(m.group(2))
 
-            print "Reading file at {} {}".format(xp, yp)
+            log.info('Reading file at {} {}'.format(xp, yp))
 
             localstones = []
 
