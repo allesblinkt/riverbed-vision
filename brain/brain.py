@@ -1,24 +1,24 @@
 #!/usr/bin/python
 import time
 import math
+import subprocess
+
 import Pyro4
 import cv2
-import numpy as np
-import subprocess
+
 from art import art_step
 from extract import process_image
 
 from utils import *
-from log import log
 from stone import Stone, StoneMap
+from log import log
 
 # CONTROL_HOSTNAME = 'localhost'
 CONTROL_HOSTNAME = '192.168.0.29'
 
-'''
-High-level operations on CNC
-'''
+
 class Machine(object):
+    """ High-level operations on CNC """
 
     def __init__(self, hostname):
         self.uri = 'PYRO:control@{}:5001'.format(hostname)
@@ -102,16 +102,15 @@ class Camera(object):
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_absolute=39'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'brightness=30'])
 
-
-    # calc distance of perceived pixel from center of the view (in cnc units = mm)
     def pos_to_mm(self, pos, offset=(0, 0)):
+        """ Calculate distance of perceived pixel from center of the view (in cnc units = mm) """
         dx, dy = -3.0, +66.00  # distance offset from head center to camera center
         x = dx + self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
         y = dy + self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
         return x, y
 
-    # calc size of perceived pixels (in cnc units = mm)
     def size_to_mm(self, size):
+        """ Calculate size of perceived pixels (in cnc units = mm) """
         w = self.viewx * size[0] / self.resx
         h = self.viewy * size[1] / self.resy
         return w, h
@@ -203,7 +202,6 @@ class Brain(object):
         self.z = self.c.get_pickup_z()
         self.m.go(e=90)
         self.c.block()
-        step = 100
         stones = []
         x, y = self.map.size
         stepx = int(self.machine.cam.viewx / 2.0)
@@ -232,7 +230,7 @@ class Brain(object):
                     stones[j].rank -= s
             log.debug('End selecting/reducing stones')
             # copy selected stones to storage
-            self.map.stones = [ s for s in stones if s.rank >= 1.5 ]
+            self.map.stones = [s for s in stones if s.rank >= 1.5]
             self.map.save()
 
 
@@ -318,7 +316,7 @@ class Brain(object):
 
             log.debug('End selecting/reducing stones')
             # copy selected stones to storage
-            self.map.stones = [ s for s in chosen_stones ]
+            self.map.stones = [s for s in chosen_stones]
             self.map.stage = (0, 2, None, None)
 
             log.debug('Reduced from {} to {} stones'.format(len(stones), len(self.map.stones)))

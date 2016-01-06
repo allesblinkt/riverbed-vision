@@ -2,18 +2,17 @@
 
 import pickle as serialization
 # import serpent as serialization
-from random import uniform
-from collections import namedtuple
-import math
+from random import uniform, random
+
 import cv2
 import numpy as np
 import time
 import shutil
-#from rtree import index
 
 from log import log
-from utils import *
+from utils import distance
 from art import art_step
+
 
 class Stone(object):
     def __init__(self, center, size, angle, color, structure, flag=False):
@@ -32,8 +31,8 @@ class Stone(object):
     def copy(self):
         return Stone(self.center, self.size, self.angle, self.color, self.structure, self.flag)
 
-    # checks whether stone overlaps with another stone
     def overlaps(self, stone):
+        """ Checks whether stone overlaps with another stone """
         dx = self.center[0] - stone.center[0]
         dy = self.center[1] - stone.center[1]
         dsq = dx * dx + dy * dy
@@ -41,27 +40,13 @@ class Stone(object):
         # d = distance(self.center, stone.center)
         return dsq < rs * rs  # add 2 mm
 
-    #
     def coincides(self, stone):
+        """ Check if two stones overlap so much that they could be the same """
         d = distance(self.center, stone.center)
         return d < (self.size[1] + stone.size[1]) * 0.5
 
-    # computes similarity with another stone
     def similarity(self, stone):
-        dc = distance(self.center, stone.center)
-        ds = distance(self.size, stone.size)
-        da = abs(self.angle - stone.angle)
-        if dc > 20:
-            return 0.0
-        if ds > 20:
-            return 0.0
-        if da > 20:
-            return 0.0
-        return 1.0 - max([dc / 20.0, ds / 20.0, da / 20.0])
-
-
-    # computes similarity with another stone
-    def similarity(self, stone):
+        """ Computes similarity with another stone """
         dc = distance(self.center, stone.center)
         ds = distance(self.size, stone.size)
         da = abs(self.angle - stone.angle)
@@ -87,8 +72,6 @@ class StoneHole(object):
 
 class StoneMap(object):
 
-
-
     def __init__(self, name):
         self.name = name
         self.stones = []
@@ -111,7 +94,7 @@ class StoneMap(object):
                 else:
                     self.stage = None
 
-                if d.has_key('stones'):
+                if 'stones' in d:
                     log.debug('Loading stones from OLD format')
                     self.stones = d['stones']
                 else:
@@ -132,12 +115,8 @@ class StoneMap(object):
             log.warn(e)
             self.save(meta=True)
 
-        for i in range(len(self.stones)):
-            self.update_idx(i)
-
         log.debug('Loaded %d stones', len(self.stones))
         self._metadata()
-
 
     # precompute useful info, but don't store it
     def _metadata(self):
@@ -153,11 +132,6 @@ class StoneMap(object):
         self.maxstonesize *= 2.0
         self.maxstonesize = 38.0 * 2.0  # Manual, so we can resume with different scan
 
-
-    def update_idx(self, i):
-        s = self.stones[i]
-        # self.idx.insert(i, (s.center[0], s.center[1], s.center[0], s.center[1]))
-
     # Can we put a stone, compare against the given list of stones
     def can_put_list(self, stone, stones):
         if stone.center[0] - stone.size[0] <= 0:
@@ -169,18 +143,19 @@ class StoneMap(object):
         if stone.center[1] + stone.size[0] >= self.size[1]:
             return False
 
-        sr = 50
+        # sr = 50
         for s in stones:
             if stone.overlaps(s):
                 return False
         return True
 
-    # can we put stone to position center?
     def can_put(self, stone):
-        return can_put_list(stone, self.stones)
+        """ Can we put stone to position center? """
+        return self.can_put_list(stone, self.stones)
 
-    # populate the map with random stones
     def randomize(self, count=2000):
+        """ Populate the map with random stones """
+
         log.debug('Generating random map of %d stones', count)
         self.stones = []
         failures = 0
@@ -192,7 +167,7 @@ class StoneMap(object):
                 a, b = b, a
             r = uniform(-90, 90)
             c = uniform(0, 255), uniform(42, 226), uniform(20, 223)
-            s = [ uniform(0.001, 0.02) for i in range(40) ] + [ uniform(0.15, 0.3), uniform(0.2, 0.4) ]
+            s = [uniform(0.001, 0.02) for i in range(40)] + [uniform(0.15, 0.3), uniform(0.2, 0.4)]
             s = Stone(center, (a, b), r, c, s)
             good = self.can_put(s)
             if not good:
@@ -214,22 +189,21 @@ class StoneMap(object):
             size = int(size[0] / scale), int(size[1] / scale)
             dummy = np.array([np.array([s.color], dtype=np.uint8)])
             color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
-            structure = s.structure
+            # structure = s.structure
             cv2.ellipse(img, center, size, 360 - angle, 0, 360, color, -1)
         for h in self.holes:
             center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
             size = int(h.size / scale)
             cv2.circle(img, center, size, (255, 255, 255))
-        """
-        if self.workarea:
-            a, b, c, d = self.workarea
-            a, b, c, d = a / scale, b / scale, c / scale, d / scale
-            cv2.rectangle(img, (a,b), (c,d), color=(255, 0, 0))
-        """
+
+        # if self.workarea:
+        #     a, b, c, d = self.workarea
+        #     a, b, c, d = a / scale, b / scale, c / scale, d / scale
+        #     cv2.rectangle(img, (a,b), (c,d), color=(255, 0, 0))
 
     def save(self, meta=False):
         with open('map/{}.data'.format(self.name), 'wb') as f:
-            s = [ Stone(x.center, x.size, x.angle, None, None, x.flag) for x in self.stones ]
+            s = [Stone(x.center, x.size, x.angle, None, None, x.flag) for x in self.stones]
             d = {'stones1': s, 'size': self.size, 'stage': self.stage}
             serialization.dump(d, f)
         ts = int(time.time())
@@ -237,7 +211,7 @@ class StoneMap(object):
         shutil.copy('map/{}.data'.format(self.name), 'map/{}-{}.data'.format(self.name, ts))
         if meta:
             with open('map/{}.data2'.format(self.name), 'wb') as f:
-                s = [ {'color': x.color, 'structure': x.structure} for x in self.stones ]
+                s = [{'color': x.color, 'structure': x.structure} for x in self.stones]
                 d = {'stones2': s}
                 serialization.dump(d, f)
             # backup with timestamp
