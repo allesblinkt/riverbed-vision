@@ -10,7 +10,7 @@ from art import art_step
 from extract import process_image
 
 from utils import random_on_circle
-from stone import StoneMap
+from stone import StoneMap, Stone
 from log import log
 
 # CONTROL_HOSTNAME = 'localhost'
