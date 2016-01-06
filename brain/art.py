@@ -7,7 +7,7 @@ from utils import map_value, constrain
 
 
 MAX_STAGE_MODE = 2  # How many stages / modes can we do (+1)
-THRESH = 2500
+WORKAREA_START_X = 2100
 
 flower_seeds = None
 min_l, max_l = None, None    # Cache luma calculations
@@ -53,7 +53,7 @@ def find_most_distant_color(stone, selection):
 
 
 def in_workarea(stone):
-    return stone.center[0] > THRESH
+    return stone.center[0] > WORKAREA_START_X
 
 
 def art_step(map):
@@ -75,28 +75,30 @@ def art_step(map):
 
     global flower_seeds
 
+    # Generate seeds
     if flower_seeds is None:
         max_x, max_y = map.size[0], map.size[1]
 
         flower_seeds = []
 
         for i in range(9):
-            y = map_value(i, 0, 8, 300, max_y - 300)
+            margin_y = 180
+            y = map_value(i, 0, 8, margin_y, max_y - margin_y)
 
             if i % 2 == 0:
-                x = max_x - 340.0
+                x = max_x - 400.0
             else:
-                x = max_x - 880.0
+                x = max_x - 1150.0
 
             flower_seeds.append((x, y))
 
     index, new_center, new_angle = None, None, None
 
     # clean unusable holes
-    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
+    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1)]
 
     if stage_mode == 0:   # Clear area
-        sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > THRESH - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step) ]
+        sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step) ]
         if sel:
             s = sel[0]
             index = s.index
@@ -106,7 +108,7 @@ def art_step(map):
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif stage_mode == 1:  # Fill line
-        untouched_sel = [s for s in map.stones if s.center[0] + s.size[0] <= THRESH - (map.maxstonesize + 10) * (stage_step + 1)]
+        untouched_sel = [s for s in map.stones if s.center[0] + s.size[0] <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1)]
         workarea_sel = [s for s in map.stones if in_workarea(s)]
 
         max_fill = 2000
@@ -138,7 +140,7 @@ def art_step(map):
                 stage1_last = s
             index = s.index
             new_angle = 0
-            x = THRESH - (map.maxstonesize + 10) * (stage_step + 0.5)
+            x = WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 0.5)
             new_center = x, stage1_y
             if stage1_y > 1650:
                 stage1_y = None
