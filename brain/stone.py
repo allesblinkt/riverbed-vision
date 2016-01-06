@@ -191,6 +191,10 @@ class StoneMap(object):
             color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
             # structure = s.structure
             cv2.ellipse(img, center, size, 360 - angle, 0, 360, color, -1)
+
+            if s.flag:
+                cv2.circle(img, center, 3, (0, 69, 255))
+
         for h in self.holes:
             center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
             size = int(h.size / scale)
