@@ -107,11 +107,17 @@ class MachineController(object):
         if self._check_movement(x=x, y=y, z=z, e=e):
             cmd_str = 'G0' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
+            return True
+        else:
+            return False
 
     def go(self, x=None, y=None, z=None, e=None):
         if self._check_movement(x=x, y=y, z=z, e=e):
             cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
+            return True
+        else:
+            return False
 
     def dwell(self, ms):
         cmd_str = 'G4 P%d' % ms
