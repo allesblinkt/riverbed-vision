@@ -160,7 +160,7 @@ class Camera(object):
             frame = img
 
         if frame is None:
-            log.warning('Failed to grab the image')
+            log.warn('Failed to grab the image')
             return []
         fn = 'grab_{:04d}_{:04d}'.format(int(x), int(y))
         if save:
