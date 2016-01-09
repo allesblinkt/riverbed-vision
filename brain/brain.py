@@ -348,6 +348,15 @@ class Brain(object):
 
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
+
+        if not self.m.check_movement(x=c1[0], y=c1[1], e=a1):
+            log.warn('Invalid pickup position {},{}. Aborting move.'.format(c1[0], c1[1]))
+            return False
+
+        if not self.m.check_movement(x=c2[0], y=c2[1], e=a2):
+            log.warn('Invalid placement position {},{}. Aborting move.'.format(c2[0], c2[1]))
+            return False
+
         self.m.go(x=c1[0], y=c1[1], e=a1)
         ret = self.m.lift_up(x=c1[0], y=c1[1])
 
