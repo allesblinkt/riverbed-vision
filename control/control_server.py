@@ -96,6 +96,9 @@ class MachineController(object):
                 return False
         return True
 
+    def check_movement(self, x=None, y=None, z=None, e=None):
+        return self._check_movement(x=x, y=y, z=z, e=e)
+
     def feedrate(self, f):
         cmd_str = format_feed(f=f)
         self._command(cmd_str)
