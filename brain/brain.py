@@ -133,9 +133,9 @@ class Camera(object):
             # cam.set(cv2.cv.CV_CAP_PROP_EXPOSURE, 19)
             # cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 10)
 
-            cam.read()
-            cam.read()
-            cam.read()
+            for i in range(3):  # Dummy captures to clear the buffer
+                cam.read()
+
             ret, frame = cam.read()
 
             cam.release()
