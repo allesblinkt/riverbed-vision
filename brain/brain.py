@@ -404,6 +404,8 @@ class Brain(object):
                 if na is None:
                     na = s.angle
 
+                log.debug('Placing stone {} from {} to {}'.format(i, s.center, nc))
+
                 if self._move_stone(s.center, s.angle, nc, na):   # Pickup worked
                     s.center = nc
                     s.angle = na
