@@ -44,6 +44,9 @@ class Machine(object):
         if e is not None:
             self.e = e
 
+    def check_movement(self, x=None, y=None, z=None, e=None):
+        return self.control.check_movement(x=x, y=y, z=z, e=e)
+
     def lift_up(self, x, y, tries=5, jitter_rad=5):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
