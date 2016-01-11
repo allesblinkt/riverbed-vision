@@ -6,8 +6,10 @@ import sys
 
 from coloranalysis import find_dominant_color
 from structure import lbp_histogram
-from log import log
 from stone import Stone
+
+from log import makelog
+log = makelog(__name__)
 
 blank = cv2.imread('blank.png')
 

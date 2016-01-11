@@ -1,10 +1,11 @@
-from log import log
 import math
 from random import choice, random
 from coloranalysis import compare_colors
 from structure import compare_histograms
 from utils import map_value, constrain
 
+from log import makelog
+log = makelog(__name__)
 
 MAX_STAGE_MODE = 2  # How many stages / modes can we do (+1)
 WORKAREA_START_X = 2100

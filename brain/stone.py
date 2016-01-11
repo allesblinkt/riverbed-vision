@@ -9,9 +9,11 @@ import numpy as np
 import time
 import shutil
 
-from log import log
 from utils import distance
 from art import art_step
+
+from log import makelog
+log = makelog(__name__)
 
 
 class Stone(object):

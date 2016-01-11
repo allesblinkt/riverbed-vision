@@ -11,7 +11,9 @@ from extract import process_image
 
 from utils import random_on_circle
 from stone import StoneMap, Stone
-from log import log
+
+from log import makelog
+log = makelog('brain')
 
 # CONTROL_HOSTNAME = 'localhost'
 CONTROL_HOSTNAME = '192.168.0.29'
