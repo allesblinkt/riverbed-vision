@@ -226,13 +226,13 @@ class StoneMap(object):
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
-    # map.stage = (0, 10, None, None)  # NOTE: use this to override the current state
-
+    map.stage = (0, 0, None, None)  # NOTE: use this to override the current state
     map.save(meta=True)
 
     if len(map.stones) == 0:
         # map.randomize()
         print "No STONES!"
+
     while True:
         img_map = np.zeros((map.size[1] / 2, map.size[0] / 2, 3), np.uint8)
         map.image(img_map, 2)
@@ -243,13 +243,14 @@ if __name__ == '__main__':
 
         do_fail = random() < 0.05   # Simulates that 5% of stones cannot be picked up
 
-        if i is not None and not do_fail:  # TODO: remove failing simulation
+        if i is not None:   # and not do_fail:  # TODO: remove failing simulation
             stone = map.stones[i]
 
             map.holes.append(StoneHole(map.stones[i]))
-            if nc is not None:
+
+            if nc is not None and na is not None and not do_fail:
+                log.debug('Placing stone {} from {} to {}'.format(i, stone.center, nc))
                 stone.center = nc
-            if na is not None:
                 stone.angle = na
 
             map.stage = stage
