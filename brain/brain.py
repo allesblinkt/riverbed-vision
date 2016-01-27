@@ -402,6 +402,9 @@ class Brain(object):
         log.debug('Saving map. Done.')
 
     def performance(self):
+
+        saving_thread = threading.Thread(target=save_map, args=self)
+
         while True:
             log.debug('Thinking...')
             i, nc, na, stage, force = art_step(self.map)
@@ -427,12 +430,20 @@ class Brain(object):
                     log.info('Placement failed')
                     s.flag = True
 
-                self.save_map()  # TODO: save while moving
+                if saving_thread.is_alive(): # wait until previous save is finished
+                    saving_thread.join()
+                saving_thread.start() # async call of self.save_map
+
             elif force:  # Art wants us to advance anyhow
                 self.map.stage = stage  # Commit stage
+                if saving_thread.is_alive(): # wait until previous save is finished
+                    saving_thread.join()
                 self.save_map()
             else:
                 time.sleep(1)
+
+        if saving_thread.is_alive(): # wait until previous save is finished
+            saving_thread.join()
 
 if __name__ == '__main__':
     brain = Brain(use_machine=True)
