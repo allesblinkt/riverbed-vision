@@ -48,8 +48,8 @@ beta_en_pin                                  0.10             # Pin for beta ena
 beta_current                                 nc               # CHANGED. Y stepper motor current
 beta_max_rate                                120000.0          # mm/min
 
-gamma_step_pin                               2.2o!            # Pin for gamma stepper step signal
-gamma_dir_pin                                0.20o!           # Pin for gamma stepper direction
+gamma_step_pin                               2.2v            # Pin for gamma stepper step signal
+gamma_dir_pin                                0.20^           # Pin for gamma stepper direction
 gamma_en_pin                                 nc               # CHANGED. Pin for gamma enable
 gamma_current                                nc               # CHANGED. Z stepper motor current
 gamma_max_rate                               10000.0            # mm/min
@@ -76,8 +76,8 @@ extruder.hotend.default_feed_rate               500              # Default rate 
 extruder.hotend.acceleration                    300              # Acceleration for the stepper motor mm/sec²
 extruder.hotend.max_speed                       500              # mm/s
 
-extruder.hotend.step_pin                        2.3o!            # Pin for extruder step signal
-extruder.hotend.dir_pin                         0.22o            # Pin for extruder dir signal
+extruder.hotend.step_pin                        2.3v            # Pin for extruder step signal
+extruder.hotend.dir_pin                         0.22v!            # Pin for extruder dir signal
 extruder.hotend.en_pin                          nc               # CHANGED. Will use 0.21 for rot limit. Pin for extruder enable signal
 
 # extruder offset
