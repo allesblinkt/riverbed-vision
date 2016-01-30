@@ -404,7 +404,7 @@ class Brain(object):
 
     def performance(self):
 
-        saving_thread = threading.Thread(target=save_map, args=self)
+        saving_thread = threading.Thread(target=self.save_map, args=self)
 
         while True:
             log.debug('Thinking...')
@@ -437,7 +437,8 @@ class Brain(object):
             elif force:  # Art wants us to advance anyhow
                 if saving_thread.is_alive(): saving_thread.join() # wait until save is completed if still being done
                 self.map.stage = stage  # Commit stage
-                self.save_map()
+
+                saving_thread.start() # async call of self.save_map
             else:
                 if saving_thread.is_alive(): saving_thread.join() # wait until save is completed if still being done
                 time.sleep(1)
