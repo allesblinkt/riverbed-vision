@@ -179,6 +179,12 @@ class Camera(object):
         return stones
 
 
+def save_map(map):
+    log.debug('Saving map...')
+    map.save()
+    log.debug('Saving map. Done.')
+
+
 class Brain(object):
 
     def __init__(self, use_machine=True):
@@ -403,8 +409,8 @@ class Brain(object):
         log.debug('Saving map. Done.')
 
     def performance(self):
-
-        saving_thread = threading.Thread(target=self.save_map, args=self)
+        
+        saving_thread = threading.Thread(target=save_map, args=self.map)
 
         while True:
             log.debug('Thinking...')
@@ -432,12 +438,14 @@ class Brain(object):
                     s.flag = True
                     log.info('Placement failed')
 
+                saving_thread = threading.Thread(target=save_map, args=self.map)
                 saving_thread.start() # async call of self.save_map
 
             elif force:  # Art wants us to advance anyhow
                 if saving_thread.is_alive(): saving_thread.join() # wait until save is completed if still being done
                 self.map.stage = stage  # Commit stage
 
+                saving_thread = threading.Thread(target=save_map, args=self.map)
                 saving_thread.start() # async call of self.save_map
             else:
                 if saving_thread.is_alive(): saving_thread.join() # wait until save is completed if still being done
