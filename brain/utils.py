@@ -27,4 +27,16 @@ def map_value(value, start1, stop1, start2, stop2):
         Simple scaling function
     """
     return start2 + (stop2 - start2) * ((value - start1) / float(stop1 - start1))
-        
+
+
+def inkey():
+    import sys, tty, termios
+
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
