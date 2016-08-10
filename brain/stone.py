@@ -303,10 +303,10 @@ if __name__ == '__main__':
 
         i, nc, na, stage, force = art_step(map)
 
-        do_fail = random() < 0.05   # Simulates that 5% of stones cannot be picked up
-        do_fail = False
+        do_fail = False               # Never fail
+        # do_fail = random() < 0.05   # Simulates that 5% of stones cannot be picked up
 
-        if i is not None:   # and not do_fail:  # TODO: remove failing simulation
+        if i is not None and not do_fail:
             stone = map.stones[i]
 
             map.holes.append(StoneHole(map.stones[i]))

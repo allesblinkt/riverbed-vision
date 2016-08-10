@@ -134,7 +134,7 @@ def art_step(map):
         sel = [s for s in total_sel if not s.flag]
 
         stripes = 4
-        stripe_gap = 100
+        stripe_gap = map.maxstonesize
         stripe_width = ((1650 - 50) - stripe_gap * (stripes - 1)) / stripes
 
         if sel:
