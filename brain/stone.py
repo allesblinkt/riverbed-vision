@@ -205,6 +205,52 @@ class StoneMap(object):
             size = int(h.size / scale)
             cv2.circle(img, center, size, (255, 255, 255))
 
+    def image_svg(self, svg, scale, stonescale=1.0):
+        """Draw the map to an svg image."""
+
+        import svgwrite
+
+        dwg = svg
+        log.debug('Creating map image svg')
+
+        dwg.add(dwg.line((0, 0), (10, 0), stroke=svgwrite.rgb(10, 10, 16, '%')))
+        dwg.add(dwg.text('Test', insert=(0, 0.2), fill='red'))
+
+        for s in self.stones:
+            center, size, angle = s.center, s.size, s.angle
+            center = float((self.size[0] - center[0]) / scale), float(center[1] / scale)
+            size = float(size[0] / scale) * stonescale, float(size[1] / scale) * stonescale
+            dummy = np.array([np.array([s.color], dtype=np.uint8)])
+            color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
+            svgcolor = svgwrite.rgb(color[2], color[1], color[0], 'RGB')
+            # structure = s.structure
+            # cv2.ellipse(img, center, size, 360 - angle, 0, 360, color, -1)
+            svg_ellip = dwg.ellipse(center=center, r=size, fill=svgcolor)
+            svg_ellip.rotate(360 - angle, center=center)
+            dwg.add(svg_ellip)
+
+            cl = 2.0
+
+            svg_line1 = dwg.line(start=(center[0] + cl, center[1]), end=(center[0] - cl, center[1]), stroke='red')
+            svg_line1.rotate(360 - angle, center=center)
+            dwg.add(svg_line1)
+            svg_line2 = dwg.line(start=(center[0], center[1] + cl), end=(center[0], center[1] - cl), stroke='red')
+            svg_line2.rotate(360 - angle, center=center)
+            dwg.add(svg_line2)
+
+            # if s.flag:
+            #    cv2.circle(img, center, 3, (0, 69, 255))
+
+        for h in self.holes:
+            center = float((self.size[0] - h.center[0]) / scale), float(h.center[1] / scale)
+            size = float(h.size / scale)
+
+            print size
+            print center
+            svg_circle = dwg.circle(center=center, r=size, stroke='black', stroke_width=0.8, fill='none')
+
+            dwg.add(svg_circle)
+
         # if self.workarea:
         #     a, b, c, d = self.workarea
         #     a, b, c, d = a / scale, b / scale, c / scale, d / scale
@@ -241,6 +287,18 @@ if __name__ == '__main__':
         cv2.imshow('map', img_map)
         if cv2.waitKey(1) == ord('q'):
             break
+
+        if cvkey == 's':
+            import svgwrite
+
+            ts = int(time.time())
+            svg_fn = 'map_{}.svg'.format(ts, )
+
+            log.debug('Saving svg to {}'.format(svg_fn))
+            dwg = svgwrite.Drawing(svg_fn)
+            map.image_svg(dwg, scale=2, stonescale=0.89)
+            dwg.save()
+
         i, nc, na, stage, force = art_step(map)
 
         do_fail = random() < 0.05   # Simulates that 5% of stones cannot be picked up
