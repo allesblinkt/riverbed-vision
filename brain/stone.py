@@ -244,6 +244,7 @@ if __name__ == '__main__':
         i, nc, na, stage, force = art_step(map)
 
         do_fail = random() < 0.05   # Simulates that 5% of stones cannot be picked up
+        do_fail = False
 
         if i is not None:   # and not do_fail:  # TODO: remove failing simulation
             stone = map.stones[i]
