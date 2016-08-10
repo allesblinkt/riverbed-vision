@@ -333,8 +333,8 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 def main():
     global blank
 
-    frame = cv2.imread('grab_0000_0000.jpg')
-    s, img = process_image('bla', frame, save_stones='png', debug_draw=True)
+    frame = cv2.imread('map_offline/grab_2535_0897.jpg')
+    stones, result_img, thresh_img, weight_img = process_image('bla', frame, save_stones='png', debug_draw=True)
 
     # for i in range(13, 30+1):
     #     frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))

@@ -185,6 +185,8 @@ class StoneMap(object):
         self._metadata()
 
     def image(self, img, scale):
+        """Draw the map to an image."""
+
         log.debug('Creating map image')
         for s in self.stones:
             center, size, angle = s.center, s.size, s.angle
