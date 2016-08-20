@@ -65,6 +65,13 @@ def compare_colors(a, b):
 
     return np.linalg.norm(a - b)
 
+
+def lab_to_rgb(c):
+    dummy = np.array([np.array([c])])
+    rgb = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
+
+    return rgb
+
 if __name__ == '__main__':
     import os
     import fnmatch
@@ -87,8 +94,7 @@ if __name__ == '__main__':
         t = time.time()
         dominant = find_dominant_color(image)
 
-        dummy = np.array([np.array([dominant])])
-        rgb_dominant = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
+        rgb_dominant = lab_to_rgb(dominant)
 
         cv2.circle(image, (w / 2, h / 2), w / 8, rgb_dominant, -1)
         print('Time taken: %.3f' % (time.time() - t))
