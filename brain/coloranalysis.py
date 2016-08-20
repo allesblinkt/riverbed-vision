@@ -25,19 +25,19 @@ def kmeans_quantization(img, n_clusters):
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
 
-    ret, labels, centers = cv2.kmeans(flab, n_clusters, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    ret, labels, centers = cv2.kmeans(data=flab, K=n_clusters, bestLabels=None, criteria=criteria, attempts=10, flags=cv2.KMEANS_RANDOM_CENTERS)
 
     exclude_idx = np.where(centers[:, -1] < 0)[0]
-    center = np.uint8(centers)
+    centers_u8 = np.uint8(centers)
 
-    res = center[labels.flatten()]
+    res = centers_u8[labels.flatten()]
 
     hist = centroid_histogram(labels)
     hist[exclude_idx] = 0.0
 
-    dominant = center[np.argmax(hist)]
+    dominant = centers_u8[np.argmax(hist)]
 
-    return dominant, hist, res
+    return dominant, hist, centers_u8, res, labels
 
 
 def centroid_histogram(labels):
@@ -55,7 +55,8 @@ def find_dominant_color(img):
 
     small_img = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
 
-    dominant, hist, processed = kmeans_quantization(small_img, n_clusters=3)
+    dominant, hist, centers, processed, labels = kmeans_quantization(small_img, n_clusters=5)
+    #return dominant, hist, centers, labels
     return dominant
 
 
