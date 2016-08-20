@@ -118,7 +118,7 @@ def art_step(map):
 
     art_center = (WORKAREA_START_X / 2, map.size[1] / 2)
 
-    print stage_mode
+    log.debug('Stage mode %d', stage_mode)
 
     if stage_mode == 0:   # Clear circle strip
         sel = [s for s in map.stones if not s.flag and distance(s.center, art_center) >= 100.0 * (stage_step) and distance(s.center, art_center) < 100.0 * (stage_step + 1) ]

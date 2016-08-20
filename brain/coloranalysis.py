@@ -5,6 +5,10 @@ import numpy as np
 
 from utils import distance2
 
+from log import makelog
+log = makelog(__name__)
+
+
 def kmeans_quantization(img, n_clusters):
     """ Quantizises the image into a given number of clusters (n_clusters). 
         This can work with images (4 channel) that have an alpha channel, this gets ignored,
@@ -88,7 +92,7 @@ if __name__ == '__main__':
             pngfiles.append(file)
 
     for fn in pngfiles:
-        print(fn)
+        log.info('Loading %s', fn)
         image = cv2.imread(os.path.join(p, fn), -1)
         (h, w) = image.shape[:2]
 
@@ -108,7 +112,7 @@ if __name__ == '__main__':
             cv2.rectangle(image, (x, h-bh), (x+20, h), lab_to_rgb(centers[i]), cv2.FILLED)
 
         cv2.circle(image, (w // 2, h // 2), w // 8, rgb_dominant, -1)
-        print('Time taken: %.3f' % (time.time() - t))
+        log.info('Time taken: %.3f', (time.time() - t))
 
         cv2.imshow('image', image)
         if cv2.waitKey(0) == 27:
