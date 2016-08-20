@@ -11,7 +11,9 @@ from stone import Stone
 from log import makelog
 log = makelog(__name__)
 
-blank = cv2.imread('blank.png')
+blank_img = cv2.imread('blank.png')
+blank_half_img = cv2.resize(blank_img, (blank_img.shape[1]//2, blank_img.shape[0]//2))
+
 
 def analyze_contour_cuts(contour, step=7):
     """
@@ -216,6 +218,8 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     log.debug('Start processing image: %s', frame_desc)
     start_time = time.time()
+    
+    half_img = cv2.resize(color_img, (color_img.shape[1]//2, color_img.shape[0]//2))
 
     # subtract blank vignette
     color_img = cv2.subtract(blank, color_img)
@@ -235,6 +239,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     # _, thresh_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # _, thresh_img = cv2.threshold(gray_img, 235, 255, cv2.THRESH_BINARY_INV)
 
+    half_img = 255 - cv2.subtract(blank_half_img, half_img)
     # Cleaning
     kernel = np.ones((3, 3), np.uint8)
     opening_img = cv2.morphologyEx(thresh_img, cv2.MORPH_OPEN, kernel, iterations=2)
@@ -337,7 +342,8 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
 
 def main():
-    global blank
+    global blank_img
+    global blank_half_img
 
     frame = cv2.imread('map_offline/grab_2535_0897.jpg')
     stones, result_img, thresh_img, weight_img = process_image('bla', frame, save_stones='png', debug_draw=True)
