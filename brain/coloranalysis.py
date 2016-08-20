@@ -93,11 +93,21 @@ if __name__ == '__main__':
         (h, w) = image.shape[:2]
 
         t = time.time()
-        dominant = find_dominant_color(image)
+        #dominant = find_dominant_color(image)
+
+        small_img = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
+        dominant, hist, centers, processed, labels = kmeans_quantization(small_img, n_clusters=5)
 
         rgb_dominant = lab_to_rgb(dominant)
 
-        cv2.circle(image, (w / 2, h / 2), w / 8, rgb_dominant, -1)
+        num_clusts = len(centers)
+        for i in range(num_clusts):
+            x = int(i / num_clusts * w)
+            bh = int(h * hist[i] * 0.5)
+
+            cv2.rectangle(image, (x, h-bh), (x+20, h), lab_to_rgb(centers[i]), cv2.FILLED)
+
+        cv2.circle(image, (w // 2, h // 2), w // 8, rgb_dominant, -1)
         print('Time taken: %.3f' % (time.time() - t))
 
         cv2.imshow('image', image)
