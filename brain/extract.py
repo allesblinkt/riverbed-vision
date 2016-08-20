@@ -373,8 +373,25 @@ def main():
     global blank_img
     global blank_half_img
 
-    frame = cv2.imread('map_offline/grab_2535_0897.jpg')
-    stones, result_img, thresh_img, weight_img = process_image('bla', frame, save_stones='png', debug_draw=True)
+    import os
+    import fnmatch
+
+    pngfiles = []
+    p = 'map_offline'
+
+    for file in os.listdir('map_offline'):
+        if fnmatch.fnmatch(file, 'grab_*.jpg'):
+            pngfiles.append(file)
+
+    # pngfiles = ["grab_1365_1311.jpg"]
+
+    for fn in pngfiles:
+        full_fn = os.path.join(p, fn)
+        log.info('Processing %s', full_fn)
+        frame = cv2.imread(full_fn)
+        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True)
+
+
 
     # for i in range(13, 30+1):
     #     frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
