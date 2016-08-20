@@ -287,7 +287,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     _, contours, _ = cv2.findContours(thresh_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     # Curvature analysis of the external contours
-    curvature_img = np.zeros_like(gray_img, dtype=np.float)
+    curvature_img = np.zeros_like(thresh_img, dtype=np.float)
 
     # Create and multiply the weighting image
     weight_img = thresh_img.copy()
@@ -386,16 +386,16 @@ def main():
     import os
     import fnmatch
 
-    pngfiles = []
+    jpgfiles = []
     p = 'map_offline'
 
     for file in os.listdir('map_offline'):
         if fnmatch.fnmatch(file, 'grab_*.jpg'):
-            pngfiles.append(file)
+            jpgfiles.append(file)
 
-    # pngfiles = ["grab_1365_1311.jpg"]
+    # jpgfiles = ["grab_0429_1380.jpg"]
 
-    for fn in pngfiles:
+    for fn in jpgfiles:
         full_fn = os.path.join(p, fn)
         log.info('Processing %s', full_fn)
         frame = cv2.imread(full_fn)
