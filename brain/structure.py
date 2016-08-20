@@ -29,7 +29,7 @@ def lbp_histogram(img, radius=5):
 def compare_histograms(a, b):
     arr_a = np.array(a, dtype=np.float32)
     arr_b = np.array(b, dtype=np.float32)
-    score = cv2.compareHist(arr_a, arr_b, cv2.cv.CV_COMP_CHISQR)
+    score = cv2.compareHist(arr_a, arr_b, cv2.HISTCMP_CHISQR)
 
     return score
 
