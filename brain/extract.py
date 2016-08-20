@@ -177,16 +177,18 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     bbox = cv2.boundingRect(contour)
 
     ec, es, ea = cv2.minAreaRect(contour)
-    ec = (int(ec[0]), int(ec[1]))
-    es = (int(es[0]) / 2, int(es[1]) / 2)
-    ea = int(ea)
-    if es[1] > es[0]:
-        es = es[1], es[0]
-        ea += 90
-    ea = ea % 180
+    
+    fit_center = (int(ec[0]), int(ec[1]))
+    fit_dim = (int(es[0]) // 2, int(es[1]) // 2)
+    fit_angle = int(ea)
+    if fit_dim[1] > fit_dim[0]:
+        fit_dim = fit_dim[1], fit_dim[0]
+        fit_angle += 90
+    fit_angle = fit_angle % 180
 
     resy, resx, _ = src_img.shape
-    if not preselect_stone((resx, resy), ec, es):
+
+    if not preselect_stone((resx, resy), fit_center, fit_dim):
         return None
 
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
@@ -194,7 +196,8 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     a = np.zeros_like(b, dtype=np.uint8)
     cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
     cropped = cv2.merge((b, g, r, a))
-    color = find_dominant_color(cropped)
+
+    dominant_color = find_dominant_color(cropped)
     structure = lbp_histogram(cropped)
 
     if result_img is not None:
@@ -202,11 +205,12 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
         # dummy = np.array([np.array([color])])
         # rgb_color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
         cv2.drawContours(result_img, [contour], 0, rgb_color, -1)
-        cv2.circle(result_img, ec, 4, (128, 0, 0))
+        cv2.circle(result_img, fit_center, 4, (128, 0, 0))
         cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
-        cv2.ellipse(result_img, ec, es, ea, 0, 360, (0, 0, 255))
 
-    ret = Stone(ec, es, ea, color, structure)
+        cv2.ellipse(result_img, fit_center, fit_dim, fit_angle, 0, 360, (0, 0, 255))
+
+    ret = Stone(fit_center, fit_dim, fit_angle, dominant_color, structure)
 
     if save_stones:
         cv2.imwrite('stones/stone_{}_{:03d}.{}'.format(frame_desc, id, save_stones), cropped)
