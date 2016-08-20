@@ -144,22 +144,32 @@ def draw_normal(img, pt, normal, angle, scale=10.0):
     cv2.line(img, (start[0], start[1]), (end[0], end[1]), (0, 0, 255))
 
 
-def preselect_stone(shape, ec, es):
-    # too close to the edge
-    if ec[0] < 100 or ec[0] > shape[0] - 100:
+def preselect_stone(img_size, center, dim, bbox):
+    min_center_border_dist = 100
+    min_axis_size = 50
+    bbox_tolerance = 4
+
+    # center too close to the edge
+    if center[0] < min_center_border_dist or center[0] > img_size[0] - min_center_border_dist:
         return False
-    if ec[1] < 100 or ec[1] > shape[1] - 100:
+    if center[1] < min_center_border_dist or center[1] > img_size[1] - min_center_border_dist:
         return False
 
-    # too small
-    if es[0] < 50 and es[1] < 50:
+    # Touches edges
+    if bbox[0] < bbox_tolerance or bbox[0] + bbox[2] > img_size[0] - bbox_tolerance -1:
+        return False   # touches X edges
+    if bbox[1] < bbox_tolerance or bbox[1] + bbox[3] > img_size[1] - bbox_tolerance -1:
+        return False   # touches Y edges
+
+    # too small (either axis)
+    if dim[0] < min_axis_size and dim[1] < min_axis_size:
         return False
 
-    small_side = min(shape[0], shape[1])
-    max_axis = small_side * 0.90 * 0.5
+    small_img_side = min(img_size[0], img_size[1])
+    max_axis = small_img_side * 0.90 * 0.5
 
     # too big, machine sees carriage
-    if es[0] > max_axis or es[1] > max_axis:
+    if dim[0] > max_axis or dim[1] > max_axis:
         return False
 
     return True
@@ -186,9 +196,9 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
         fit_angle += 90
     fit_angle = fit_angle % 180
 
-    resy, resx, _ = src_img.shape
+    img_h, img_w, _ = src_img.shape
 
-    if not preselect_stone((resx, resy), fit_center, fit_dim):
+    if not preselect_stone((img_w, img_h), fit_center, fit_dim, bbox):
         return None
 
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
