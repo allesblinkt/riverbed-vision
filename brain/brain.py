@@ -130,11 +130,11 @@ class Camera(object):
         self.machine.control.light(True)
         try:
             cam = cv2.VideoCapture(self.index)
-            cam.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 1280)
-            cam.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 720)
-            cam.set(cv2.cv.CV_CAP_PROP_FPS, 10)
-            # cam.set(cv2.cv.CV_CAP_PROP_EXPOSURE, 19)
-            # cam.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS, 10)
+            cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+            cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+            cam.set(cv2.CAP_PROP_FPS, 10)
+            # cam.set(cv2.CAP_PROP_EXPOSURE, 19)
+            # cam.set(cv2.CAP_PROP_BRIGHTNESS, 10)
 
             for i in range(3):  # Dummy captures to clear the buffer
                 cam.read()
