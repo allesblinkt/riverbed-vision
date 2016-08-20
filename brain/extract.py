@@ -345,7 +345,10 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     markers_img[unknown_img == 255] = 0      # mark the region of unknown with zero
 
     segmented_img = markers_img.copy()
-    cv2.watershed(half_img, segmented_img)
+
+    #watershed_img = cv2.cvtColor(thresh_img, cv2.COLOR_GRAY2RGB)
+    watershed_img = half_img
+    cv2.watershed(watershed_img, segmented_img)
     segmented_img[segmented_img == 1] = -1
 
     # Find individual stones and draw them
@@ -357,6 +360,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     for id, contour in enumerate(stones_contours):
         contour *= 2
         s = process_stone(frame_desc, id, contour, color_img, result_img, save_stones=save_stones)
+        
         if s:
             stones.append(s)
 
