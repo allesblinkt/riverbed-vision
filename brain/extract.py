@@ -33,6 +33,11 @@ def analyze_contour_cuts(contour, step=7):
     if c_len <= step:
         return None
 
+    try: # xrange is range in Python 3
+        xrange
+    except NameError:
+        xrange = range
+
     for i in xrange(c_len):
         p_a = contour[i][0]  # prev
         p_b = contour[(i + step) % c_len][0]  # this

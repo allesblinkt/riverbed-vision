@@ -81,7 +81,7 @@ class StoneMap(object):
         self.size = 3770, 1730
         self.stage = 0
 
-        print "Loading"
+        print("Loading")
 
         # self.idx = index.Index()
 
@@ -112,7 +112,7 @@ class StoneMap(object):
                     for i in range(len(sm)):
                         self.stones[i].color = sm[i]['color']
                         self.stones[i].structure = sm[i]['structure']
-        except Exception, e:
+        except Exception as e:
             log.warn('Something happened while loading')
             log.warn(e)
             self.save(meta=True)
@@ -245,8 +245,8 @@ class StoneMap(object):
             center = float((self.size[0] - h.center[0]) / scale), float(h.center[1] / scale)
             size = float(h.size / scale)
 
-            print size
-            print center
+            print(size)
+            print(center)
             svg_circle = dwg.circle(center=center, r=size, stroke='black', stroke_width=0.8, fill='none')
 
             dwg.add(svg_circle)
@@ -279,7 +279,7 @@ if __name__ == '__main__':
 
     if len(map.stones) == 0:
         # map.randomize()
-        print "No STONES!"
+        print("No STONES!")
 
     while True:
         img_map = np.zeros((map.size[1] / 2, map.size[0] / 2, 3), np.uint8)

@@ -80,7 +80,7 @@ if __name__ == '__main__':
             pngfiles.append(file)
 
     for fn in pngfiles:
-        print fn
+        print(fn)
         image = cv2.imread(os.path.join(p, fn), -1)
         (h, w) = image.shape[:2]
 
