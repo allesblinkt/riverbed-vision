@@ -319,13 +319,13 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     _, weight_thresh_img = cv2.threshold(weight_thresh_img, 128, 255, cv2.THRESH_BINARY)
 
     # Standard distance transform and watershed segmentation
-    dist_transform = cv2.distanceTransform(weight_thresh_img, cv2.cv.CV_DIST_L2, 5)
+    dist_transform = cv2.distanceTransform(weight_thresh_img, cv2.DIST_L2, 5)
     _, dist_thresh_img = cv2.threshold(dist_transform, 10, 255, cv2.THRESH_BINARY)   # Constant distance...
 
     markers_img = np.zeros((thresh_img.shape[0], thresh_img.shape[1]), dtype=np.int32)
 
     dist_thresh_img_u8 = np.uint8(dist_thresh_img)
-    kernel_contours, _ = cv2.findContours(dist_thresh_img_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    _, kernel_contours, _ = cv2.findContours(dist_thresh_img_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     for id in range(len(kernel_contours)):
         cv2.drawContours(markers_img, kernel_contours, id, id + 1, -1)
 
@@ -339,7 +339,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     segmented_img[segmented_img == 1] = -1
 
     # Find individual stones and draw them
-    stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
+    _, stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
 
     result_img = np.zeros_like(color_img)
 
