@@ -214,6 +214,45 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
 
     return ret
 
+
+def threshold_adaptive_with_saturation(image):
+    """ Expects an RGB image and thresholds based on saturation and value channels."""
+   
+    # image = cv2.resize(image, (image.shape[1]//4, image.shape[0]//4))
+
+    # Grayscale conversion, blurring, threshold
+    hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    h_img, s_img, v_img = cv2.split(hsv_img)
+       
+    gray_s_img = cv2.GaussianBlur(255-s_img, (15, 15), 0)
+    gray_v_img = cv2.GaussianBlur(v_img, (5, 5), 0)
+
+    thresh_v_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -30)
+    thresh_s_img = cv2.adaptiveThreshold(gray_s_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -15)
+
+    thresh_v_sure_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, 5)
+    thresh_v_sure_img[gray_v_img > 252] = 0    # prevent adaptive runaway
+
+    # Secondary static threshhold on saturation
+    thresh_s_img[gray_s_img > 240] = 0
+
+    # "AND" with relaxed thresshold of values
+    thresh_s_img[thresh_v_img < 128] = 0
+
+    # "OR" with tight thresshold of valus
+    thresh_s_img[thresh_v_sure_img > 128] = 255
+
+    thresh_img = thresh_s_img
+
+
+
+    # thresh_img = cv2.resize(thresh_img, (thresh_img.shape[1]*4, thresh_img.shape[0]*4), interpolation=cv2.INTER_CUBIC)
+    thresh_img = cv2.GaussianBlur(thresh_img, (9, 9), 0)   
+    _, thresh_img = cv2.threshold(thresh_img, 128, 255, cv2.THRESH_BINARY)
+
+    return thresh_img
+
+
 def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
     log.debug('Start processing image: %s', frame_desc)
@@ -222,24 +261,9 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     half_img = cv2.resize(color_img, (color_img.shape[1]//2, color_img.shape[0]//2))
 
     # subtract blank vignette
-    color_img = cv2.subtract(blank, color_img)
-    color_img = 255 - color_img
-
-    half_img = cv2.resize(color_img, (color_img.shape[1]/2, color_img.shape[0]/2))
-
-    # Grayscale conversion, blurring, threshold
-    hls = cv2.cvtColor(half_img, cv2.COLOR_BGR2HLS)
-    h, l, s = cv2.split(hls)
-    gray_img = l
-
-    gray_img = cv2.GaussianBlur(gray_img, (5, 5), 0)
-
-    thresh_img = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -18)
-    thresh_img[gray_img > 240] = 0
-    # _, thresh_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    # _, thresh_img = cv2.threshold(gray_img, 235, 255, cv2.THRESH_BINARY_INV)
-
     half_img = 255 - cv2.subtract(blank_half_img, half_img)
+    thresh_img = threshold_adaptive_with_saturation(half_img)
+    
     # Cleaning
     kernel = np.ones((3, 3), np.uint8)
     opening_img = cv2.morphologyEx(thresh_img, cv2.MORPH_OPEN, kernel, iterations=2)
