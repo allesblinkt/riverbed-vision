@@ -274,7 +274,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
     sure_bg_img = cv2.dilate(opening_img, kernel, iterations=3)
 
     # Contouring
-    contours, _ = cv2.findContours(thresh_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    _, contours, _ = cv2.findContours(thresh_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     # Curvature analysis of the external contours
     curvature_img = np.zeros_like(gray_img, dtype=np.float)
