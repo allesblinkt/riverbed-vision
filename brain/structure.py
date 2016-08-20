@@ -52,20 +52,20 @@ if __name__ == '__main__':
     first_hist = lbp_histogram(first_img)
 
     for fn in pngfiles:
-        print(fn)
+        log.info('Loading %s', fn)
         image = cv2.imread(os.path.join(p, fn), -1)
         (h, w) = image.shape[:2]
 
         t = time.time()
         hist = lbp_histogram(image)
-        print('Time for lbp_histogram: %.3f' % (time.time() - t))
+        log.info('Time for lbp_histogram: %.3f', (time.time() - t))
 
         t = time.time()
         for i in range(1000):
             score = compare_histograms(first_hist, hist)
-        print('Time for compare_histograms: %.3f' % (time.time() - t))
+        log.info('Time for compare_histograms: %.3f', (time.time() - t))
 
-        print('Score %0.3f' % (score, ))
+        log.info('Score %0.3f',  (score, ))
         cv2.imshow('first', first_img)
         cv2.imshow('second', image)
 

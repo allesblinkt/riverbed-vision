@@ -280,5 +280,5 @@ if __name__ == '__main__':
     daemon = Pyro4.Daemon(host=host, port=PORT)
     control = MachineController(DEVICE)
     uri = daemon.register(control, 'control')
-    print 'Running at', uri
+    log.info('Running at %s', uri)
     daemon.requestLoop()

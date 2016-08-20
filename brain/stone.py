@@ -81,7 +81,7 @@ class StoneMap(object):
         self.size = 3770, 1730
         self.stage = 0
 
-        print("Loading")
+        log.info('Loading map')
 
         # self.idx = index.Index()
 
@@ -245,8 +245,7 @@ class StoneMap(object):
             center = float((self.size[0] - h.center[0]) / scale), float(h.center[1] / scale)
             size = float(h.size / scale)
 
-            print(size)
-            print(center)
+            # log.debug('Hole. Center: %s   Size: %f', center, size)
             svg_circle = dwg.circle(center=center, r=size, stroke='black', stroke_width=0.8, fill='none')
 
             dwg.add(svg_circle)
