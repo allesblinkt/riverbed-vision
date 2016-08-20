@@ -267,7 +267,7 @@ def threshold_adaptive_with_saturation(image):
     return thresh_img
 
 
-def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
+def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, debug_wait=False):
 
     log.debug('Start processing image: %s', frame_desc)
     start_time = time.time()
@@ -376,7 +376,12 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
         cv2.imshow('curvature weighting threshold', weight_thresh_img)
         cv2.imshow('markers', markers_img * 256)
         cv2.imshow('stones', result_img)
-        key = cv2.waitKey()
+        
+        if debug_wait:
+            key = cv2.waitKey()
+        else:
+            key = cv2.waitKey(1)
+
         if key == ord('q'):
             sys.exit(1)
 
@@ -403,7 +408,8 @@ def main():
         full_fn = os.path.join(p, fn)
         log.info('Processing %s', full_fn)
         frame = cv2.imread(full_fn)
-        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True)
+        stones, result_img, thresh_img, weight_img = 
+            process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=False)
 
 
 
