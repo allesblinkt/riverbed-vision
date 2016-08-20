@@ -301,16 +301,16 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False):
 
             rad = 60.0
 
-            x = max(0, cut_point[0] - rad)
-            y = max(0, cut_point[1] - rad)
+            x1 = int(round(max(0, cut_point[0] - rad)))
+            y1 = int(round(max(0, cut_point[1] - rad)))
 
-            x2 = min(thresh_img.shape[1], cut_point[0] + rad)
-            y2 = min(thresh_img.shape[0], cut_point[1] + rad)
+            x2 = int(round(min(thresh_img.shape[1], cut_point[0] + rad)))
+            y2 = int(round(min(thresh_img.shape[0], cut_point[1] + rad)))
 
-            falloff_part = falloff_gradient(x, x2, y, y2, cut_point, cut_normal, rad)
+            falloff_part = falloff_gradient(x1, x2, y1, y2, cut_point, cut_normal, rad)
 
             try:
-                weight_img[y:y2, x:x2] *= falloff_part
+                weight_img[y1:y2, x1:x2] *= falloff_part
             except:
                 pass
 
