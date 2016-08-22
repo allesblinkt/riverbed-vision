@@ -11,8 +11,10 @@ from stone import Stone
 from log import makelog
 log = makelog(__name__)
 
+p_scalef = 4
+
 blank_img = cv2.imread('blank.png')
-blank_half_img = cv2.resize(blank_img, (blank_img.shape[1]//2, blank_img.shape[0]//2))
+blank_small_img = cv2.resize(blank_img, (blank_img.shape[1]//p_scalef, blank_img.shape[0]//p_scalef))
 
 
 def analyze_contour_cuts(contour, step=7):
@@ -212,21 +214,20 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
 
     if result_img is not None:
         rgb_color = lab_to_rgb(dominant_color)
-        # dummy = np.array([np.array([color])])
-        # rgb_color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
+
         cv2.drawContours(result_img, [contour], 0, rgb_color, -1)
         cv2.circle(result_img, fit_center, 4, (128, 0, 0))
         cv2.rectangle(result_img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0))
 
         cv2.ellipse(result_img, fit_center, fit_dim, fit_angle, 0, 360, (0, 0, 255))
 
-    ret = Stone(fit_center, fit_dim, fit_angle, dominant_color, structure)
+    stone_data = Stone(fit_center, fit_dim, fit_angle, dominant_color, structure)
 
     if save_stones:
         cv2.imwrite('stones/stone_{}_{:03d}.{}'.format(frame_desc, id, save_stones), cropped)
-        ret.save('stones/stone_{}_{:03d}.data'.format(frame_desc, id))
+        stone_data.save('stones/stone_{}_{:03d}.data'.format(frame_desc, id))
 
-    return ret
+    return stone_data
 
 
 def threshold_adaptive_with_saturation(image):
@@ -253,7 +254,7 @@ def threshold_adaptive_with_saturation(image):
     # "AND" with relaxed thresshold of values
     thresh_s_img[thresh_v_img < 128] = 0
 
-    # "OR" with tight thresshold of valus
+    # "OR" with tight thresshold of values
     thresh_s_img[thresh_v_sure_img > 128] = 255
 
     thresh_img = thresh_s_img
@@ -272,11 +273,11 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     log.debug('Start processing image: %s', frame_desc)
     start_time = time.time()
     
-    half_img = cv2.resize(color_img, (color_img.shape[1]//2, color_img.shape[0]//2))
+    small_img = cv2.resize(color_img, (color_img.shape[1]//p_scalef, color_img.shape[0]//p_scalef))
 
     # subtract blank vignette
-    half_img = 255 - cv2.subtract(blank_half_img, half_img)
-    thresh_img = threshold_adaptive_with_saturation(half_img)
+    small_img = 255 - cv2.subtract(blank_small_img, small_img)
+    thresh_img = threshold_adaptive_with_saturation(small_img)
     
     # Cleaning
     kernel = np.ones((3, 3), np.uint8)
@@ -347,7 +348,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     segmented_img = markers_img.copy()
 
     #watershed_img = cv2.cvtColor(thresh_img, cv2.COLOR_GRAY2RGB)
-    watershed_img = half_img
+    watershed_img = small_img
     cv2.watershed(watershed_img, segmented_img)
     segmented_img[segmented_img == 1] = -1
 
@@ -390,7 +391,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
 
 def main():
     global blank_img
-    global blank_half_img
+    global blank_small_img
 
     import os
     import fnmatch
@@ -408,8 +409,7 @@ def main():
         full_fn = os.path.join(p, fn)
         log.info('Processing %s', full_fn)
         frame = cv2.imread(full_fn)
-        stones, result_img, thresh_img, weight_img = 
-            process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=False)
+        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=False)
 
 
 
