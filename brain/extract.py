@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import time
 import sys
+from multiprocessing import Pool
 
 from coloranalysis import find_dominant_color, lab_to_rgb
 from structure import lbp_histogram
@@ -352,18 +353,26 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     cv2.watershed(watershed_img, segmented_img)
     segmented_img[segmented_img == 1] = -1
 
-    # Find individual stones and draw them
-    _, stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
-
     result_img = np.zeros_like(color_img)
 
-    stones = []
+    # Find individual stones and analyze them
+    _, stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
+
+    pool = Pool(8)    # TODO: make the number of processes configurable
+
+    contours_and_args = []
     for id, contour in enumerate(stones_contours):
-        contour *= 2
-        s = process_stone(frame_desc, id, contour, color_img, result_img, save_stones=save_stones)
-        
-        if s:
-            stones.append(s)
+        contour *= p_scalef   # enlarge to compensate for smaller processed image
+        # contours_and_args.append([frame_desc, id, contour, color_img, result_img, save_stones])
+        contours_and_args.append([frame_desc, id, contour, color_img, None, save_stones])
+
+    stones = pool.starmap(process_stone, contours_and_args)
+
+    pool.close()
+
+    # Keep stones with a result
+    stones = [stone for stone in stones if stone is not None]
+
 
     elapsed_time = time.time() - start_time
 
