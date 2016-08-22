@@ -278,7 +278,7 @@ if __name__ == '__main__':
 
     if len(map.stones) == 0:
         # map.randomize()
-        print("No STONES!")
+        log.warn('No STONES!')
 
     while True:
         img_map = np.zeros((map.size[1] / 2, map.size[0] / 2, 3), np.uint8)

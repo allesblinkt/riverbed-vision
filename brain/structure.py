@@ -6,6 +6,8 @@ import numpy as np
 from skimage.feature import local_binary_pattern
 from scipy.stats import itemfreq
 
+from log import makelog
+log = makelog(__name__)
 
 def lbp_histogram(img, radius=5):
     """ Computes the LBP Histogram for a given images luminance channel and returns it """
