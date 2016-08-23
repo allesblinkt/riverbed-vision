@@ -43,3 +43,68 @@ def inkey():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
+
+class SpatialHashMap(object):
+    """SpatialHashMap"""
+
+    def __init__(self, cell_size=10):
+        super(SpatialHashMap, self).__init__()
+
+        self.cell_size = cell_size
+        self.contents = {}
+
+    def _hash(self, pointtuple):
+        return int(pointtuple[0] / self.cell_size), int(pointtuple[1] / self.cell_size)
+
+    def update_object_at_point(self, old_point, new_point, obj):
+        objects = self.contents.setdefault(self._hash((old_point.x, old_point.y)), [])
+
+        if obj in objects:
+            objects.remove(obj)
+
+        self.insert_object_at_point(new_point, obj)
+
+    def insert_object_at_point(self, point, obj):
+        """Insert an object at a certain point into the map. Allows double insertion."""
+        hash = self._hash(point)
+
+        if hash not in self.contents:
+            self.contents[hash] = []
+
+        if obj not in self.contents[hash]:  # TODO: consider set...
+            self.contents[hash].append(obj)
+
+    def remove(self, obj):
+        """Remove an object obj from the hash. This happens by a linear search, so it's not very performant."""
+
+        for hash, objects in self.contents.items():
+            if obj in objects:
+                objects.remove(obj)
+
+            if len(objects) == 0:
+                del self.contents[hash]
+
+    def get_at(self, point):
+        """Retrieve objects that at a certain point in the hash"""
+        hash = self._hash((point.x, point.y))
+
+        if hash in self.contents:
+            return self.contents[hash].copy()
+        else:
+            return []
+
+    def get_at_with_border(self, point, border_size):
+        """Retrieve objects at a certain range defined by border_size around a point in the map."""
+        retlist = []
+
+        min = self._hash((point.x - border_size, point.y - border_size))
+        max = self._hash((point.x + border_size, point.y + border_size))
+
+        for i in range(min[0], max[0] + 1):
+            for j in range(min[1], max[1] + 1):
+                hash = (i, j)
+
+                if hash in self.contents:
+                    retlist.append(self.contents[hash])
+
+        return retlist
