@@ -2,7 +2,7 @@
 
 import pickle as serialization
 # import serpent as serialization
-from random import uniform, random
+from random import uniform
 
 import cv2
 import numpy as np
@@ -52,13 +52,16 @@ class Stone(object):
         dc = distance(self.center, stone.center)
         ds = distance(self.size, stone.size)
         da = abs(self.angle - stone.angle)
-        if dc > 20:
+
+        threshold = 20.0
+
+        if dc > threshold:
             return 0.0
-        if ds > 20:
+        if ds > threshold:
             return 0.0
-        if da > 20:
+        if da > threshold:
             return 0.0
-        return 1.0 - max([dc / 20.0, ds / 20.0, da / 20.0])
+        return 1.0 - max([dc / threshold, ds / threshold, da / threshold])
 
     def save(self, filename):
         with open(filename, 'wb') as f:
@@ -87,11 +90,12 @@ class StoneMap(object):
 
         try:
             meta = False
+
             with open('map/{}.data'.format(self.name), 'rb') as f:
                 d = serialization.load(f)
                 self.size = d['size']
 
-                if not isinstance(d['stage'], (int, long, float, complex)):
+                if not isinstance(d['stage'], (int, float, complex)):
                     self.stage = d['stage']
                 else:
                     self.stage = None
@@ -133,7 +137,8 @@ class StoneMap(object):
                 self.maxstonesize = s.size[0]
         self.maxstonesize *= 2.0
 
-        self.maxstonesize = 26.0 * 2.0  # Manual, so we can resume with different scan
+        # Manual, so we can resume with different scan
+        self.maxstonesize = 26.0 * 2.0
 
     # Can we put a stone, compare against the given list of stones
     def can_put_list(self, stone, stones):
