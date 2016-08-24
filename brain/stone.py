@@ -9,7 +9,7 @@ import numpy as np
 import time
 import shutil
 
-from utils import distance
+from utils import distance, SpatialHashMap
 from art import art_step
 
 from log import makelog
@@ -120,6 +120,11 @@ class StoneMap(object):
             log.warn('Something happened while loading')
             log.warn(e)
             self.save(meta=True)
+        # Update spatialhashmap
+        self.spatialmap = SpatialHashMap(cell_size=20)  # TODOL cell size to settings
+
+        for stone in self.stones:
+            self.spatialmap.insert_object_at_point(point=stone.center, obj=stone)
 
         log.debug('Loaded %d stones', len(self.stones))
         self._metadata()
@@ -140,8 +145,9 @@ class StoneMap(object):
         # Manual, so we can resume with different scan
         self.maxstonesize = 26.0 * 2.0
 
-    # Can we put a stone, compare against the given list of stones
-    def can_put_list(self, stone, stones):
+    def is_inside(self, stone):
+        """Check if a stone center is within the bounds of the map."""
+
         if stone.center[0] - stone.size[0] <= 0:
             return False
         if stone.center[1] - stone.size[0] <= 0:
@@ -151,21 +157,39 @@ class StoneMap(object):
         if stone.center[1] + stone.size[0] >= self.size[1]:
             return False
 
+        return True
+
+    def can_put(self, stone):
+        """Checks if we can put the stone to a new position."""
+        border_size = (max(stone.size) + self.maxstonesize) * 2.0  # FIXME: Check *2 or not. Not sure
+        candidates = self.spatialmap.get_at_with_border(stone.center, border_size)
+
+        return self.can_put_list(stone, candidates)
+
+    def can_put_list(self, stone, stones):
+        """Check if we can put a stone. Warning: Slow. Simply compares against the whole list of given stones."""
+        if not self.is_inside(stone):
+            return False
+
         # sr = 50
         for s in stones:
             if stone.overlaps(s):
                 return False
         return True
 
-    def can_put(self, stone):
-        """ Can we put stone to position center? """
-        return self.can_put_list(stone, self.stones)
+    def move_stone(self, stone, new_center, angle=None):
+        self.spatialmap.update_object_at_point(stone.center, new_center, stone)
+
+        stone.center = new_center
+
+        if angle is not None:
+            stone.angle = angle
 
     def randomize(self, count=2000):
         """ Populate the map with random stones """
 
         log.debug('Generating random map of %d stones', count)
-        self.stones = []
+        self.stones = []   # TODO: update map
         failures = 0
         while count > 0 and failures < 100:
             center = (uniform(30, self.size[0] - 1000 - 30), uniform(30, self.size[1] - 30))
@@ -317,8 +341,8 @@ if __name__ == '__main__':
 
             if nc is not None and na is not None and not do_fail:
                 log.debug('Placing stone {} from {} to {}'.format(i, stone.center, nc))
-                stone.center = nc
-                stone.angle = na
+
+                map.move_stone(stone, nc, na)
 
             map.stage = stage
         elif i is not None:
