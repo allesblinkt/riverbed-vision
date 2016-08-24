@@ -16,16 +16,18 @@ min_l, max_l = None, None    # Cache luma calculations
 
 def find_flower_pos(map, stone, center):
     radius, angle = 0.0, 0
-    stone2 = stone.copy()
+    stone_dummy = stone.copy()
 
-    workarea_sel = [s for s in map.stones if in_workarea(s)]
+    # workarea_sel = [s for s in map.stones if in_workarea(s)]
 
     while True:
-        x, y = center[0] + math.cos(math.radians(angle)) * radius, center[1] + math.sin(math.radians(angle)) * radius
-        stone2.center = x, y
-        stone2.angle = angle % 180
-        if in_workarea(stone2) and map.can_put_list(stone2, workarea_sel):
-            return (x, y), angle % 180
+        new_center = center[0] + math.cos(math.radians(angle)) * radius, center[1] + math.sin(math.radians(angle)) * radius
+        stone_dummy.center = new_center
+        stone_dummy.angle = angle % 180
+
+        if in_workarea(stone_dummy) and map.can_put(stone_dummy):
+            return new_center, angle % 180
+
         angle += (137.50776405 / 5.0)
         if angle > 360:
             angle -= 360
