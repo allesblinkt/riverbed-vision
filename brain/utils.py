@@ -57,7 +57,8 @@ class SpatialHashMap(object):
         return int(pointtuple[0] / self.cell_size), int(pointtuple[1] / self.cell_size)
 
     def update_object_at_point(self, old_point, new_point, obj):
-        objects = self.contents.setdefault(self._hash((old_point.x, old_point.y)), [])
+        hash = self._hash(old_point)
+        objects = self.contents.get(hash) if hash in self.contents else []
 
         if obj in objects:
             objects.remove(obj)
@@ -86,7 +87,7 @@ class SpatialHashMap(object):
 
     def get_at(self, point):
         """Retrieve objects that at a certain point in the hash"""
-        hash = self._hash((point.x, point.y))
+        hash = self._hash(point)
 
         if hash in self.contents:
             return self.contents[hash].copy()
@@ -97,14 +98,14 @@ class SpatialHashMap(object):
         """Retrieve objects at a certain range defined by border_size around a point in the map."""
         retlist = []
 
-        min = self._hash((point.x - border_size, point.y - border_size))
-        max = self._hash((point.x + border_size, point.y + border_size))
+        min_v = self._hash((point[0] - border_size, point[1] - border_size))
+        max_v = self._hash((point[0] + border_size, point[1] + border_size))
 
-        for i in range(min[0], max[0] + 1):
-            for j in range(min[1], max[1] + 1):
+        for i in range(min_v[0], max_v[0] + 1):
+            for j in range(min_v[1], max_v[1] + 1):
                 hash = (i, j)
 
                 if hash in self.contents:
-                    retlist.append(self.contents[hash])
+                    retlist.extend(self.contents[hash])
 
         return retlist
