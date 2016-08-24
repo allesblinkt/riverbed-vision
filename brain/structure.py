@@ -36,6 +36,20 @@ def compare_histograms(a, b):
     return score
 
 
+def plot_hist(hist):
+    graph_w = 300
+    graph_h = 200
+    graph_img = np.zeros((graph_h, graph_w,3), np.uint8)
+
+    num_bins = len(hist)
+    for i in range(1, num_bins-2, 1):
+        x = int(i / num_bins * graph_w)
+        bh = int(graph_h * hist[i] * 10.0)
+        bw = int(graph_w / num_bins)
+        cv2.rectangle(graph_img, (x, graph_h-bh), (x+bw, graph_h), [255, 0, 0], cv2.FILLED)
+
+    return graph_img
+
 if __name__ == '__main__':
     import os
     import fnmatch
@@ -50,7 +64,11 @@ if __name__ == '__main__':
         if fnmatch.fnmatch(file, '*.png'):
             pngfiles.append(file)
 
-    first_img = cv2.imread(os.path.join(p, pngfiles[0]), -1)
+    pngfiles = ["a.png", "b.png", "a.png", "b.png", "a.png", "b.png", "a.png", "b.png", "a.png", "b.png", "a.png", "b.png", "a.png", "b.png", "a.png", "b.png"]
+
+    first_path = os.path.join(p, pngfiles[0])
+    first_img = cv2.imread(first_path, -1)
+
     first_hist = lbp_histogram(first_img)
 
     for fn in pngfiles:
@@ -59,17 +77,33 @@ if __name__ == '__main__':
         (h, w) = image.shape[:2]
 
         t = time.time()
-        hist = lbp_histogram(image)
-        log.info('Time for lbp_histogram: %.3f', (time.time() - t))
+        hist_a = lbp_histogram(image, radius=3)
+        hist_b = lbp_histogram(image, radius=12)
+        #print(hist)
+        log.info('Time for lbp_histogram: %.3fs', (time.time() - t))
 
-        t = time.time()
-        for i in range(1000):
-            score = compare_histograms(first_hist, hist)
-        log.info('Time for compare_histograms: %.3f', (time.time() - t))
+        # t = time.time()
+        # for i in range(1000):
+        #     score = compare_histograms(first_hist, hist)
+        # print(score)
+        # log.info('Time for compare_histograms: %.3fs', (time.time() - t))
 
-        log.info('Score %0.3f',  (score, ))
+        # import matplotlib.pyplot as plt
+        # plt.plot(hist)
+        # plt.ylabel('some numbers')
+        # plt.show()
+
+        graph_a_img = plot_hist(hist_a)
+        graph_b_img = plot_hist(hist_b)
+
+
+
+
+        # log.info('Score %0.3f',  (score, ))
         cv2.imshow('first', first_img)
         cv2.imshow('second', image)
+        cv2.imshow('histogram_a', graph_a_img)
+        cv2.imshow('histogram_b', graph_b_img)
 
         if cv2.waitKey(0) == 27:
             sys.exit(-1)
