@@ -33,13 +33,14 @@ class Stone(object):
     def copy(self):
         return Stone(self.center, self.size, self.angle, self.color, self.structure, self.flag)
 
-    def overlaps(self, stone):
+    def overlaps(self, other):
         """ Checks whether stone overlaps with another stone """
-        dx = self.center[0] - stone.center[0]
-        dy = self.center[1] - stone.center[1]
+        dx = self.center[0] - other.center[0]
+        dy = self.center[1] - other.center[1]
         dsq = dx * dx + dy * dy
-        rs = (self.size[0] + stone.size[0] + 2)
-        # d = distance(self.center, stone.center)
+        rs = (self.size[0] + other.size[0] + 2)
+        # d = distance(self.center, other.center)
+        # TODO: double check all this...
         return dsq < rs * rs  # add 2 mm
 
     def coincides(self, stone):
@@ -100,7 +101,7 @@ class StoneMap(object):
                 else:
                     self.stage = None
 
-                if 'stones' in d:
+                if 'stones' in d:   # TODO: remove old format at some point?
                     log.debug('Loading stones from OLD format')
                     self.stones = d['stones']
                 else:
