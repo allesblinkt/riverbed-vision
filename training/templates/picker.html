@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<script>
+	$(document).ready(function(argument) {
+		$.ajax({
+			url: '/stones/random'
+		}).done(function(res){
+			console.log(res);
+
+			var template = $('#stone-template').html();
+			Mustache.parse(template);
+
+
+			for (var i = 0; i < res.stones.length; i++) {
+				var stone = res.stones[i];
+
+				console.log(stone);
+				var html = Mustache.render(template, {img_src: stone.img_src, identifier: stone.identifier});
+
+				$(html).appendTo('#stone_chooser');
+			}
+		});
+	});
+
+</script>
+<h1>Guten Tag</h1>
+
+{% raw %}
+<script id="stone-template" type="x-tmpl-mustache">
+<li>
+		<img src="{{img_src}}" /><span>{{identifier}}</span>
+</li>
+
+</script>
+{% endraw %}
+
+<ul id="stone_chooser">
+</ul>
+{% endblock %}

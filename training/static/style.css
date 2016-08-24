@@ -1,0 +1,41 @@
+body {
+	/*background-color: #d0f;*/
+}
+
+
+ul#stone_chooser li {
+  float: left;
+  position: relative;
+  overflow:hidden;
+  width: 150px;
+  height: 150px;
+  margin: 10px;
+
+  font-size: 9px;
+}
+
+ul#stone_chooser li img {
+    position: absolute;
+    top: -9999px;
+    bottom: -9999px;
+    left: -9999px;
+    right: -9999px;
+    margin: auto;
+
+  	-webkit-filter: contrast(1.0) saturate(150%);
+ }
+
+
+ul#stone_chooser li img:hover {
+  	-webkit-filter: contrast(3.0) saturate(10%);;
+
+}
+
+
+ul#stone_chooser li span {
+	position: absolute;
+	left: 5px;
+	bottom: 5px;
+
+	z-index: 9;
+}
