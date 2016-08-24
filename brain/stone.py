@@ -110,7 +110,9 @@ class StoneMap(object):
                     meta = True
             if meta:
                 with open('map/{}.data2'.format(self.name), 'rb') as f:
-                    d = serialization.load(f)
+                    # TODO: latin1 is just here because otherwise Py3 pickle cannot read stuff from Py2 pickle
+                    # which contains numpy structures
+                    d = serialization.load(f, encoding='latin1')
                     log.debug('Loading stones from NEW format #2')
                     sm = d['stones2']
                     assert len(self.stones) == len(sm)
