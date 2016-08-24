@@ -432,10 +432,11 @@ class Brain(object):
                     self.map.move_stone(s, center=nc, angle=na)
                     # s.center = nc
                     # s.angle = na
+
                     self.map.stage = stage  # Commit stage
                     log.info('Placement worked')
                 else:  # Fail, flag
-                    if saving_thread.is_alive(): saving_thread.join() # wait until save is completed if still being done
+                    if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
                     s.flag = True
                     log.info('Placement failed')
 
@@ -443,16 +444,16 @@ class Brain(object):
                 saving_thread.start() # async call of self.save_map
 
             elif force:  # Art wants us to advance anyhow
-                if saving_thread.is_alive(): saving_thread.join() # wait until save is completed if still being done
+                if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
                 self.map.stage = stage  # Commit stage
 
                 saving_thread = threading.Thread(target=save_map, args=(self.map, ))
                 saving_thread.start() # async call of self.save_map
             else:
-                if saving_thread.is_alive(): saving_thread.join() # wait until save is completed if still being done
+                if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
                 time.sleep(1)
 
-        if saving_thread.is_alive(): saving_thread.join() # wait until save is completed if still being done
+        if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
 
 if __name__ == '__main__':
     brain = Brain(use_machine=True)
