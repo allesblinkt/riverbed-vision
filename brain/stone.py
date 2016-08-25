@@ -237,7 +237,7 @@ class StoneMap(object):
             size = int(h.size / scale)
             cv2.circle(img, center, size, (255, 255, 255))
 
-    def image_svg(self, svg, scale, stonescale=1.0):
+    def image_svg(self, svg, scale, stone_scale=1.0, metadata_scale=1.0, crosshair_scale=1.0, hole_scale=1.0):
         """Draw the map to an svg image."""
 
         import svgwrite
@@ -248,39 +248,60 @@ class StoneMap(object):
         dwg.add(dwg.line((0, 0), (10, 0), stroke=svgwrite.rgb(10, 10, 16, '%')))
         dwg.add(dwg.text('Test', insert=(0, 0.2), fill='red'))
 
-        for s in self.stones:
+        stones = self.stones
+        holes = self.holes
+
+        for s in stones:
             center, size, angle = s.center, s.size, s.angle
             center = float((self.size[0] - center[0]) / scale), float(center[1] / scale)
-            size = float(size[0] / scale) * stonescale, float(size[1] / scale) * stonescale
+            size = float(size[0] / scale) * stone_scale, float(size[1] / scale) * stone_scale
             dummy = np.array([np.array([s.color], dtype=np.uint8)])
             color = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
             svgcolor = svgwrite.rgb(color[2], color[1], color[0], 'RGB')
-            # structure = s.structure
-            # cv2.ellipse(img, center, size, 360 - angle, 0, 360, color, -1)
-            svg_ellip = dwg.ellipse(center=center, r=size, fill=svgcolor)
-            svg_ellip.rotate(360 - angle, center=center)
-            dwg.add(svg_ellip)
+            structure = s.structure
 
-            cl = 2.0
+            if stone_scale > 0.0:
+                svg_ellip = dwg.ellipse(center=center, r=size, fill=svgcolor)
+                svg_ellip.rotate(360 - angle, center=center)
+                dwg.add(svg_ellip)
 
-            svg_line1 = dwg.line(start=(center[0] + cl, center[1]), end=(center[0] - cl, center[1]), stroke='red')
-            svg_line1.rotate(360 - angle, center=center)
-            dwg.add(svg_line1)
-            svg_line2 = dwg.line(start=(center[0], center[1] + cl), end=(center[0], center[1] - cl), stroke='red')
-            svg_line2.rotate(360 - angle, center=center)
-            dwg.add(svg_line2)
+            if crosshair_scale > 0.0:
+                cl = 2.0 * crosshair_scale
+
+                svg_line1 = dwg.line(start=(center[0] + cl, center[1]), end=(center[0] - cl, center[1]), stroke='red')
+                svg_line1.rotate(360 - angle, center=center)
+                dwg.add(svg_line1)
+                svg_line2 = dwg.line(start=(center[0], center[1] + cl), end=(center[0], center[1] - cl), stroke='red')
+                svg_line2.rotate(360 - angle, center=center)
+                dwg.add(svg_line2)
+
+            if metadata_scale > 0.0:
+                bar_w = (0.25 / scale) * metadata_scale
+                bar_h = (20.0 / scale) * metadata_scale
+
+                hist = structure[1:-2]
+                num_bins = len(hist)
+
+                for i in range(num_bins):
+                    x = center[0] + i * bar_w
+                    h = bar_h * hist[i] * 10.0
+                    y = center[1] + (bar_h - h)
+
+                    svg_rect = dwg.rect(insert=(x, y), size=(bar_w, h), fill='blue')
+                    dwg.add(svg_rect)
 
             # if s.flag:
             #    cv2.circle(img, center, 3, (0, 69, 255))
 
-        for h in self.holes:
+        for h in holes:
             center = float((self.size[0] - h.center[0]) / scale), float(h.center[1] / scale)
-            size = float(h.size / scale)
+            size = float(h.size / scale) * hole_scale
 
-            # log.debug('Hole. Center: %s   Size: %f', center, size)
-            svg_circle = dwg.circle(center=center, r=size, stroke='black', stroke_width=0.8, fill='none')
+            if hole_scale > 0.0:
+                # log.debug('Hole. Center: %s   Size: %f', center, size)
+                svg_circle = dwg.circle(center=center, r=size, stroke='black', stroke_width=0.8, fill='none')
 
-            dwg.add(svg_circle)
+                dwg.add(svg_circle)
 
         # if self.workarea:
         #     a, b, c, d = self.workarea
@@ -328,9 +349,9 @@ if __name__ == '__main__':
             svg_fn = 'map_{}.svg'.format(ts, )
 
             log.debug('Saving svg to {}'.format(svg_fn))
-            dwg = svgwrite.Drawing(svg_fn)
-            map.image_svg(dwg, scale=2, stonescale=0.89)
-            dwg.save()
+            svg_drawing = svgwrite.Drawing(svg_fn)
+            map.image_svg(svg_drawing, scale=2, stone_scale=0.89)
+            svg_drawing.save()
 
         i, nc, na, stage, force = art_step(map)
 
