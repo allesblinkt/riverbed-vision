@@ -164,7 +164,7 @@ class StoneMap(object):
 
     def can_put(self, stone):
         """Checks if we can put the stone to a new position."""
-        border_size = (max(stone.size) + self.maxstonesize) * 2.0  # FIXME: Check *2 or not. Not sure
+        border_size = (max(stone.size) + self.maxstonesize)  # FIXME: Check *2 or not. Not sure
         candidates = self.spatialmap.get_at_with_border(stone.center, border_size)
 
         return self.can_put_list(stone, candidates)
