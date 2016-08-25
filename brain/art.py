@@ -14,18 +14,18 @@ flower_seeds = None
 min_l, max_l = None, None    # Cache luma calculations
 
 
-def find_flower_pos(map, stone, center):
+def find_flower_pos(stonemap, stone, center):
     radius, angle = 0.0, 0
     stone_dummy = stone.copy()
 
-    # workarea_sel = [s for s in map.stones if in_workarea(s)]
+    # workarea_sel = [s for s in stonemap.stones if in_workarea(s)]
 
     while True:
         new_center = center[0] + math.cos(math.radians(angle)) * radius, center[1] + math.sin(math.radians(angle)) * radius
         stone_dummy.center = new_center
         stone_dummy.angle = angle % 180
 
-        if in_workarea(stone_dummy) and map.can_put(stone_dummy):
+        if in_workarea(stone_dummy) and stonemap.can_put(stone_dummy):
             return new_center, angle % 180
 
         angle += (137.50776405 / 5.0)
@@ -59,10 +59,10 @@ def in_workarea(stone):
     return stone.center[0] > WORKAREA_START_X
 
 
-def art_step(map):
-    if map.stage is not None:
-        stage_mode, stage_step, stage1_y, stage1_last_index = map.stage
-        stage1_last = map.stones[stage1_last_index] if stage1_last_index is not None else None
+def art_step(stonemap):
+    if stonemap.stage is not None:
+        stage_mode, stage_step, stage1_y, stage1_last_index = stonemap.stage
+        stage1_last = stonemap.stones[stage1_last_index] if stage1_last_index is not None else None
     else:
         stage_mode = 0
         stage1_y = None
@@ -72,15 +72,15 @@ def art_step(map):
     # Color range
     global min_l, max_l
     if min_l is None:
-        min_l = min(map.stones, key=lambda x: x.color[0]).color[0]
+        min_l = min(stonemap.stones, key=lambda x: x.color[0]).color[0]
     if max_l is None:
-        max_l = max(map.stones, key=lambda x: x.color[0]).color[0]
+        max_l = max(stonemap.stones, key=lambda x: x.color[0]).color[0]
 
     global flower_seeds
 
     # Generate seeds
     if flower_seeds is None:
-        max_x, max_y = map.size[0], map.size[1]
+        max_x, max_y = stonemap.size[0], stonemap.size[1]
 
         flower_seeds = []
 
@@ -98,21 +98,21 @@ def art_step(map):
     index, new_center, new_angle = None, None, None
 
     # clean unusable holes
-    map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1)]
+    stonemap.holes = [h for h in stonemap.holes if not in_workarea(h) and h.center[0] + h.size <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1)]
 
     if stage_mode == 0:   # Clear area
-        sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step) ]
+        sel = [s for s in stonemap.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step) ]
         if sel:
             s = sel[0]
             index = s.index
 
             bucket = map_value(s.color[0], min_l, max_l, 0, len(flower_seeds) + 1)
             bucket = constrain(int(bucket), 0, len(flower_seeds) - 1)
-            new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
+            new_center, new_angle = find_flower_pos(stonemap, s, flower_seeds[bucket])
 
     elif stage_mode == 1:  # Fill line
-        untouched_sel = [s for s in map.stones if s.center[0] + s.size[0] <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1)]
-        workarea_sel = [s for s in map.stones if in_workarea(s)]
+        untouched_sel = [s for s in stonemap.stones if s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1)]
+        workarea_sel = [s for s in stonemap.stones if in_workarea(s)]
 
         max_fill = 2000
         rand_thresh = max(max_fill - len(workarea_sel), 0) / float(max_fill)
@@ -143,7 +143,7 @@ def art_step(map):
                 stage1_last = s
             index = s.index
             new_angle = 0
-            x = WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 0.5)
+            x = WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 0.5)
             new_center = x, stage1_y
             if stage1_y > 1650:
                 stage1_y = None

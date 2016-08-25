@@ -11,7 +11,7 @@ from art import art_step
 from extract import process_image
 
 from utils import random_on_circle
-from stone import StoneMap, Stone
+from stone import StoneMap
 
 from log import makelog
 log = makelog('brain')
@@ -193,7 +193,7 @@ class Brain(object):
         else:
             self.machine = None
 
-        self.map = StoneMap('stonemap')
+        self.stone_map = StoneMap('stonemap')
         # shortcuts for convenience
 
         if self.machine:
@@ -220,7 +220,7 @@ class Brain(object):
         self.c.block()
 
         stones = []
-        x, y = self.map.size
+        x, y = self.stone_map.size
         stepx = int(self.machine.cam.viewx / 2.0)
         stepy = int(self.machine.cam.viewy / 2.0)
         for i in range(int(startx), x + 1, stepx):
@@ -247,8 +247,8 @@ class Brain(object):
                     stones[j].rank -= s
             log.debug('End selecting/reducing stones')
             # copy selected stones to storage
-            self.map.stones = [s for s in stones if s.rank >= 1.5]
-            self.map.save()
+            self.stone_map.stones = [s for s in stones if s.rank >= 1.5]
+            self.stone_map.save()
 
     def scan_from_files(self, analyze=True):
         import re
@@ -332,12 +332,12 @@ class Brain(object):
 
             log.debug('End selecting/reducing stones')
             # copy selected stones to storage
-            self.map.stones = [s for s in chosen_stones]
-            self.map.stage = (0, 2, None, None)
+            self.stone_map.stones = [s for s in chosen_stones]
+            self.stone_map.stage = (0, 2, None, None)
 
-            log.debug('Reduced from {} to {} stones'.format(len(stones), len(self.map.stones)))
+            log.debug('Reduced from {} to {} stones'.format(len(stones), len(self.stone_map.stones)))
 
-            self.map.save(meta=True)
+            self.stone_map.save(meta=True)
 
     def demo1(self):
         # demo program which moves stone back and forth
@@ -395,7 +395,7 @@ class Brain(object):
         # Case 1
         nc1, nc2 = self._turn_stone_calc(c1, 0.0, c2, da)
 
-        max_y = self.map.size[1]
+        max_y = self.stone_map.size[1]
         if c1[1] >= 0 and c2[1] >= 0 and c1[1] <= max_y and c2[1] <= max_y:
             return self._move_stone_absolute(nc1, 0, nc2, da)
         else:   # Case 2
@@ -405,18 +405,18 @@ class Brain(object):
 
     def save_map(self):
         log.debug('Saving map...')
-        self.map.save()
+        self.stone_map.save()
         log.debug('Saving map. Done.')
 
     def performance(self):
-        saving_thread = threading.Thread(target=save_map, args=(self.map, ))
+        saving_thread = threading.Thread(target=save_map, args=(self.stone_map, ))
 
         while True:
             log.debug('Thinking...')
-            i, nc, na, stage, force = art_step(self.map)
+            i, nc, na, stage, force = art_step(self.stone_map)
 
             if i is not None:
-                s = self.map.stones[i]
+                s = self.stone_map.stones[i]
 
                 if nc is None:
                     nc = s.center
@@ -429,25 +429,25 @@ class Brain(object):
                 if self._move_stone(s.center, s.angle, nc, na):   # Pickup worked
                     if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
 
-                    self.map.move_stone(s, center=nc, angle=na)
+                    self.stone_map.move_stone(s, center=nc, angle=na)
                     # s.center = nc
                     # s.angle = na
 
-                    self.map.stage = stage  # Commit stage
+                    self.stone_map.stage = stage  # Commit stage
                     log.info('Placement worked')
                 else:  # Fail, flag
                     if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
                     s.flag = True
                     log.info('Placement failed')
 
-                saving_thread = threading.Thread(target=save_map, args=(self.map, ))
+                saving_thread = threading.Thread(target=save_map, args=(self.stone_map, ))
                 saving_thread.start() # async call of self.save_map
 
             elif force:  # Art wants us to advance anyhow
                 if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
-                self.map.stage = stage  # Commit stage
+                self.stone_map.stage = stage  # Commit stage
 
-                saving_thread = threading.Thread(target=save_map, args=(self.map, ))
+                saving_thread = threading.Thread(target=save_map, args=(self.stone_map, ))
                 saving_thread.start() # async call of self.save_map
             else:
                 if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
