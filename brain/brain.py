@@ -20,6 +20,7 @@ log = makelog('brain')
 CONTROL_HOSTNAME = '192.168.0.29'
 
 executor_save = ThreadPoolExecutor(max_workers=1)
+executor_step = ThreadPoolExecutor(max_workers=1)
 
 class Machine(object):
     """ High-level operations on CNC """
@@ -403,12 +404,19 @@ class Brain(object):
         self.stone_map.save()
         log.debug('Saving map. Done.')
 
+    def next_step(self):
+        log.debug('Getting next step...')
+        r = art_step(self.map)
+        log.debug('Getting next step. Done.')
+        return r
+
     def performance(self):
         future_save = executor_save.submit(self.save_map) # async call of save_map
+        future_step = executor_step.submit(self.next_step) # async call of next_step
 
         while True:
-            log.debug('Thinking...')
-            i, nc, na, stage, force = art_step(self.stone_map)
+            i, nc, na, stage, force = future_step.result()
+            future_step = executor_step.submit(self.next_step) # async call of next_step
 
             if i is not None:
                 s = self.stone_map.stones[i]
