@@ -7,20 +7,33 @@ import random
 app = Flask(__name__)
 api = Api(app)
 
-
-stones = {
-    'stone1': {'img_src': 'foo.jpg', 'task': 'build an API'},
-    'stone2': {'img_src': 'foo.jpg', 'task': '?????'},
-    'stone3': {'img_src': 'foo.jpg', 'task': 'profit!'},
-}
-
-
 stones = trainer.load_stones()
+stone_category_votes = {}
+categories = {}
 
 
-def abort_if_stone_doesnt_exist(todo_id):
+def abort_if_stone_doesnt_exist(stone_id):
     if stone_id not in stones:
         abort(404, message="Stone {} doesn't exist".format(stone_id))
+
+
+def abort_if_category_doesnt_exist(category_id):
+    if category_id not in categories:
+        abort(404, message="Category {} doesn't exist".format(category_id))
+
+
+def stone_to_dict(stone):
+    def rgbtriplet2hex(triplet):
+        return '#%02x%02x%02x' % (triplet[0], triplet[1], triplet[2])
+
+    return {
+        'identifier': stone.identifier,
+        'img_src': '/static/stones/' + stone.identifier + '.png',
+        'color': rgbtriplet2hex(stone.color.tolist()),
+        'structure': stone.structure.tolist(),
+    }
+
+
 
 parser = reqparse.RequestParser()
 parser.add_argument('task')
@@ -33,50 +46,9 @@ def page_picker(name=None):
     return render_template('picker.html', name='Yello')
 
 
-# Todo
-# shows a single todo item and lets you delete a todo item
-class ApiStone(Resource):
-    def get(self, stone_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        return stone[todo_id]
-
-    # def put(self, todo_id):
-    #     args = parser.parse_args()
-    #     task = {'task': args['task']}
-    #     TODOS[todo_id] = task
-    #     return task, 201
-
-
-# TodoList
-# shows a list of all todos, and lets you POST to add new tasks
-class ApiStoneList(Resource):
-    def get(self):
-        return stones
-
-    def post(self):
-        args = parser.parse_args()
-        stone_id = int(max(TODOS.keys()).lstrip('stone')) + 1
-        stone_id = 'stone%i' % stone_id
-        stones[stone_id] = {'task': args['task']}
-        return stones[stone_id], 201
-
-
-
-def stone_to_dict(stone):
-    def rgbtriplet2hex(triplet):
-        return '#%02x%02x%02x' % (triplet[0], triplet[1], triplet[2])
-
-
-    return {
-        'identifier': stone.identifier,
-        'img_src': '/static/stones/' + stone.identifier + '.png',
-        'color': rgbtriplet2hex(stone.color.tolist()),
-        'structure': stone.structure.tolist(),
-
-    }
 
 @app.route('/stones/random')
-def stones_random_list():
+def stones_list_random():
     count = 10
     l = stones.copy()
     random.shuffle(l)
@@ -85,8 +57,9 @@ def stones_random_list():
 
     return jsonify({'stones': r[:count]})
 
+
 @app.route('/stones/similar')
-def stones_similar_list():
+def stones_list_similar():
     count = 10
     l = stones.copy()
     random.shuffle(l)
@@ -98,14 +71,46 @@ def stones_similar_list():
     return jsonify({'stones': r[:count]})
 
 
+@app.route('/stones/<str:stone_id>/vote/<str:category_id>')
+def stone_vote_category(stone_id, category_id):
+    abort_if_stone_doesnt_exist(stone_id)
+    abort_if_category_doesnt_exist(category_id)
+
+    if stone_id not in stone_category_votes:
+        stone_category_votes[stone_id] = []
+
+    stone_category_votes.append(category_id)
+    categories[category_id].add(stone_id)
+
+    return jsonify({'counted': True})
 
 
-##
-## Actually setup the Api resource routing here
-##
-#api.add_resource(ApiStoneQuery, '/stones/similar')
-api.add_resource(ApiStoneList, '/stones')
-api.add_resource(ApiStone, '/stones/<todo_id>')
+@app.route('/stones/<str:stone_id>/unvote/<str:category_id>')
+def stone_unvote_category(stone_id, category_id):
+    abort_if_stone_doesnt_exist(stone_id)
+    abort_if_category_doesnt_exist(category_id)
+
+    if stone_id in stone_category_votes and category_id in stone_category_votes[stone_id]:
+        stone_category_votes[stone_id].remove(category_id)   # Removes one...
+
+        if category_id not in stone_category_votes[stone_id]:
+            categories[category_id]['stones_set'].remove(stone_id)
+
+    return jsonify({'uncounted': True})
+
+
+@app.route('/stones/<str:stone_id>/votes')
+def stone_votes_list(stone_id):
+    abort_if_stone_doesnt_exist(stone_id)
+
+    votes = []
+    if stone_id in stone_category_votes:
+        votes = stone_category_votes[stone_id]
+
+    return jsonify({'votes': votes})
+
+
+
 
 
 if __name__ == '__main__':
