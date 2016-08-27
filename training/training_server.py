@@ -35,16 +35,14 @@ def stone_to_dict(stone):
 
 
 
-parser = reqparse.RequestParser()
-parser.add_argument('task')
-
+# parser = reqparse.RequestParser()
+# parser.add_argument('task')
 
 
 @app.route('/picker/')
 #@app.route('/hello/<name>')
 def page_picker(name=None):
     return render_template('picker.html', name='Yello')
-
 
 
 @app.route('/stones/random')
@@ -108,9 +106,6 @@ def stone_votes_list(stone_id):
         votes = stone_category_votes[stone_id]
 
     return jsonify({'votes': votes})
-
-
-
 
 
 if __name__ == '__main__':
