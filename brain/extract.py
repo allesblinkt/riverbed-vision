@@ -242,18 +242,18 @@ def threshold_adaptive_with_saturation(image):
    # Grayscale conversion, blurring, threshold
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     h_img, s_img, v_img = cv2.split(hsv_img)
-       
-    gray_s_img = cv2.GaussianBlur(255-s_img, (15, 15), 0)
+
+    gray_s_img = cv2.GaussianBlur(255 - s_img, (15, 15), 0)
     gray_v_img = cv2.GaussianBlur(v_img, (5, 5), 0)
 
-    thresh_v_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -30)
+    thresh_v_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -35)
     thresh_s_img = cv2.adaptiveThreshold(gray_s_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -15)
 
-    thresh_v_sure_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, 5)
+    thresh_v_sure_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -5)
     thresh_v_sure_img[gray_v_img > 252] = 0    # prevent adaptive runaway
 
     # Secondary static threshhold on saturation
-    thresh_s_img[gray_s_img > 240] = 0
+    thresh_s_img[gray_s_img > 235] = 0
 
     # "AND" with relaxed thresshold of values
     thresh_s_img[thresh_v_img < 128] = 0
@@ -264,10 +264,9 @@ def threshold_adaptive_with_saturation(image):
     thresh_img = thresh_s_img
 
 
-
     # thresh_img = cv2.resize(thresh_img, (thresh_img.shape[1]*4, thresh_img.shape[0]*4), interpolation=cv2.INTER_CUBIC)
-    thresh_img = cv2.GaussianBlur(thresh_img, (9, 9), 0)   
-    _, thresh_img = cv2.threshold(thresh_img, 128, 255, cv2.THRESH_BINARY)
+    # thresh_img = cv2.GaussianBlur(thresh_img, (9, 9), 0)
+    # _, thresh_img = cv2.threshold(thresh_img, 128, 255, cv2.THRESH_BINARY)
 
     return thresh_img
 
