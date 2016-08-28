@@ -54,14 +54,19 @@ def centroid_histogram(labels):
     return hist
 
 
-def find_dominant_color(img):
-    """ Expects an image with or without alpha channel and returns the dominant color (BGR) """
-
+def find_dominant_colors(img):
+    """Expects an image with or without alpha channel and
+       returns the dominant colors (LAB) and their distribution (histogram)"""
     small_img = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
 
-    dominant, hist, centers, processed, labels = kmeans_quantization(small_img, n_clusters=5)
-    #return dominant, hist, centers, labels
-    return dominant
+    dominant, hist, centers, processed, labels = kmeans_quantization(small_img, n_clusters=4)
+
+    p = hist.argsort()[::-1][:-1]   # Sort and trim of background index (last)
+    hist_sorted = hist[p]
+    centers_sorted = centers[p]
+
+    # return dominant, hist, centers, labels
+    return centers_sorted, hist_sorted
 
 
 def compare_colors(a, b):
@@ -97,19 +102,23 @@ if __name__ == '__main__':
         (h, w) = image.shape[:2]
 
         t = time.time()
-        #dominant = find_dominant_color(image)
+        centers, hist = find_dominant_colors(image)
 
         small_img = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
-        dominant, hist, centers, processed, labels = kmeans_quantization(small_img, n_clusters=5)
+        # dominant, hist, centers, processed, labels = kmeans_quantization(small_img, n_clusters=5)
 
+        dominant = centers[0]
         rgb_dominant = lab_to_rgb(dominant)
+
+        print(len(centers))
+        print(len(hist))
 
         num_clusts = len(centers)
         for i in range(num_clusts):
             x = int(i / num_clusts * w)
             bh = int(h * hist[i] * 0.5)
 
-            cv2.rectangle(image, (x, h-bh), (x+20, h), lab_to_rgb(centers[i]), cv2.FILLED)
+            cv2.rectangle(image, (x, h - bh), (x + 20, h), lab_to_rgb(centers[i]), cv2.FILLED)
 
         cv2.circle(image, (w // 2, h // 2), w // 8, rgb_dominant, -1)
         log.info('Time taken: %.3f', (time.time() - t))
