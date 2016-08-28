@@ -27,4 +27,7 @@ stone_photo*
 brain/stones/**
 brain/map/**
 brain/map_offline/**
+brain/map_offline_old/**
+brain/map_images/**
 brain/logs/**
+training/static/stones/**
