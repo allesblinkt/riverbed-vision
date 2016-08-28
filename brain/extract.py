@@ -5,7 +5,7 @@ import time
 import sys
 from multiprocessing import Pool
 
-from coloranalysis import find_dominant_color, lab_to_rgb
+from coloranalysis import find_dominant_colors, lab_to_rgb
 from structure import lbp_histogram
 from stone import Stone
 
@@ -210,7 +210,8 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
     cropped = cv2.merge((b, g, r, a))
 
-    dominant_color = find_dominant_color(cropped)
+    colors_lab, colors_hist = find_dominant_colors(cropped)
+    dominant_color = colors_lab[0]
     structure = lbp_histogram(cropped)
 
     if result_img is not None:
