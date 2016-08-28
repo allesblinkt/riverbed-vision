@@ -235,7 +235,7 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
 
 def threshold_adaptive_with_saturation(image):
     """ Expects an RGB image and thresholds based on saturation and value channels."""
-   
+
     # image = cv2.resize(image, (image.shape[1]//4, image.shape[0]//4))
 
     # Grayscale conversion, blurring, threshold
@@ -272,29 +272,32 @@ def threshold_adaptive_with_saturation(image):
 
 
 def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, debug_wait=False):
-
     log.debug('Start processing image: %s', frame_desc)
     start_time = time.time()
-    
-    small_img = cv2.resize(color_img, (color_img.shape[1]//p_scalef, color_img.shape[0]//p_scalef))
+
+    small_img = cv2.resize(color_img, (color_img.shape[1] // p_scalef, color_img.shape[0] // p_scalef))
 
     # subtract blank vignette
     small_img = 255 - cv2.subtract(blank_small_img, small_img)
     thresh_img = threshold_adaptive_with_saturation(small_img)
-    
+
     # Cleaning
     kernel = np.ones((3, 3), np.uint8)
     opening_img = cv2.morphologyEx(thresh_img, cv2.MORPH_OPEN, kernel, iterations=2)
     sure_bg_img = cv2.dilate(opening_img, kernel, iterations=3)
 
+    # Blur thresholded image for curvature analysis
+    thresh_blur_img = cv2.GaussianBlur(thresh_img, (3, 3), 0)
+    _, thresh_blur_img = cv2.threshold(thresh_blur_img, 128, 255, cv2.THRESH_BINARY)
+
     # Contouring
-    _, contours, _ = cv2.findContours(thresh_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    _, contours, _ = cv2.findContours(thresh_blur_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     # Curvature analysis of the external contours
-    curvature_img = np.zeros_like(thresh_img, dtype=np.float)
+    # curvature_img = np.zeros_like(thresh_img, dtype=np.float)  # TODO: only assign on debug
 
     # Create and multiply the weighting image
-    weight_img = thresh_img.copy()
+    weight_img = thresh_blur_img.copy()
 
     # Draw the outer contours for the distance map
     for id in range(len(contours)):
