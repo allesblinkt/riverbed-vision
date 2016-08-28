@@ -80,7 +80,7 @@ def analyze_contour_cuts(contour, step=7):
     for point in concave_points:
         idx, pt, normal, angle = point
 
-        if idx - last_idx > 5:  # TODO: make threshold adjustable
+        if idx - last_idx > 10:  # TODO: make threshold adjustable
             cut_points = []
             cut_normals = []
             cut_angles = []
@@ -93,7 +93,7 @@ def analyze_contour_cuts(contour, step=7):
 
     new_cuts = []
     for cut_points, cut_normals, cut_angles in cuts:
-        if len(cut_points) < 2:
+        if len(cut_points) < 3:
             continue
 
         points = np.array(cut_points)
@@ -132,11 +132,12 @@ def falloff_gradient(x, x2, y, y2, pt, n, rad):   # max curvature influence     
 
     vecs = vecs / mags
 
-    dots = (vecs.dot(n) - 0.5) * 2.0  # TODO: adjust
+    dots = (vecs.dot(n) - 0.75) * 5.0  # TODO: adjust
 
-    grad = 1.0 - np.clip(mags[:, :, 0] / rad, 0, 1.0)
+    grad = 1.0 - np.clip(mags[:, :, 0] / rad, 0.0, 1.0)
+    #dots = 1.0 - np.clip(dots[:, :], 0.0, 1.0)
     result = 1.0 - (grad * dots)
-
+    #qresult = dots
     return result
 
 
