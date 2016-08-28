@@ -15,7 +15,7 @@ log = makelog(__name__)
 p_scalef = 4
 
 blank_img = cv2.imread('blank.png')
-blank_small_img = cv2.resize(blank_img, (blank_img.shape[1]//p_scalef, blank_img.shape[0]//p_scalef))
+blank_small_img = cv2.resize(blank_img, (blank_img.shape[1] // p_scalef, blank_img.shape[0] // p_scalef))
 
 
 def analyze_contour_cuts(contour, step=7):
@@ -38,7 +38,7 @@ def analyze_contour_cuts(contour, step=7):
     if c_len <= step:
         return None
 
-    try: # xrange is range in Python 3
+    try:  # xrange is range in Python 3
         xrange
     except NameError:
         xrange = range
@@ -117,7 +117,7 @@ def falloff_gradient(x, x2, y, y2, pt, n, rad):   # max curvature influence     
     ----------
     """
 
-    n = (n[1], n[0]) / np.linalg.norm(n)
+    n = (n[1], n[0]) / np.linalg.norm(n)   # Normalized normal
 
     xlin = np.arange(x, x2)
     ylin = np.arange(y, y2)
@@ -159,9 +159,9 @@ def preselect_stone(img_size, center, dim, bbox):
         return False
 
     # Touches edges
-    if bbox[0] < bbox_tolerance or bbox[0] + bbox[2] > img_size[0] - bbox_tolerance -1:
+    if bbox[0] < bbox_tolerance or bbox[0] + bbox[2] > img_size[0] - bbox_tolerance - 1:
         return False   # touches X edges
-    if bbox[1] < bbox_tolerance or bbox[1] + bbox[3] > img_size[1] - bbox_tolerance -1:
+    if bbox[1] < bbox_tolerance or bbox[1] + bbox[3] > img_size[1] - bbox_tolerance - 1:
         return False   # touches Y edges
 
     # too small (either axis)
@@ -190,7 +190,7 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     bbox = cv2.boundingRect(contour)
 
     ec, es, ea = cv2.minAreaRect(contour)
-    
+
     fit_center = (int(ec[0]), int(ec[1]))
     fit_dim = (int(es[0]) // 2, int(es[1]) // 2)
     fit_angle = int(ea)
@@ -204,7 +204,7 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     if not preselect_stone((img_w, img_h), fit_center, fit_dim, bbox):
         return None
 
-    cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0]+ bbox[2]]
+    cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0] + bbox[2]]
     b, g, r = cv2.split(cutout)
     a = np.zeros_like(b, dtype=np.uint8)
     cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
@@ -238,6 +238,7 @@ def threshold_adaptive_with_saturation(image):
     # image = cv2.resize(image, (image.shape[1]//4, image.shape[0]//4))
 
     # Grayscale conversion, blurring, threshold
+   # Grayscale conversion, blurring, threshold
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     h_img, s_img, v_img = cv2.split(hsv_img)
        
@@ -317,8 +318,8 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
             x1 = int(round(max(0, cut_point[0] - rad)))
             y1 = int(round(max(0, cut_point[1] - rad)))
 
-            x2 = int(round(min(thresh_img.shape[1], cut_point[0] + rad)))
-            y2 = int(round(min(thresh_img.shape[0], cut_point[1] + rad)))
+            x2 = int(round(min(thresh_blur_img.shape[1], cut_point[0] + rad)))
+            y2 = int(round(min(thresh_blur_img.shape[0], cut_point[1] + rad)))
 
             falloff_part = falloff_gradient(x1, x2, y1, y2, cut_point, cut_normal, rad)
 
