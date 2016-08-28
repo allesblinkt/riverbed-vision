@@ -389,14 +389,16 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     log.debug('End processing image: %s, Analysis took: %0.3fs', frame_desc, elapsed_time)
 
     if debug_draw:
-        cv2.imshow('color with debug', gray_img)
+        cv2.imshow('color with debug', small_img)
         cv2.imshow('threshold', thresh_img)
         cv2.imshow('distance threshold', dist_thresh_img)
         cv2.imshow('curvature weighting', weight_img)
         cv2.imshow('curvature weighting threshold', weight_thresh_img)
-        cv2.imshow('markers', markers_img * 256)
+        cv2.imshow('markers', markers_img * 2000)
+        cv2.imshow('segmented', segmented_img)
+
         cv2.imshow('stones', result_img)
-        
+
         if debug_wait:
             key = cv2.waitKey()
         else:
@@ -428,7 +430,7 @@ def main():
         full_fn = os.path.join(p, fn)
         log.info('Processing %s', full_fn)
         frame = cv2.imread(full_fn)
-        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=False)
+        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=True)
 
 
 
