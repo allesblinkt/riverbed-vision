@@ -363,17 +363,22 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     # Find individual stones and analyze them
     _, stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
 
-    pool = Pool(8)    # TODO: make the number of processes configurable
+    if not debug_draw:
+        pool = Pool(8)    # TODO: make the number of processes configurable
 
-    contours_and_args = []
-    for id, contour in enumerate(stones_contours):
-        contour *= p_scalef   # enlarge to compensate for smaller processed image
-        # contours_and_args.append([frame_desc, id, contour, color_img, result_img, save_stones])
-        contours_and_args.append([frame_desc, id, contour, color_img, None, save_stones])
+        contours_and_args = []
+        for id, contour in enumerate(stones_contours):
+            contour *= p_scalef   # enlarge to compensate for smaller processed image
+            contours_and_args.append([frame_desc, id, contour, color_img, None, save_stones])
 
-    stones = pool.starmap(process_stone, contours_and_args)
+        stones = pool.starmap(process_stone, contours_and_args)
 
-    pool.close()
+        pool.close()
+    else:
+        stones = []
+        for id, contour in enumerate(stones_contours):
+            contour *= p_scalef   # enlarge to compensate for smaller processed image
+            stones.append(process_stone(frame_desc, id, contour, color_img, result_img, save_stones))
 
     # Keep stones with a result
     stones = [stone for stone in stones if stone is not None]
