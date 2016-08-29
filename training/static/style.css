@@ -1,9 +1,33 @@
 body {
-	/*background-color: #d0f;*/
+	background-color: #ddd;
+  position: relative;
+
+  font-size: 10px;
 }
 
 
-ul#stone_chooser li {
+body>footer {
+  display: block;
+  height: 30px;
+  background-color: #bbb;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+
+body>footer ul {
+  list-style: none;
+}
+
+body>footer ul>li {
+  float: left;
+  position: relative; 
+  margin-right: 10px;
+}
+
+ul#stone_chooser>li {
   float: left;
   position: relative;
   overflow:hidden;
@@ -14,25 +38,27 @@ ul#stone_chooser li {
   font-size: 9px;
 }
 
-ul#stone_chooser li img {
-    position: absolute;
-    top: -9999px;
-    bottom: -9999px;
-    left: -9999px;
-    right: -9999px;
-    margin: auto;
+ul#stone_chooser>li img {
+  transform: scale(0.5);
 
-  	-webkit-filter: contrast(1.0) saturate(150%);
- }
+  position: absolute;
+  top: -9999px;
+  bottom: -9999px;
+  left: -9999px;
+  right: -9999px;
+  margin: auto;
+
+	-webkit-filter: contrast(1.0) saturate(150%);
+}
 
 
-ul#stone_chooser li img:hover {
+ul#stone_chooser>li img:hover {
   	-webkit-filter: contrast(3.0) saturate(10%);;
 
 }
 
 
-ul#stone_chooser li span {
+ul#stone_chooser>li span {
 	position: absolute;
 	left: 5px;
 	bottom: 5px;

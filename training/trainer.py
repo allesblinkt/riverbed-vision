@@ -16,21 +16,23 @@ STONE_DATA_PATH = '../brain/stones/'
 
 
 def load_stones():
-	stones = []
+    stones = {}
 
-	for fn in os.listdir(STONE_DATA_PATH):
-		if fn.endswith('.data'):
-			path = os.path.join(STONE_DATA_PATH, fn)
-			with open(path, 'rb') as f:
-				ident = os.path.splitext(fn)[0]
+    for fn in os.listdir(STONE_DATA_PATH):
+        if fn.endswith('.data'):
+            path = os.path.join(STONE_DATA_PATH, fn)
+            with open(path, 'rb') as f:
+                ident = os.path.splitext(fn)[0]
 
-				stone = serialization.load(f)
-				stone.identifier = ident
-				stones.append(stone)
+                stone = serialization.load(f)
+                stone.identifier = ident
+                # stones.append(stone)
 
-	log.info('Loaded %d stones', len(stones))
+                stones[stone.identifier] = stone
 
-	return stones
+    log.info('Loaded %d stones', len(stones))
+
+    return stones
 
 
 

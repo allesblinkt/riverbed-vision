@@ -3,8 +3,18 @@
 
 <script>
 	$(document).ready(function(argument) {
+		$(document).keypress(function( event ) {
+			if (event.which == 13) {
+				event.preventDefault();
+			}
+
+			console.log(event.key.toLowerCase() == 'n');
+		});
+
+
+
 		$.ajax({
-			url: '/stones/random'
+			url: '/stones/similar/stone_grab_1365_1035.jpg_005?count=2'
 		}).done(function(res){
 			console.log(res);
 
@@ -14,11 +24,22 @@
 
 			for (var i = 0; i < res.stones.length; i++) {
 				var stone = res.stones[i];
-
-				console.log(stone);
 				var html = Mustache.render(template, {img_src: stone.img_src, identifier: stone.identifier});
 
-				$(html).appendTo('#stone_chooser');
+				var stone_el = $(html).appendTo("#stone_chooser");
+				var votes_ul = $(stone_el).find(".votes");
+
+					$("<li>Bla</li>").appendTo(votes_ul);
+										$("<li>Bla</li>").appendTo(votes_ul);
+										$("<li>Bla</li>").appendTo(votes_ul);
+
+				console.log(votes_ul);
+				for (var j = 0; j < stone.votes.length; j++) {
+					var vote = stone.votes[j];
+
+					$("<li>Bla</li>").appendTo(votes_ul);
+					console.log(vote)
+				}
 			}
 		});
 	});
@@ -28,13 +49,36 @@
 
 {% raw %}
 <script id="stone-template" type="x-tmpl-mustache">
-<li>
-		<img src="{{img_src}}" /><span>{{identifier}}</span>
-</li>
-
+	<li>
+			<img src="{{img_src}}" /><span>{{identifier}}</span>
+			<ul class="votes">
+			</ul>
+	</li>
 </script>
 {% endraw %}
 
 <ul id="stone_chooser">
 </ul>
+
+
+<section id="filter_ui">
+	<form>
+		<label for="only_least">Only least categorized</label>
+		<input type="checkbox" name="only_least" value="1">
+		
+		<label for="only_least">Only least categorized</label>
+		<input type="checkbox" name="only_least" value="1">
+
+		<input type="range" value="3" name="only_least">
+	</form>
+</section>
+
+
+<footer>
+<ul>
+	<li><span>n</span> = New category</li>
+	<li><span>1-9</span> = Assign to existing</li>
+	
+</ul>
+</footer>
 {% endblock %}
