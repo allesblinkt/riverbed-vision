@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 from random import uniform
 import math
 
@@ -27,6 +28,20 @@ def random_on_circle(rad):
 def map_value(value, start1, stop1, start2, stop2):
     """Scale value from a range of start1, stop1, to a range of start2, stop2."""
     return start2 + (stop2 - start2) * ((value - start1) / float(stop1 - start1))
+
+
+def rotated_subimg(image, center, theta, width, height):
+    theta *= math.pi / 180.0  # convert to rad
+
+    v_x = (math.cos(theta), math.sin(theta))
+    v_y = (-math.sin(theta), math.cos(theta))
+    s_x = center[0] - v_x[0] * (width / 2) - v_y[0] * (height / 2)
+    s_y = center[1] - v_x[1] * (width / 2) - v_y[1] * (height / 2)
+
+    mapping = np.array([[v_x[0], v_y[0], s_x],
+                        [v_x[1], v_y[1], s_y]])
+
+    return cv2.warpAffine(image, mapping,(width, height), flags=cv2.WARP_INVERSE_MAP+cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE)
 
 
 def inkey():
