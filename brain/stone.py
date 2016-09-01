@@ -326,8 +326,9 @@ class StoneMap(object):
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
-    map.stage = (0, 0, None, None)  # NOTE: use this to override the current state
+    #map.stage = (0, 0, None, None)  # NOTE: use this to override the current state
     map.save(meta=True)
+
 
     if len(map.stones) == 0:
         # map.randomize()

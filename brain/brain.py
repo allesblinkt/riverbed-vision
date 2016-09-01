@@ -342,8 +342,8 @@ class Brain(object):
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
-            self._move_stone_absolute((3500, 1000),  0, (3500, 1250), 90)
-            self._move_stone_absolute((3500, 1250), 90, (3500, 1000),  0)
+            self._move_stone_absolute((3500, 1000), 0, (3500, 1250), 90)
+            self._move_stone_absolute((3500, 1250), 90, (3500, 1000), 0)
 
     def demo2(self):
         while True:
