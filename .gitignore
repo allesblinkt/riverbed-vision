@@ -31,3 +31,6 @@ brain/map_offline_old/**
 brain/map_images/**
 brain/logs/**
 training/static/stones/**
+/brain/grabs.tar
+/training/voting.db.lock
+/training/voting.db.r*
