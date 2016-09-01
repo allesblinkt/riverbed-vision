@@ -2,46 +2,330 @@
 {% block body %}
 
 <script>
+	var selected_stone_id = false;
+	var selected_category_id = false;
+	var selected_sticky_category_id = false;
+
+	var categories = {};
+
+
+
+	function select_stone(stone_id) {
+		$("#stone_chooser>li.selected").removeClass("selected");
+
+		$("#stone_chooser>li").each(function(idx, el) {
+			var cur_stone_id = $(el).data("stone_id");
+			if (cur_stone_id === stone_id) {
+				$(el).addClass("selected");
+				var stone = $(el).data("stone");
+
+				console.log(stone);
+			} else {
+				$(el).removeClass("selected");
+			}
+		});
+
+		selected_stone_id = stone_id;
+	}
+
+
+	function select_first_stone() {
+		$("#stone_chooser>li").first().each(function(idx, el) {
+			var stone_id = $(el).data("stone_id");
+			select_stone(stone_id);
+		});
+	}
+
+
+	function load_stones_for_category(category_id, all) {
+		selected_stone_id = false;
+
+		var url = '/stones/random?count=5';
+
+		if (category_id) {
+			var category = categories[category_id];
+			
+			if (all) {
+				url = '/stones/category/' + category_id
+			} else {
+				var best_id = category.highest_voted[0].identifier;
+				url = '/stones/similar/' + best_id + '?count=25';
+			}			
+		}
+
+		
+		$.ajax({
+			url: url
+		}).done(function(res){
+			var stone_chooser_el = $("#stone_chooser");
+			stone_chooser_el.empty();
+
+			for (var i = 0; i < res.stones.length; i++) {
+				var stone = res.stones[i];
+				var html = Mustache.render($('#stone-template').html(), {img_src: stone.img_src, identifier: stone.identifier});
+
+				var stone_el = $(html).appendTo(stone_chooser_el);
+				stone_el.data("stone_id", stone.identifier);
+				stone_el.data("stone", stone);
+				var votes_ul = $(stone_el).find(".votes");
+			
+				for (var j = 0; j < stone.votes.length; j++) {
+					var vote = stone.votes[j];
+					
+					var html = Mustache.render($('#stone-vote-template').html(), {category: vote});
+					$(html).appendTo(votes_ul);
+				}			
+			}
+
+			select_first_stone();
+
+			$("#stone_chooser>li").click(function(e) {
+				var clicked_el = $(e.currentTarget);
+				var stone_id = clicked_el.data("stone_id");
+							
+				select_stone(stone_id);
+			});
+		});
+	};
+
+
+	function load_categories() {
+		$.ajax({
+			url: '/categories'
+		}).done(function(res){
+			categories = {};
+
+			$("#category_chooser").empty();
+
+			for (var i = 0; i < res.categories.length; i++) {
+				var category = res.categories[i];
+
+				var category_html = Mustache.render($('#category-template').html(), {id: category.id});	
+				var category_el = $(category_html).appendTo("#category_chooser");
+				category_el.data("category_id", category.id);
+				category_el.data("category", category);
+
+				var category_stones_el = category_el.find("ul");
+
+				for (var j = 0; j < category.highest_voted.length; j++) {
+					var stone = category.highest_voted[j];
+					var stone_html = Mustache.render($('#stone-template').html(), {img_src: stone.img_src, identifier: stone.identifier});
+					$(stone_html).appendTo(category_stones_el);
+				}
+
+				categories[category.id] = category;
+			}
+
+			$("#category_chooser>li").click(function(e) {
+				$("#category_chooser>li").removeClass("selected");
+
+				var clicked_el = $(e.currentTarget);
+
+				var category_id = clicked_el.data("category_id");
+				var category = clicked_el.data("category");
+
+				select_category(category_id, true);
+			});			
+		});
+	}
+
+
+	function select_category(category_id, possibly_load) {
+		$("#category_chooser>li").removeClass("selected");
+		$("#category_chooser>li").removeClass("sticky");
+		
+		if (possibly_load) {
+			if (selected_category_id === category_id || selected_category_id === false) {
+				load_stones_for_category(category_id, false);
+				selected_sticky_category_id = false;
+			}	
+		}
+		
+		selected_category_id = category_id;
+
+		$("#category_chooser>li").each(function(idx, el) {
+			var cur_category_id = $(el).data("category_id");
+
+			if (cur_category_id === category_id) {
+				$(el).addClass("selected");
+			}
+
+			if (selected_sticky_category_id) {
+				if (cur_category_id === selected_sticky_category_id) {
+					$(el).addClass("sticky");
+				}
+			}
+		});
+	}
+
+
+	function create_category(stone_id) {
+		$.ajax({
+			url: '/category/add'
+		}).done(function(res){
+			console.log("Category created", res.created);
+
+			if (res.created) {
+				var category_id = res.category_id;
+				assign_stone_to_category(stone_id, category_id, true, load_categories);
+			}
+		});
+	}
+
+
+	function assign_stone_to_category(stone_id, category_id, do_remove, done_fn) {
+		var url = '/stones/' + stone_id + '/vote/' + category_id
+		$.ajax({
+			url: url
+		}).done(function(res){
+			console.log(res.counted);
+
+			if (done_fn) {
+				done_fn();
+			}
+		});
+
+		if (do_remove) {
+			remove_stone(stone_id);	
+		} else {
+			greyout_stone(stone_id, true);
+		}
+
+		if (selected_sticky_category_id) {
+			console.log("reselecting", selected_sticky_category_id);
+			select_category(selected_sticky_category_id, false);
+
+			if (category_id !== selected_sticky_category_id) {
+				remove_stone(stone_id);		
+			}
+			
+		}
+	}
+
+
+	function deassign_stone_from_category(stone_id, category_id, do_remove, done_fn) {
+		var url = '/stones/' + stone_id + '/unvote/' + category_id
+		$.ajax({
+			url: url
+		}).done(function(res){
+			console.log(res.counted);
+
+			if (done_fn) {
+				done_fn();
+			}
+		});
+
+		if (do_remove) {
+			remove_stone(stone_id);	
+		} else {
+			greyout_stone(stone_id, false);
+		}
+	}
+
+
+	function remove_stone(stone_id) {
+		$("#stone_chooser>li").each(function(idx, el) {
+			var cur_stone_id = $(el).data("stone_id");
+			if (cur_stone_id === stone_id) {
+				console.log("Removing id ", stone_id);
+				$(el).remove();
+			}
+		});
+
+		select_first_stone();
+	}
+
+
+	function greyout_stone(stone_id, green) {
+		$("#stone_chooser>li").each(function(idx, el) {
+			var cur_stone_id = $(el).data("stone_id");
+
+			if (cur_stone_id === stone_id) {
+				console.log("Greying out id ", stone_id);
+
+				$(el).removeClass('crossed');
+				$(el).removeClass('voted');
+
+				if(green) {
+					$(el).addClass('voted');
+				} else {
+					$(el).addClass('crossed');
+				}
+			}
+		});
+	}
+
+
 	$(document).ready(function(argument) {
 		$(document).keypress(function( event ) {
 			if (event.which == 13) {
 				event.preventDefault();
 			}
 
-			console.log(event.key.toLowerCase() == 'n');
-		});
+			if (event.key.toLowerCase() == 'b') {
+				$("body").toggleClass("bright");
+			}
 
+			if (event.key.toLowerCase() == 'a') {
+				console.log("Assign!");
 
-
-		$.ajax({
-			url: '/stones/similar/stone_grab_1365_1035.jpg_005?count=2'
-		}).done(function(res){
-			console.log(res);
-
-			var template = $('#stone-template').html();
-			Mustache.parse(template);
-
-
-			for (var i = 0; i < res.stones.length; i++) {
-				var stone = res.stones[i];
-				var html = Mustache.render(template, {img_src: stone.img_src, identifier: stone.identifier});
-
-				var stone_el = $(html).appendTo("#stone_chooser");
-				var votes_ul = $(stone_el).find(".votes");
-
-					$("<li>Bla</li>").appendTo(votes_ul);
-										$("<li>Bla</li>").appendTo(votes_ul);
-										$("<li>Bla</li>").appendTo(votes_ul);
-
-				console.log(votes_ul);
-				for (var j = 0; j < stone.votes.length; j++) {
-					var vote = stone.votes[j];
-
-					$("<li>Bla</li>").appendTo(votes_ul);
-					console.log(vote)
+				if (selected_stone_id !== false && selected_category_id !== false) {
+					assign_stone_to_category(selected_stone_id, selected_category_id, false);
+				} else {
+					console.log("Stone and category must be selected.");
 				}
 			}
+
+			if (event.key.toLowerCase() == 'n') {
+				console.log("New category!");
+				var really = confirm("Really?");
+
+				if (really && selected_stone_id !== false) {
+					create_category(selected_stone_id);
+				} else {
+					console.log("Stone needs to be selected");
+				}				
+			}
+
+			if (event.key.toLowerCase() == 'r') {
+				console.log("Reload!");
+
+				if (selected_category_id) {
+					selected_sticky_category_id = false;
+					select_category(selected_category_id, false);
+				}				
+
+				load_stones_for_category(null, false);
+			}
+			
+			if (event.key.toLowerCase() == 'c') {
+				console.log("All for category!");
+				selected_sticky_category_id = selected_category_id;
+
+				if (selected_category_id) {
+					select_category(selected_category_id, false);	
+					load_stones_for_category(selected_category_id, true);	
+				}				
+			}
+
+
+			if (event.key.toLowerCase() == 'u') {
+				console.log("Unvote!");
+				deassign_stone_from_category(selected_stone_id, selected_category_id, false);
+			}
+
+			// if (event.key.toLowerCase() == 'o') {
+			// 	console.log("Change votes to other category!");
+
+			// 	deassign_stone_from_category(selected_stone_id, selected_category_id, false);
+			// 	assign_stone_to_category(selected_stone_id, selected_category_id, true);
+			// }
+
+
+
 		});
+
+		load_categories();
 	});
 
 </script>
@@ -53,15 +337,38 @@
 			<img src="{{img_src}}" /><span>{{identifier}}</span>
 			<ul class="votes">
 			</ul>
+			<p>&nbsp;</p>
+	</li>
+
+</script>
+
+<script id="stone-vote-template" type="x-tmpl-mustache">
+	<li>{{category}}</li>
+</script>
+
+<script id="category-template" type="x-tmpl-mustache">
+	<li>{{id}}
+		<ul></ul>
 	</li>
 </script>
+
+
+<script id="spinner-template" type="x-tmpl-mustache">
+	<li>{{category}}</li>
+</script>
+
+
 {% endraw %}
+
+<ul id="category_chooser">
+</ul>
+
 
 <ul id="stone_chooser">
 </ul>
 
 
-<section id="filter_ui">
+<!-- <section id="filter_ui">
 	<form>
 		<label for="only_least">Only least categorized</label>
 		<input type="checkbox" name="only_least" value="1">
@@ -71,14 +378,28 @@
 
 		<input type="range" value="3" name="only_least">
 	</form>
-</section>
+</section> -->
 
 
 <footer>
 <ul>
-	<li><span>n</span> = New category</li>
-	<li><span>1-9</span> = Assign to existing</li>
-	
+	<li><span>b</span> = Toggle background</li>
+		<li>|</li>
+		<li><span>1clk</span> = Select category</li>
+	<li><span>2nd clk</span> = Load similar stones for category</li>
+	<li>|</li>
+	<li><span>r</span> = Reload random stone selection</li>
+	<li><span>c</span> = Load all stones for category</li>
+
+
+
+	<li>|</li>
+	<li><span>n</span> = New category for selected stone</li>
+	<li><span>a</span> = Assign selected stone to selected category</li>
+	<li><span>u</span> = Deassign selected stone to selected category </li>
+
+
 </ul>
+
 </footer>
 {% endblock %}

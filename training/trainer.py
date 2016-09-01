@@ -37,8 +37,8 @@ def load_stones():
 
 
 def find_best_matches(stone, selection, target_count=10):    # TODO: put selection in one place
-    bucket_size_c=10 * target_count
-    bucket_size_s=200 * target_count
+    bucket_size_c = 20 * target_count
+    bucket_size_s = 100 * target_count
 
     min_colors = sorted(selection, key=lambda x: compare_colors(x.color, stone.color))
     min_structures = sorted(selection, key=lambda x: compare_histograms(x.structure, stone.structure))
@@ -48,9 +48,16 @@ def find_best_matches(stone, selection, target_count=10):    # TODO: put selecti
 
     intersection_list = list(color_set.intersection(structure_set))
 
-    if len(intersection_list) > 0:
+    union_list = []
+    union_list.extend(min_colors[:target_count // 2])
+    union_list.extend(min_structures[:target_count // 2])
+
+    if False and len(intersection_list) > 0:
         log.debug('Found stone matches in intersection set')
+        intersection_list = sorted(intersection_list, key=lambda x: compare_colors(x.color, stone.color))
+
+        #intersection_list = sorted(intersection_list, key=lambda x: compare_histograms(x.structure, stone.structure))
         return intersection_list
 
-    return min_colors
+    return union_list
 
