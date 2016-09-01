@@ -432,15 +432,22 @@ def main():
         if fnmatch.fnmatch(file, 'grab_*.jpg'):
             jpgfiles.append(file)
 
-    # jpgfiles = ["grab_0429_1380.jpg"]
+    # jpgfiles = ["grab_2652_0690.jpg", "grab_0975_0828.jpg"]
 
     for fn in jpgfiles:
         full_fn = os.path.join(p, fn)
         log.info('Processing %s', full_fn)
         frame = cv2.imread(full_fn)
-        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=True)
+        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=False, debug_wait=False)
 
 
+    # grab_0429_1380.jpg
+    # grab_0429_1380.jpg
+    # grab_1755_1173.jpg
+    # grab_1911_0276.jpg,
+
+    # FIXED
+    # grab_1365_1311.jpg # Threshold saturation fail...
 
     # for i in range(13, 30+1):
     #     frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
