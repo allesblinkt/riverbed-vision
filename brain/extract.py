@@ -1,10 +1,12 @@
 #!/usr/bin/python
 import cv2
 import numpy as np
+import math
 import time
 import sys
 from multiprocessing import Pool
 
+from utils import rotated_subimg
 from coloranalysis import find_dominant_colors, lab_to_rgb
 from structure import lbp_histogram
 from stone import Stone
@@ -12,7 +14,7 @@ from stone import Stone
 from log import makelog
 log = makelog(__name__)
 
-p_scalef = 4
+p_scalef = 2
 
 blank_img = cv2.imread('blank.png')
 blank_small_img = cv2.resize(blank_img, (blank_img.shape[1] // p_scalef, blank_img.shape[0] // p_scalef))
@@ -331,7 +333,6 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
             continue
 
         for cut_point, cut_normal, cut_angle in cuts:
-
             if np.linalg.norm(cut_normal) < 0.0001:  # Normal too short
                 continue
 
