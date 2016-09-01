@@ -122,7 +122,9 @@ class StoneMap(object):
         except Exception as e:
             log.warn('Something happened while loading')
             log.warn(e)
-            self.save(meta=True)
+            raise(e)
+            # self.save(meta=True)
+
         # Update spatialhashmap
         self.spatialmap = SpatialHashMap(cell_size=20)  # TODOL cell size to settings
 
