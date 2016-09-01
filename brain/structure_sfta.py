@@ -99,7 +99,6 @@ def sfta(img, nt):
     img = img.astype(np.uint8)
 
     thresholds = otsu_recurse(img, nt)
-    print(thresholds)
 
     size_feat_vect = len(thresholds) * 6
     feat_vect = np.zeros(size_feat_vect)
