@@ -1,5 +1,4 @@
-#!/usr/bin/python
-
+#!/usr/bin/env python3
 import cv2
 import numpy as np
 
@@ -102,6 +101,7 @@ if __name__ == '__main__':
         (h, w) = image.shape[:2]
 
         t = time.time()
+
         centers, hist = find_dominant_colors(image)
 
         small_img = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)

@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import time
 import math
 import subprocess
-import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import Pyro4
 import cv2
@@ -19,6 +19,8 @@ log = makelog('brain')
 # CONTROL_HOSTNAME = 'localhost'
 CONTROL_HOSTNAME = '192.168.0.29'
 
+executor_save = ThreadPoolExecutor(max_workers=1)
+executor_step = ThreadPoolExecutor(max_workers=1)
 
 class Machine(object):
     """ High-level operations on CNC """
@@ -179,12 +181,6 @@ class Camera(object):
         return stones
 
 
-def save_map(map):
-    log.debug('Saving map...')
-    map.save()
-    log.debug('Saving map. Done.')
-
-
 class Brain(object):
 
     def __init__(self, use_machine=True):
@@ -342,8 +338,8 @@ class Brain(object):
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
-            self._move_stone_absolute((3500, 1000), 0, (3500, 1250), 90)
-            self._move_stone_absolute((3500, 1250), 90, (3500, 1000), 0)
+            self._move_stone_absolute((3500, 1000),  0, (3500, 1250), 90)
+            self._move_stone_absolute((3500, 1250), 90, (3500, 1000),  0)
 
     def demo2(self):
         while True:
@@ -408,12 +404,19 @@ class Brain(object):
         self.stone_map.save()
         log.debug('Saving map. Done.')
 
+    def next_step(self):
+        log.debug('Getting next step...')
+        r = art_step(self.map)
+        log.debug('Getting next step. Done.')
+        return r
+
     def performance(self):
-        saving_thread = threading.Thread(target=save_map, args=(self.stone_map, ))
+        future_save = executor_save.submit(self.save_map) # async call of save_map
+        future_step = executor_step.submit(self.next_step) # async call of next_step
 
         while True:
-            log.debug('Thinking...')
-            i, nc, na, stage, force = art_step(self.stone_map)
+            i, nc, na, stage, force = future_step.result()
+            future_step = executor_step.submit(self.next_step) # async call of next_step
 
             if i is not None:
                 s = self.stone_map.stones[i]
@@ -427,7 +430,7 @@ class Brain(object):
                 log.debug('Placing stone {} from {} to {}'.format(i, s.center, nc))
 
                 if self._move_stone(s.center, s.angle, nc, na):   # Pickup worked
-                    if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
+                    future_save.result() # wait until save is completed if still being done
 
                     self.stone_map.move_stone(s, center=nc, angle=na)
                     # s.center = nc
@@ -436,24 +439,22 @@ class Brain(object):
                     self.stone_map.stage = stage  # Commit stage
                     log.info('Placement worked')
                 else:  # Fail, flag
-                    if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
+                    future_save.result() # wait until save is completed if still being done
                     s.flag = True
                     log.info('Placement failed')
 
-                saving_thread = threading.Thread(target=save_map, args=(self.stone_map, ))
-                saving_thread.start() # async call of self.save_map
+                future_save = executor_save.submit(self.save_map) # async call of save_map
 
             elif force:  # Art wants us to advance anyhow
-                if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
+                future_save.result() # wait until save is completed if still being done
                 self.stone_map.stage = stage  # Commit stage
 
-                saving_thread = threading.Thread(target=save_map, args=(self.stone_map, ))
-                saving_thread.start() # async call of self.save_map
+                future_save = executor_save.submit(self.save_map) # async call of save_map
             else:
-                if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
+                future_save.result() # wait until save is completed if still being done
                 time.sleep(1)
 
-        if saving_thread.is_alive(): saving_thread.join()  # wait until save is completed if still being done
+        future_save.result() # wait until save is completed if still being done
 
 if __name__ == '__main__':
     brain = Brain(use_machine=True)
