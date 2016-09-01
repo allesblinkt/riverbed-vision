@@ -205,17 +205,28 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     if not preselect_stone((img_w, img_h), fit_center, fit_dim, bbox):
         return None
 
+    # Cut out image and create masked stone image
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0] + bbox[2]]
-    # b, g, r = cv2.split(cutout)  # TODO: use numpy?
 
+    # b, g, r = cv2.split(cutout)  # TODO: use numpy?
     r = cutout[:, :, 0]  # TODO: check
     g = cutout[:, :, 1]
     b = cutout[:, :, 2]
 
+    # cropped = rotated_subimg(src_img, fit_center, fit_angle, fit_dim[0] * 2, fit_dim[1] * 2)
+
     a = np.zeros_like(b, dtype=np.uint8)
     cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
+
+    # print(contour)
+    # cropped = rotated_subimg(src_img, fit_center, fit_angle, fit_dim[0] * 2, fit_dim[1] * 2)
+
     cropped = cv2.merge((b, g, r, a))
 
+    # cropped_h, cropped_w, _ = cropped.shape
+    # cropped = rotated_subimg(cropped, (cropped_w // 2, cropped_h // 2), fit_angle, fit_dim[0] * 2, fit_dim[1] * 2)
+
+    # Analyze structure and color
     colors_lab, colors_hist = find_dominant_colors(cropped)
     dominant_color = colors_lab[0]
     structure = lbp_histogram(cropped)
