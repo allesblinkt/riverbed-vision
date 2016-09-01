@@ -115,6 +115,7 @@ class StoneMap(object):
                     d = serialization.load(f, encoding='latin1')
                     log.debug('Loading stones from NEW format #2')
                     sm = d['stones2']
+
                     assert len(self.stones) == len(sm)
                     for i in range(len(sm)):
                         self.stones[i].color = sm[i]['color']
