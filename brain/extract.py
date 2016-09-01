@@ -206,7 +206,12 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
         return None
 
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0] + bbox[2]]
-    b, g, r = cv2.split(cutout)
+    # b, g, r = cv2.split(cutout)  # TODO: use numpy?
+
+    r = cutout[:, :, 0]  # TODO: check
+    g = cutout[:, :, 1]
+    b = cutout[:, :, 2]
+
     a = np.zeros_like(b, dtype=np.uint8)
     cv2.drawContours(a, [contour], 0, 255, -1, offset=(-bbox[0], -bbox[1]))
     cropped = cv2.merge((b, g, r, a))
@@ -241,7 +246,10 @@ def threshold_adaptive_with_saturation(image):
     # Grayscale conversion, blurring, threshold
    # Grayscale conversion, blurring, threshold
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    h_img, s_img, v_img = cv2.split(hsv_img)
+    # h_img, s_img, v_img = cv2.split(hsv_img)   # TODO: use numpy?
+    # h_img = hsv_img[:, :, 0]  # TODO: check
+    s_img = hsv_img[:, :, 1]
+    v_img = hsv_img[:, :, 2]
 
     gray_s_img = cv2.GaussianBlur(255 - s_img, (15, 15), 0)
     gray_v_img = cv2.GaussianBlur(v_img, (5, 5), 0)
