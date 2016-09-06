@@ -419,6 +419,8 @@ class Brain(object):
             i, nc, na, stage, force = future_step.result()
             future_step = executor_step.submit(self.next_step) # async call of next_step
 
+            self.control.check_pause()
+
             if i is not None:
                 s = self.stone_map.stones[i]
 

@@ -78,7 +78,7 @@ class StoneHole(object):
 
 class StoneMap(object):
 
-    def __init__(self, name):
+    def __init__(self, name, create_new=False):
         self.name = name
         self.stones = []
         self.holes = []
@@ -126,8 +126,11 @@ class StoneMap(object):
         except Exception as e:
             log.warn('Something happened while loading')
             log.warn(e)
-            raise(e)
-            # self.save(meta=True)
+
+            if create_new:
+                self.save(meta=True)
+            else:
+                raise(e)
 
         # Update spatialhashmap
         self.spatialmap = SpatialHashMap(cell_size=20)  # TODOL cell size to settings
