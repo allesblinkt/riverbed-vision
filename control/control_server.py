@@ -113,7 +113,7 @@ class MachineController(object):
                 log.warn('Invalid movement: Z=%f', kwargs['z'])
                 return False
         if 'e' in kwargs and kwargs['e'] is not None:
-            if kwargs['e'] < 0 or kwargs['e'] > 180:
+            if kwargs['e'] < -3 or kwargs['e'] > 180:
                 log.warn('Invalid movement: E=%f', kwargs['e'])
                 return False
         return True
