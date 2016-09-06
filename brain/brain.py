@@ -116,7 +116,8 @@ class Camera(object):
 
     def pos_to_mm(self, pos, offset=(0, 0)):
         """ Calculate distance of perceived pixel from center of the view (in cnc units = mm) """
-        dx, dy = -3.0, +66.00  # distance offset from head center to camera center
+        # distance offset from head center to camera center
+        dx, dy = -3.0, +62.00 # used to be -3, +66
         x = dx + self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
         y = dy + self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
         return x, y
