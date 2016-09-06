@@ -198,9 +198,7 @@ class Brain(object):
             self.c = self.machine.control
             self.c.reset()
             self.c.home()
-
-            # go home (also test if the machine is initialized and working)
-            # self.c.home()
+            self.c.home_e()
 
     def start(self):
         pass

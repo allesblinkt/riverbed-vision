@@ -8,7 +8,7 @@ from log import makelog
 log = makelog(__name__)
 
 MAX_STAGE_MODE = 2  # How many stages / modes can we do (+1)
-WORKAREA_START_X = 2100
+WORKAREA_START_X = 2300
 
 flower_seeds = None
 min_l, max_l = None, None    # Cache luma calculations
@@ -145,7 +145,7 @@ def art_step(stonemap):
             new_angle = 0
             x = WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 0.5)
             new_center = x, stage1_y
-            if stage1_y > 1650:
+            if stage1_y > 1545:
                 stage1_y = None
                 stage_step += 1
                 stage_mode = 0
