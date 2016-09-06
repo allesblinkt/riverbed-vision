@@ -461,6 +461,6 @@ if __name__ == '__main__':
     brain = Brain(use_machine=True, create_new_map=True)
     brain.start()
     # brain.scan_from_files()
-    # brain.scan(startx=2769, analyze=False)
+    brain.scan(startx=1700, analyze=False)
     # brain.demo1()
-    brain.performance()
+    #brain.performance()
