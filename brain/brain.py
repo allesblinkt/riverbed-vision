@@ -27,6 +27,8 @@ class Machine(object):
 
     def __init__(self, hostname):
         self.uri = 'PYRO:control@{}:5001'.format(hostname)
+        log.info('Connecting to control server at %s', self.uri)
+
         self.control = Pyro4.Proxy(self.uri)
         self.cam = Camera(self)
         self.x, self.y, self.z, self.e = 0.0, 0.0, 0.0, 0.0
