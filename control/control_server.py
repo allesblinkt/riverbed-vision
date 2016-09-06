@@ -103,9 +103,12 @@ class MachineController(object):
             self._command('G92 E0')   # reset E axis to 0
             result = self._command('M119', read_result=True)
             if result.find('min_z:0') > -1:
+                self._command('G92 E0')   # reset E axis to 0
                 break
             self.go(e=0.5)
             self.block()
+
+        self.go(e=3.0)
         self._command('G92 E0')   # reset E axis to 0
         status.write(pose=0)
 
@@ -186,7 +189,7 @@ class MachineController(object):
         self.home_z()
         return None
 
-    def pickup_custom(self, start_z=26.0, end_z=0.0, step=2.0):
+    def pickup_custom(self, start_z=26.0, end_z=0.0, step=2.0):   # end at 0.0 for the new sucker, 1.5 for the new
         self.pickup_top()
 
         has_picked = False
@@ -196,14 +199,14 @@ class MachineController(object):
         self.go(z=pick_z)
         self.block()
 
-        while pick_z > 0.0 and not has_picked:
-            pick_z = max(0.0, pick_z - step)
+        while pick_z > end_z and not has_picked:
+            pick_z = max(end_z, pick_z - step)
 
             self.go(z=pick_z)
             self.block()
 
             if pick_z < 0.05:
-                self.dwell(1500)
+                self.dwell(2000)
                 self.block()
 
             result = self._command('M119', read_result=True)
@@ -212,6 +215,8 @@ class MachineController(object):
                 has_picked = True
 
         if has_picked:
+            self.dwell(1500)
+            self.block()
             self.pickup_top()  # This also homes...
 
             return pick_z
