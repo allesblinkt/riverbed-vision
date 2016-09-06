@@ -435,7 +435,7 @@ class Brain(object):
                 if self._move_stone(s.center, s.angle, nc, na):   # Pickup worked
                     future_save.result() # wait until save is completed if still being done
 
-                    self.stone_map.move_stone(s, center=nc, angle=na)
+                    self.stone_map.move_stone(s, new_center=nc, angle=na)
                     # s.center = nc
                     # s.angle = na
 
