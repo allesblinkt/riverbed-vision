@@ -6,7 +6,7 @@ import logging
 import Pyro4
 import netifaces
 
-NEWLINE = '\n'
+NEWLINE = b'\n'
 DEVICE  = '/dev/ttyAMA0'
 PORT    = 5001
 
@@ -245,15 +245,15 @@ class MachineController(object):
         if self.serial_port:
             with self.serial_mutex:
                 self.serial_port.flushInput()
-                self.serial_port.write(cmd_str + NEWLINE)
+                self.serial_port.write(bytes(cmd_str, 'utf-8') + NEWLINE)
                 # self.serial_port.flushOutput()
-                line = self.serial_port.readline()
+                line = self.serial_port.readline().decode('utf-8')
                 log.debug('Received line "%s"', line.rstrip())
                 if read_result:
                     if line.startswith('ok'):
                         raise StateException('Expected result, but OK returned')
                     result = line
-                    line = self.serial_port.readline()
+                    line = self.serial_port.readline().decode('utf-8')
                     log.debug('Received line#2 "%s"', line.rstrip())
                 else:
                     result = None
