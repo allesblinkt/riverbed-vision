@@ -9,6 +9,7 @@ import netifaces
 NEWLINE = b'\n'
 DEVICE  = '/dev/ttyAMA0'
 PORT    = 5001
+IFACE   = 'wlan0'
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -295,7 +296,7 @@ class SerialOpenError(Exception):
 
 if __name__ == '__main__':
     try: # raspi detection
-        host = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
+        host = netifaces.ifaddresses(IFACE)[netifaces.AF_INET][0]['addr']
     except:
         host = 'localhost'
     daemon = Pyro4.Daemon(host=host, port=PORT)
