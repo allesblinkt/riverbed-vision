@@ -80,7 +80,7 @@ class MachineController(object):
         while True:
             self._command('G92 E0')   # reset E axis to 0
             result = self._command('M119', read_result=True)
-            if result.find('min_z: 1') > -1:
+            if result.find('min_z:1') > -1:
                 break
             self.go(e=-3)
             self.block()
@@ -90,7 +90,7 @@ class MachineController(object):
         while True:
             self._command('G92 E0')   # reset E axis to 0
             result = self._command('M119', read_result=True)
-            if result.find('min_z: 1') > -1:
+            if result.find('min_z:1') > -1:
                 break
             self.go(e=-0.5)
             self.block()
