@@ -217,6 +217,7 @@ class Brain(object):
             self.c.reset()
             self.c.home()
             self.c.home_e()
+            self.c.feedrate(20000)
 
     def start(self):
         pass
