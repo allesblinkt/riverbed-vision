@@ -201,7 +201,7 @@ class MachineController(object):
             self.block()
 
             if pick_z < 0.05:
-                self.dwell(600)
+                self.dwell(1500)
                 self.block()
 
             result = self._command('M119', read_result=True)
