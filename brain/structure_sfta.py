@@ -9,6 +9,7 @@ Alceu Costa
 
 import numpy as np
 import cv2
+#np.seterr(all='raise')
 
 
 def find_borders(img):
@@ -28,7 +29,11 @@ def otsu(counts):
     mu = np.cumsum(p * range(1, len(p) + 1))
     mu_t = mu[-1]
 
-    sigma_b_squared = (mu_t * omega - mu)**2 / (omega * (1 - omega))
+    try:
+        sigma_b_squared = (mu_t * omega - mu)**2 / (omega * (1 - omega))
+    except:
+        sigma_b_squared = np.nan
+
     maxval = np.max(np.nan_to_num(sigma_b_squared))
     if np.isnan(sigma_b_squared).all():
         pos = 0
@@ -78,16 +83,23 @@ def haus_dim(img):
     img_size = np.shape(img)[0]
     box_size = 1
     idx = 0
+
     while box_size <= img_size:
         box_count = (img > 0).sum()
         idx = idx + 1
-        box_counts[idx - 1] = box_count
+        box_counts[idx - 1] = (box_count)
         resolutions[idx - 1] = 1.0 / box_size
 
         box_size = box_size * 2
         img = img[::2, ::2] + img[1::2, ::2] + img[1::2, 1::2] + img[::2, 1::2]
 
-    return np.polyfit(np.log(resolutions), np.log(box_counts), 1)[0]
+    fit = np.polyfit(np.log(resolutions), np.log(box_counts), 1)
+    r = fit[0]
+
+    if np.isnan([r]):    # TODO: is this right?
+        return 1.0
+    else:
+        return r
 
 
 def sfta(img, nt):
@@ -114,8 +126,9 @@ def sfta(img, nt):
         img_borders = find_borders(img_borders)
 
         vals = img[img_borders.nonzero()].astype(np.double)
+        mean = np.mean(vals) if len(vals) > 0 else 0.0
         feat_vect[vect_idx + 0] = haus_dim(img_borders)
-        feat_vect[vect_idx + 1] = np.mean(vals)
+        feat_vect[vect_idx + 1] = mean
         feat_vect[vect_idx + 2] = len(vals)
         vect_idx += 3
 
@@ -129,8 +142,9 @@ def sfta(img, nt):
         img_borders = find_borders(img_borders)
 
         vals = img[img_borders.nonzero()].astype(np.double)
+        mean = np.mean(vals) if len(vals) > 0 else 0.0
         feat_vect[vect_idx + 0] = haus_dim(img_borders)
-        feat_vect[vect_idx + 1] = np.mean(vals)
+        feat_vect[vect_idx + 1] = mean
         feat_vect[vect_idx + 2] = len(vals)
         vect_idx += 3
     return feat_vect, debug_imgs
