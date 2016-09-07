@@ -48,7 +48,6 @@ class Machine(object):
             self.z = z
         if e is not None:
             self.e = e
-        status.write(posx=self.x, posy=self.y, posz=self.z, pose=self.e)
 
     def check_movement(self, x=None, y=None, z=None, e=None):
         return self.control.check_movement(x=x, y=y, z=z, e=e)
@@ -64,12 +63,9 @@ class Machine(object):
         for i in range(tries):
             log.info('Pickup try {} of {}'.format(i + 1, tries))
             self.control.light(True)
-            status.write(light=True)
             # self.control.vacuum(True)   # Turned on in pickup routine
-            status.write(vacuum=True)
             h = self.control.pickup_custom()
             self.control.light(False)
-            status.write(light=False)
             if h is not None:
                 log.info('Picked up at height {}'.format(h, ))
                 self.last_pickup_height = h
@@ -86,12 +82,9 @@ class Machine(object):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
         self.control.light(True)
-        status.write(light=True)
         self.go(z=max(self.last_pickup_height - extra_z_down, 0))
         self.control.vacuum(False)
-        status.write(vacuum=False)
         self.control.light(False)
-        status.write(light=False)
         self.control.pickup_top()
         self.last_pickup_height = None
 

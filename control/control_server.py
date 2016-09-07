@@ -6,6 +6,8 @@ import logging
 import Pyro4
 import netifaces
 
+import status
+
 NEWLINE = b'\n'
 DEVICE  = '/dev/ttyAMA0'
 PORT    = 5001
@@ -70,10 +72,12 @@ class MachineController(object):
     def home(self):
         self._command('G28')
         self.block()
+        status.write(posx=0, posy=0, posz=0)
 
     def home_z(self):
         self._command('G28 Z0')
         self.block()
+        status.write(posz=0)
 
     def home_e(self):
         # big steps
@@ -93,6 +97,7 @@ class MachineController(object):
             self.go(e=0.5)
             self.block()
         self._command('G92 E0')   # reset E axis to 0
+        status.write(pose=0)
 
     def get_pickup_z(self):
         return self.pickup_z
@@ -127,6 +132,7 @@ class MachineController(object):
         if self._check_movement(x=x, y=y, z=z, e=e):
             cmd_str = 'G0' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
+            status.write(posx=x, posy=y, posz=z, pose=e)
             return True
         else:
             return False
@@ -135,6 +141,7 @@ class MachineController(object):
         if self._check_movement(x=x, y=y, z=z, e=e):
             cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
+            status.write(posx=x, posy=y, posz=z, pose=e)
             return True
         else:
             return False
@@ -223,10 +230,12 @@ class MachineController(object):
     def vacuum(self, state):
         cmd_str = 'M42' if state else 'M43'
         self._command(cmd_str)
+        status.write(vacuum=True if state else False)
 
     def light(self, state):
         cmd_str = 'M108' if state else 'M109'
         self._command(cmd_str)
+        status.write(light=True if state else False)
 
     def emergency(self):
         cmd_str = 'M112'
