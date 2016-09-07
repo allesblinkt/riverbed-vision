@@ -20,7 +20,6 @@ log = makelog('brain')
 CONTROL_HOSTNAME = '10.0.42.42'
 
 executor_save = ThreadPoolExecutor(max_workers=1)
-executor_step = ThreadPoolExecutor(max_workers=1)
 
 class Machine(object):
     """ High-level operations on CNC """
@@ -391,7 +390,6 @@ class Brain(object):
 
         # Case 1
         nc1, nc2 = self._turn_stone_calc(c1, 0.0, c2, da)
-
         max_y = self.stone_map.size[1]
         if c1[1] >= 0 and c2[1] >= 0 and c1[1] <= max_y and c2[1] <= max_y:
             return self._move_stone_absolute(nc1, 0, nc2, da)
@@ -400,10 +398,15 @@ class Brain(object):
             return self._move_stone_absolute(nc1, 180.0, nc2, da)
         # TODO: save map here ?
 
+    def save_map_wait(self):
+        # wait for map save if in progress
+        if hasattr(self, 'future_save'):
+            self.future_save.result()
+            del self.future_save
+
     def save_map(self):
-        log.debug('Saving map...')
-        self.stone_map.save()
-        log.debug('Saving map. Done.')
+        self.save_map_wait()
+        self.future_save = executor_save.submit(self.stone_map.save)
 
     def next_step(self):
         log.debug('Getting next step...')
@@ -412,15 +415,10 @@ class Brain(object):
         return r
 
     def performance(self):
-        future_save = executor_save.submit(self.save_map) # async call of save_map
-        future_step = executor_step.submit(self.next_step) # async call of next_step
 
         while True:
-            i, nc, na, stage, force = future_step.result()
-            future_step = executor_step.submit(self.next_step) # async call of next_step
-
+            i, nc, na, stage, force = self.next_step()
             self.c.check_pause()
-
             if i is not None:
                 s = self.stone_map.stones[i]
 
@@ -432,32 +430,22 @@ class Brain(object):
 
                 log.debug('Placing stone {} from {} to {}'.format(i, s.center, nc))
 
-                if self._move_stone(s.center, s.angle, nc, na):   # Pickup worked
-                    future_save.result() # wait until save is completed if still being done
-
+                success_move = self._move_stone(s.center, s.angle, nc, na)
+                if success_move:   # Pickup worked
                     self.stone_map.move_stone(s, new_center=nc, angle=na)
-                    # s.center = nc
-                    # s.angle = na
-
                     self.stone_map.stage = stage  # Commit stage
                     log.info('Placement worked')
+                    self.save_map()
                 else:  # Fail, flag
-                    future_save.result() # wait until save is completed if still being done
                     s.flag = True
                     log.info('Placement failed')
-
-                future_save = executor_save.submit(self.save_map) # async call of save_map
+                    self.save_map()
 
             elif force:  # Art wants us to advance anyhow
-                future_save.result() # wait until save is completed if still being done
                 self.stone_map.stage = stage  # Commit stage
-
-                future_save = executor_save.submit(self.save_map) # async call of save_map
+                self.save_map()
             else:
-                future_save.result() # wait until save is completed if still being done
                 time.sleep(1)
-
-        future_save.result() # wait until save is completed if still being done
 
 if __name__ == '__main__':
     brain = Brain(use_machine=True, create_new_map=False)

@@ -319,6 +319,7 @@ class StoneMap(object):
         #     cv2.rectangle(img, (a,b), (c,d), color=(255, 0, 0))
 
     def save(self, meta=False):
+        log.debug('Saving map...')
         with open('map/{}.data'.format(self.name), 'wb') as f:
             s = [Stone(x.center, x.size, x.angle, None, None, x.flag) for x in self.stones]
             d = {'stones1': s, 'size': self.size, 'stage': self.stage}
@@ -333,6 +334,7 @@ class StoneMap(object):
                 serialization.dump(d, f)
             # backup with timestamp
             shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data'.format(self.name, ts))
+        log.debug('Saving map... Done.')
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
