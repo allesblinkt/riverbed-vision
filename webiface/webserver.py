@@ -13,7 +13,7 @@ def root():
 
 @app.route('/status.json')
 def status_json():
-    s = status.read(['state'])
+    s = status.read()
     return jsonify(s)
 
 @app.route('/pause', methods=['POST'])

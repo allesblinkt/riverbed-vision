@@ -3,9 +3,7 @@ import shelve
 def read(keys=[]):
     try:
         d = shelve.open('/tmp/jller.status', 'r')
-        v = {}
-        for k in keys:
-            v[k] = d[k]
+        v = dict(d)
         d.close()
         return v
     except:
