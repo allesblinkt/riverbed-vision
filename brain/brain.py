@@ -218,7 +218,7 @@ class Brain(object):
             self.c.home()
             self.c.home_e()
             self.c.go(x=100, y=100, e=90)
-            self.c.feedrate(20000)
+            self.c.feedrate(17000)
 
     def start(self):
         pass
