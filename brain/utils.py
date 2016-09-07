@@ -147,7 +147,9 @@ class SpatialHashMap(object):
     def remove(self, obj):
         """Remove an object obj from the hash. This happens by a linear search, so it's not very performant."""
 
-        for hash, objects in self.contents.items():
+        keys = list(self.contents.keys())
+        for hash in keys:
+            objects = self.contents[hash]
             if obj in objects:
                 objects.remove(obj)
 
