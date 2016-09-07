@@ -206,8 +206,9 @@ class StoneMap(object):
         self.spatialmap.insert_object_at_point(stone.center, stone)
 
     def remove_stone(self, stone):
-        self.stones.remove(stone)
-        self.spatialmap.remove(stone)
+        if stone in self.stones:
+            self.stones.remove(stone)
+            self.spatialmap.remove(stone)
 
     def randomize(self, count=2000):
         """ Populate the map with random stones """
