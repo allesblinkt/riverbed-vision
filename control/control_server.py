@@ -258,6 +258,8 @@ class MachineController(object):
                     result = None
                 if line.lower().startswith('ok'):
                     return result
+                elif line.lower().startswith('!!'):
+                    raise StateException('Emergency')
                 else:
                     raise CommunicationException('Communication Error')
 
