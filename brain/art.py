@@ -141,7 +141,7 @@ def art_step(stonemap):
                 stage1_first = s
                 stage1_last = s
             else:
-                s = find_best_match(stage1_last, sel)
+                s = find_best_match(stage1_first, sel)
                 stage1_y += stage1_last.size[1] + s.size[1] + 5
                 stage1_last = s
             chosen_stone = s
