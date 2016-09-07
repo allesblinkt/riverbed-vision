@@ -241,7 +241,7 @@ class Brain(object):
         for new_stone in new_stones:
             # Add it
             add_count += 1
-            self.stones_map.add_stone(new_stone)
+            self.stone_map.add_stone(new_stone)
 
             for old_stone in old_stones:
                 remove_count += 1
@@ -254,7 +254,6 @@ class Brain(object):
         # select stones outside of the view
         # TODO: get these right:
 
-        
         # borderx, bordery = 0, 0
         # stones_o = [s for s in self.stone_map.stones if abs(s.center[0] - x) > (self.machine.cam.viewx / 2.0 - borderx) and abs(s.center[1] - y) > (self.machine.cam.viewy / 2.0 - bordery)]
         # log.debug('Continous scan: removing %d stones', len(self.stone_map.stones) - stones_o)
