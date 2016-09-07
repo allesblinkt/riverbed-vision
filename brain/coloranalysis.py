@@ -8,6 +8,35 @@ from log import makelog
 log = makelog(__name__)
 
 
+def histogram_lab(img, n_bins=16):
+    """
+    This feature extractor takes in a color image and returns a normalized color
+    histogram of the pixel counts of each hue.
+    """
+
+    has_mask = img.shape[2] == 4
+
+    color = img[:, :, 0:3] if has_mask else img
+    lab = cv2.cvtColor(color, cv2.COLOR_BGR2LAB)    # Convert to lab for better perceptual accuracy
+    lab_flat = lab.reshape((color.shape[0] * color.shape[1], 3))
+
+    if has_mask:
+        mask = img[:, :, 3]
+        mask = mask.reshape((mask.shape[0] * mask.shape[1], 1))
+        lab_flat = lab_flat[np.where(mask > 128)[0]]
+
+    l = lab_flat[:, 0]
+    a = lab_flat[:, 1]
+    b = lab_flat[:, 2]
+
+    hist_l = np.histogram(l, n_bins, density=True, range=(0, 255))[0]
+    hist_a = np.histogram(a, n_bins, density=True, range=(0, 255))[0]
+    hist_b = np.histogram(b, n_bins, density=True, range=(0, 255))[0]
+
+    hist = np.concatenate((hist_l, hist_a, hist_b), axis=0)
+    return hist
+
+
 def kmeans_quantization(img, n_clusters):
     """ Quantizises the image into a given number of clusters (n_clusters). 
         This can work with images (4 channel) that have an alpha channel, this gets ignored,
@@ -107,21 +136,23 @@ if __name__ == '__main__':
         small_img = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
         # dominant, hist, centers, processed, labels = kmeans_quantization(small_img, n_clusters=5)
 
-        dominant = centers[0]
-        rgb_dominant = lab_to_rgb(dominant)
+        # dominant = centers[0]
+        # rgb_dominant = lab_to_rgb(dominant)
 
-        print(len(centers))
-        print(len(hist))
+        # print(len(centers))
+        # print(len(hist))
 
-        num_clusts = len(centers)
-        for i in range(num_clusts):
-            x = int(i / num_clusts * w)
-            bh = int(h * hist[i] * 0.5)
+        # num_clusts = len(centers)
+        # for i in range(num_clusts):
+        #     x = int(i / num_clusts * w)
+        #     bh = int(h * hist[i] * 0.5)
 
-            cv2.rectangle(image, (x, h - bh), (x + 20, h), lab_to_rgb(centers[i]), cv2.FILLED)
+        #     cv2.rectangle(image, (x, h - bh), (x + 20, h), lab_to_rgb(centers[i]), cv2.FILLED)
 
-        cv2.circle(image, (w // 2, h // 2), w // 8, rgb_dominant, -1)
-        log.info('Time taken: %.3f', (time.time() - t))
+        # cv2.circle(image, (w // 2, h // 2), w // 8, rgb_dominant, -1)
+        # log.info('Time taken: %.3f', (time.time() - t))
+
+        limg = histogram_lab(image)
 
         cv2.imshow('image', image)
         if cv2.waitKey(0) == 27:
