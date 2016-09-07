@@ -34,7 +34,7 @@ def find_flower_pos(stonemap, stone, center):
             radius += 2.0
 
 
-def find_best_match(stone, selection, bucket_size_c=10, bucket_size_s=200):
+def find_best_match(stone, selection, bucket_size_c=10, bucket_size_s=50):
     min_colors = sorted(selection, key=lambda x: compare_colors(x.color, stone.color))
     min_structures = sorted(selection, key=lambda x: compare_histograms(x.structure, stone.structure))
 
