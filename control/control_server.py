@@ -5,6 +5,7 @@ import threading
 import logging
 import Pyro4
 import netifaces
+import time
 
 import status
 
@@ -52,6 +53,13 @@ class MachineController(object):
     def block(self):
         # M400 - Wait for the queue to be empty before answering "OK"
         self._command('M400')
+
+    def check_pause(self):
+        while True:
+            s = status.read(['state'])
+            if s is not None and 'state' in s and s['state'] != 'paused':
+                break
+            time.sleep(0.25)
 
     def reset(self):
         # send newlines to clear noise
