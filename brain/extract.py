@@ -211,9 +211,9 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
     cutout = src_img[bbox[1]:bbox[1] + bbox[3], bbox[0]:bbox[0] + bbox[2]]
 
     # b, g, r = cv2.split(cutout)  # TODO: use numpy?
-    r = cutout[:, :, 0]  # TODO: check
+    b = cutout[:, :, 0]  # TODO: check
     g = cutout[:, :, 1]
-    b = cutout[:, :, 2]
+    r = cutout[:, :, 2]
 
     # cropped = rotated_subimg(src_img, fit_center, fit_angle, fit_dim[0] * 2, fit_dim[1] * 2)
 
