@@ -229,8 +229,10 @@ class Brain(object):
 
         log.debug('Continous scan: found %d stones', len(new_stones))
 
-        camera_center = self.cam.camera_center_to_mm((x, y))
-        old_stones = self.stone_map.get_at_with_border(camera_center, border_size=max(self.cam.resx, self.cam.resy))
+        camera = self.machine.cam
+
+        camera_center = camera.camera_center_to_mm((x, y))
+        old_stones = self.stone_map.get_at_with_border(camera_center, border_size=max(camera.resx, camera.resy))
 
         add_count = 0
         remove_count = 0
