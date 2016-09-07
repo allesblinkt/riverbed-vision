@@ -109,6 +109,9 @@ class Camera(object):
         self.viewx = 39.0 * 2.0  # view width (in cnc units = mm). Transposed!
         self.viewy = 69.0 * 2.0  # view height (in cnc units = mm). Transposed!
         self.flipall = True
+        self.offset_x = -3.0
+        self.offset_y = 62.00  # used to be -3, +66
+
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4667'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_auto=1'])  # means disable
@@ -118,9 +121,19 @@ class Camera(object):
     def pos_to_mm(self, pos, offset=(0, 0)):
         """ Calculate distance of perceived pixel from center of the view (in cnc units = mm) """
         # distance offset from head center to camera center
-        dx, dy = -3.0, +62.00  # used to be -3, +66
+        dx = self.offset_x
+        dy = self.offset_y
         x = dx + self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
         y = dy + self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
+        return x, y
+
+    def camera_pos_to_mm(self, pos):
+        """ Converts from camera center to head coordinates """
+        # distance offset from head center to camera center
+        dx = self.offset_x
+        dy = self.offset_y
+        x = -dx + pos[0]
+        y = -dy + pos[1]
         return x, y
 
     def camera_center_to_mm(self, pos):
