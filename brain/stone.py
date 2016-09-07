@@ -156,7 +156,7 @@ class StoneMap(object):
         self.maxstonesize *= 2.0
 
         # Manual, so we can resume with different scan
-        self.maxstonesize = 26.0 * 2.0
+        self.maxstonesize = 22.0 * 2.0
 
     def is_inside(self, stone):
         """Check if a stone center is within the bounds of the map."""
