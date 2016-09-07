@@ -210,6 +210,7 @@ class Brain(object):
         f()
 
     def scan_update(self):
+        self.m.go(e=90)
         log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
         x, y = self.machine.x, self.machine.y
         st = self.machine.cam.grab_extract(x, y, save=False)
@@ -388,13 +389,15 @@ class Brain(object):
 
         self.m.go(x=c1[0], y=c1[1], e=a1)
         self.scan_update()
+        self.m.go(x=c1[0], y=c1[1], e=a1)
 
-        ret = self.m.lift_up(x=c1[0], y=c1[1])
+        ret = self.m.lift_up(x=c1[0], y=c1[1], e=a1)
 
         if ret:
             self.m.go(x=c2[0], y=c2[1], e=a2)
             self.m.lift_down()
             self.scan_update()
+
             return True
         else:
             return False
