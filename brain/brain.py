@@ -440,7 +440,7 @@ class Brain(object):
             self.m.go(x=c2[0], y=c2[1], e=a2)
             self.m.lift_down()
 
-            d_head = self.machine.head_delta(e=a2)
+            d_head = self.machine.head_delta(a2)
             pickup_pos = (d_head[0] + c2[0], d_head[1] + c2[1])
             scan_pos = self.machine.cam.camera_pos_to_mm(pickup_pos)
 
