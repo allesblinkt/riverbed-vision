@@ -148,7 +148,7 @@ class StoneMap(object):
     def _metadata(self):
         self.maxstonesize = 0
         for i, s in enumerate(self.stones):
-            s.index = i
+            # s.index = i   # Not relying on index
 
             if not hasattr(s, 'flag'):
                 s.flag = False
@@ -352,7 +352,7 @@ class StoneMap(object):
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
-    #map.stage = (0, 0, None, None)  # NOTE: use this to override the current state
+    #map.stage = (0, 0, None, None, None)  # NOTE: use this to override the current state
     map.save(meta=True)
 
 
@@ -380,25 +380,22 @@ if __name__ == '__main__':
             map.image_svg(svg_drawing, scale=2, stone_scale=0.89)
             svg_drawing.save()
 
-        i, nc, na, stage, force = art_step(map)
+        chosen_stone, nc, na, stage, force = art_step(map)
 
         do_fail = False               # Never fail
         # do_fail = random() < 0.05   # Simulates that 5% of stones cannot be picked up
 
-        if i is not None and not do_fail:
-            stone = map.stones[i]
-
-            map.holes.append(StoneHole(map.stones[i]))
+        if chosen_stone is not None and not do_fail:
+            map.holes.append(StoneHole(chosen_stone))
 
             if nc is not None and na is not None and not do_fail:
-                log.debug('Placing stone {} from {} to {}'.format(i, stone.center, nc))
+                log.debug('Placing stone {} from {} to {}'.format(chosen_stone, chosen_stone.center, nc))
 
-                map.move_stone(stone, nc, na)
+                map.move_stone(chosen_stone, nc, na)
 
             map.stage = stage
-        elif i is not None:
-            stone = map.stones[i]
-            stone.flag = True
+        elif chosen_stone is not None:
+            chosen_stone.flag = True
         elif force:
             map.stage = stage
 

@@ -496,18 +496,17 @@ class Brain(object):
     def performance(self):
 
         while True:
-            i, nc, na, stage, force = self.next_step()
+            chosen_stone, nc, na, stage, force = self.next_step()
             self.c.check_pause()
-            if i is not None:
-                s = self.stone_map.stones[i]
-
+            if chosen_stone is not None:
+                s = chosen_stone
                 if nc is None:
                     nc = s.center
 
                 if na is None:
                     na = s.angle
 
-                log.debug('Placing stone {} from {} to {}'.format(i, s.center, nc))
+                log.debug('Placing stone {} from {} to {}'.format(s, s.center, nc))
 
                 success_move = self._move_stone(s.center, s.angle, nc, na)
                 self.save_map_wait()

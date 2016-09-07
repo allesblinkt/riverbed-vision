@@ -61,12 +61,14 @@ def in_workarea(stone):
 
 def art_step(stonemap):
     if stonemap.stage is not None:
-        stage_mode, stage_step, stage1_y, stage1_last_index = stonemap.stage
-        stage1_last = stonemap.stones[stage1_last_index] if stage1_last_index is not None else None
+        stage_mode, stage_step, stage1_y, stage1_last, stage1_first = stonemap.stage
+        # stage1_last = stonemap.stones[stage1_last_index] if stage1_last_index is not None else None   # TODO: First 
     else:
+        log.info('Created new stage')
         stage_mode = 0
         stage1_y = None
         stage1_last = None
+        stage1_first = None
         stage_step = 0
 
     # Color range
@@ -95,7 +97,7 @@ def art_step(stonemap):
 
             flower_seeds.append((x, y))
 
-    index, new_center, new_angle = None, None, None
+    chosen_stone, new_center, new_angle = None, None, None
 
     # clean unusable holes
     stonemap.holes = [h for h in stonemap.holes if not in_workarea(h) and h.center[0] + h.size <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1)]
@@ -104,7 +106,7 @@ def art_step(stonemap):
         sel = [s for s in stonemap.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step) ]
         if sel:
             s = sel[0]
-            index = s.index
+            chosen_stone = s
 
             bucket = map_value(s.color[0], min_l, max_l, 0, len(flower_seeds) + 1)
             bucket = constrain(int(bucket), 0, len(flower_seeds) - 1)
@@ -131,17 +133,18 @@ def art_step(stonemap):
                 # first run of this stage
                 stage1_y = 50
                 # pick random stone
-                if stage1_last is not None:
-                    s = find_most_distant_color(stage1_last, sel)
+                if stage1_first is not None:
+                    s = find_most_distant_color(stage1_first, sel)
                 else:
                     s = choice(sel)
 
+                stage1_first = s
                 stage1_last = s
             else:
                 s = find_best_match(stage1_last, sel)
                 stage1_y += stage1_last.size[1] + s.size[1] + 5
                 stage1_last = s
-            index = s.index
+            chosen_stone = s
             new_angle = 0
             x = WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 0.5)
             new_center = x, stage1_y
@@ -153,14 +156,14 @@ def art_step(stonemap):
     elif stage_mode == 2:   # Done
         pass
 
-    if index is not None:
+    if chosen_stone is not None:
         force_advance = False
-        log.debug('Art stage mode %d: stone %s => new center: %s, new angle: %s', stage_mode, index, str(new_center), str(new_angle))
+        log.debug('Art stage mode %d: stone %s => new center: %s, new angle: %s', stage_mode, str(chosen_stone), str(new_center), str(new_angle))
     else:
         force_advance = True
         stage_mode = min(stage_mode + 1, MAX_STAGE_MODE)
         log.debug('Art stage mode %d: None', stage_mode)
 
-    stage = stage_mode, stage_step, stage1_y, stage1_last.index if stage1_last else None   # Do not store in map
+    stage = stage_mode, stage_step, stage1_y, stage1_last, stage1_first   # Do not store in map
 
-    return index, new_center, new_angle, stage, force_advance
+    return chosen_stone, new_center, new_angle, stage, force_advance
