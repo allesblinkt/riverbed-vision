@@ -362,3 +362,29 @@ smoothe kalzit
 
 25
 Bunter Liaskalk
+
+107
+Grünsandstein
+
+
+b
+Sandstein
+hell
+
+76 Garbage
+
+52
+Sandstein 
+rech hell
+
+
+105
+Dunkle Sandsteine (split?)
+rötlichdunkel
+
+
+109
+
+Sandstein
+grünlichdunkel
+Flysch?

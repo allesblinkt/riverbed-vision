@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from random import uniform
+import random
 import math
 
 
@@ -21,13 +21,67 @@ def constrain(value, lower, upper):
 
 def random_on_circle(rad):
     """Generate a random angle 2D vector (tuple) with a specified length rad."""
-    a = uniform(0, math.pi * 2.0)
+    a = random.uniform(0, math.pi * 2.0)
     return (rad * math.sin(a), rad * math.cos(a))
 
 
 def map_value(value, start1, stop1, start2, stop2):
     """Scale value from a range of start1, stop1, to a range of start2, stop2."""
     return start2 + (stop2 - start2) * ((value - start1) / float(stop1 - start1))
+
+
+def find_point_closest_to(points, point):
+    """Find the a point in points closest to point"""
+    best = None
+    best_dsq = 0
+
+    for p in points:
+        d_x = point[0] - p[0]
+        d_y = point[1] - p[1]
+        dsq = d_x * d_x + d_y * d_y
+
+        if best is None or dsq < best_dsq:
+            best = p
+            best_dsq = dsq
+
+    return best
+
+
+def find_most_distant_pair(points, iter=1000):
+    """Find a pair of points in points which are furthest apart.
+    This is determined by looking at a couple of random choices, as determined by iter"""
+
+    if len(points) < 2:
+        return None
+    elif len(points) == 2:
+        return (points[0], points[1])
+
+    best = None
+    best_dsq = 0
+
+    for i in range(iter):
+        a = random.choice(points)
+        b = random.choice(points)
+
+        d_x = a[0] - b[0]
+        d_y = a[1] - b[1]
+        dsq = d_x * d_x + d_y * d_y
+
+        if best is None or dsq > best_dsq:
+            best = (a, b)
+            best_dsq = dsq
+
+    return best
+
+
+def find_random_points(points, count=10):
+    """Find a number of random points in points"""
+    if len(points) < count:
+        return points.copy()
+
+    l = points.copy()
+    random.shuffle(l)
+    return l[:count]
 
 
 def rotated_subimg(image, center, theta, width, height):

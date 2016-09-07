@@ -159,7 +159,7 @@ def stones_list_similar(stone_id):
     count = parse_int_default(request.values.get('count'), 10)
     # count = 10
 
-    find_count = count * 5
+    find_count = count * 20
     l = trainer.find_best_matches(reference_stone, selection, find_count)
     random.shuffle(l)
     l = l[:count]
