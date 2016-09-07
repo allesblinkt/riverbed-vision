@@ -209,6 +209,26 @@ class Brain(object):
         f = getattr(self, prgname)
         f()
 
+    def scan_update(self):
+        log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
+        x, y = self.machine.x, self.machine.y
+        st = self.machine.cam.grab_extract(x, y, save=True)
+        stones_n = []
+        for s in st:
+            s.center = self.machine.cam.pos_to_mm(s.center, offset=(x, y))
+            s.size = self.machine.cam.size_to_mm(s.size)
+            s.rank = 0.0
+            stones_n.append(s)
+        log.debug('Continous scan: found %d stones', len(stones_n))
+        # select stones outside of the view
+        # TODO: get these right:
+        borderx, bordery = 0, 0
+        stones_o = [s for s in self.stone_map.stones if abs(s.center[0] - x) > (self.machine.cam.viewx / 2.0 - borderx) and abs(s.center[1] - y) > (self.machine.cam.viewy / 2.0 - bordery)]
+        log.debug('Continous scan: removing %d stones', len(self.stone_map.stones) - stones_o)
+        self.stone_map.stones = stones_o + stones_n
+        log.debug('Continous scan: end (%d stones)', len(self.stone_map.stones))
+        self.stone_map.save()
+
     def scan(self, startx=0, starty=0, analyze=True):
         log.debug('Begin scanning')
         self.c.pickup_top()
