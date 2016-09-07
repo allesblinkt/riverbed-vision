@@ -118,7 +118,7 @@ class Camera(object):
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4667'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_auto=1'])  # means disable
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_absolute=39'])
+        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_absolute=19'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'brightness=30'])
 
     def pos_to_mm(self, pos, offset=(0, 0)):
