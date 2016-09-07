@@ -17,7 +17,7 @@ from log import makelog
 log = makelog('brain')
 
 # CONTROL_HOSTNAME = 'localhost'
-CONTROL_HOSTNAME = '192.168.0.29'
+CONTROL_HOSTNAME = '10.0.42.42'
 
 executor_save = ThreadPoolExecutor(max_workers=1)
 executor_step = ThreadPoolExecutor(max_workers=1)
