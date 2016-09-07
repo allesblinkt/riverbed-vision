@@ -128,6 +128,7 @@ class StoneMap(object):
             log.warn(e)
 
             if create_new:
+                log.info('Creating map file')
                 self.save(meta=True)
             else:
                 raise(e)
