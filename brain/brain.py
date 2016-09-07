@@ -244,12 +244,11 @@ class Brain(object):
             self.stone_map.add_stone(new_stone)
 
             for old_stone in old_stones:
-                remove_count += 1
-
                 if new_stone.coincides(old_stone):
+                    remove_count += 1
                     self.stone_map.remove_stone(old_stone)
 
-        log.debug('Added %d new stones and removes %d old stones', remove_count, add_count)
+        log.debug('Added %d new stones and removes %d old stones', add_count, remove_count)
 
         # select stones outside of the view
         # TODO: get these right:
