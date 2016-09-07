@@ -184,13 +184,13 @@ class Camera(object):
 
 class Brain(object):
 
-    def __init__(self, use_machine=True):
+    def __init__(self, use_machine=True, create_new_map=False):
         if use_machine:
             self.machine = Machine(CONTROL_HOSTNAME)
         else:
             self.machine = None
 
-        self.stone_map = StoneMap('stonemap')
+        self.stone_map = StoneMap('stonemap', create_new=create_new_map)
         # shortcuts for convenience
 
         if self.machine:
@@ -458,7 +458,7 @@ class Brain(object):
         future_save.result() # wait until save is completed if still being done
 
 if __name__ == '__main__':
-    brain = Brain(use_machine=True)
+    brain = Brain(use_machine=True, create_new_map=True)
     brain.start()
     # brain.scan_from_files()
     # brain.scan(startx=2769, analyze=False)
