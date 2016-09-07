@@ -103,9 +103,12 @@ class MachineController(object):
             self._command('G92 E0')   # reset E axis to 0
             result = self._command('M119', read_result=True)
             if result.find('min_z:0') > -1:
+                self._command('G92 E0')   # reset E axis to 0
                 break
             self.go(e=0.5)
             self.block()
+
+        self.go(e=1.0)
         self._command('G92 E0')   # reset E axis to 0
         status.write(pose=0)
 
