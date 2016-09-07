@@ -118,10 +118,14 @@ class Camera(object):
     def pos_to_mm(self, pos, offset=(0, 0)):
         """ Calculate distance of perceived pixel from center of the view (in cnc units = mm) """
         # distance offset from head center to camera center
-        dx, dy = -3.0, +62.00 # used to be -3, +66
+        dx, dy = -3.0, +62.00  # used to be -3, +66
         x = dx + self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
         y = dy + self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
         return x, y
+
+    def camera_center_to_mm(self, pos):
+        """ Calculate where the camera center is at a given head position """
+        return self.pos_to_mm((self.resx * 0.5, self.resy * 0.5), offset=(pos[0], pos[1]))
 
     def size_to_mm(self, size):
         """ Calculate size of perceived pixels (in cnc units = mm) """
@@ -207,6 +211,53 @@ class Brain(object):
     def run(self, prgname):
         f = getattr(self, prgname)
         f()
+
+    def scan_update(self):
+        self.m.go(e=90)
+
+        log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
+        x, y = self.machine.x, self.machine.y
+        st = self.machine.cam.grab_extract(x, y, save=False)
+        new_stones = []
+
+        for s in st:
+            s.center = self.machine.cam.pos_to_mm(s.center, offset=(x, y))
+            s.size = self.machine.cam.size_to_mm(s.size)
+            s.rank = 0.0
+            s.bogus = False
+            new_stones.append(s)
+
+        log.debug('Continous scan: found %d stones', len(new_stones))
+
+        camera = self.machine.cam
+
+        camera_center = camera.camera_center_to_mm((x, y))
+        old_stones = self.stone_map.get_at_with_border(camera_center, border_size=max(camera.resx, camera.resy))
+
+        add_count = 0
+        remove_count = 0
+
+        for new_stone in new_stones:
+            # Add it
+            add_count += 1
+            self.stone_map.add_stone(new_stone)
+
+            for old_stone in old_stones:
+                if new_stone.coincides(old_stone):
+                    remove_count += 1
+                    self.stone_map.remove_stone(old_stone)
+
+        log.debug('Added %d new stones and removes %d old stones', add_count, remove_count)
+
+        # select stones outside of the view
+        # TODO: get these right:
+
+        # borderx, bordery = 0, 0
+        # stones_o = [s for s in self.stone_map.stones if abs(s.center[0] - x) > (self.machine.cam.viewx / 2.0 - borderx) and abs(s.center[1] - y) > (self.machine.cam.viewy / 2.0 - bordery)]
+        # log.debug('Continous scan: removing %d stones', len(self.stone_map.stones) - stones_o)
+        # self.stone_map.stones = stones_o + stones_n
+        # log.debug('Continous scan: end (%d stones)', len(self.stone_map.stones))
+        # self.stone_map.save()
 
     def scan(self, startx=0, starty=0, analyze=True):
         log.debug('Begin scanning')
@@ -329,7 +380,7 @@ class Brain(object):
             log.debug('End selecting/reducing stones')
             # copy selected stones to storage
             self.stone_map.stones = [s for s in chosen_stones]
-            self.stone_map.stage = (0, 2, None, None)
+            self.stone_map.stage = (0, 0, None, None)
 
             log.debug('Reduced from {} to {} stones'.format(len(stones), len(self.stone_map.stones)))
 
@@ -363,11 +414,16 @@ class Brain(object):
             return False
 
         self.m.go(x=c1[0], y=c1[1], e=a1)
+        self.scan_update()
+        self.m.go(x=c1[0], y=c1[1], e=a1)
+
         ret = self.m.lift_up(x=c1[0], y=c1[1])
 
         if ret:
             self.m.go(x=c2[0], y=c2[1], e=a2)
             self.m.lift_down()
+            self.scan_update()
+
             return True
         else:
             return False

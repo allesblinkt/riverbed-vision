@@ -136,8 +136,8 @@ if __name__ == '__main__':
         small_img = cv2.resize(image, (0, 0), fx=0.25, fy=0.25)
         # dominant, hist, centers, processed, labels = kmeans_quantization(small_img, n_clusters=5)
 
-        # dominant = centers[0]
-        # rgb_dominant = lab_to_rgb(dominant)
+        dominant = centers[0]
+        rgb_dominant = lab_to_rgb(dominant)
 
         # print(len(centers))
         # print(len(hist))
@@ -149,7 +149,9 @@ if __name__ == '__main__':
 
         #     cv2.rectangle(image, (x, h - bh), (x + 20, h), lab_to_rgb(centers[i]), cv2.FILLED)
 
-        # cv2.circle(image, (w // 2, h // 2), w // 8, rgb_dominant, -1)
+        # cv2.rectangle(image, (0, 0 , (x + 20, h), lab_to_rgb(centers[i]), cv2.FILLED)
+
+        cv2.circle(image, (w // 2, h // 2), w // 8, rgb_dominant, -1)
         # log.info('Time taken: %.3f', (time.time() - t))
 
         limg = histogram_lab(image)

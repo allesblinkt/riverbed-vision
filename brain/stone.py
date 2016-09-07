@@ -172,6 +172,9 @@ class StoneMap(object):
 
         return True
 
+    def get_at_with_border(self, center, border_size):
+        return self.spatialmap.get_at_with_border(center, border_size)
+
     def can_put(self, stone):
         """Checks if we can put the stone to a new position."""
         border_size = (max(stone.size) + self.maxstonesize)  # FIXME: Check *2 or not. Not sure
@@ -197,6 +200,15 @@ class StoneMap(object):
 
         if angle is not None:
             stone.angle = angle
+
+    def add_stone(self, stone):
+        self.stones.append(stone)
+        self.spatialmap.insert_object_at_point(stone.center, stone)
+
+    def remove_stone(self, stone):
+        if stone in self.stones:
+            self.stones.remove(stone)
+            self.spatialmap.remove(stone)
 
     def randomize(self, count=2000):
         """ Populate the map with random stones """
