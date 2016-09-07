@@ -57,9 +57,11 @@ class MachineController(object):
     def check_pause(self):
         while True:
             s = status.read(['state'])
-            if s is not None and 'state' in s and s['state'] != 'paused':
+            if s is not None and 'state' in s and s['state'] == 'paused':
+                time.sleep(0.25)
+                continue
+            else:
                 break
-            time.sleep(0.25)
 
     def reset(self):
         # send newlines to clear noise
