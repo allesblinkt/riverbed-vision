@@ -126,7 +126,8 @@ class Camera(object):
 
     def camera_center_to_mm(self, pos):
         """ Calculate where the camera center is at a given head position """
-        return pos_to_mm((self.resx * 0.5, self.resy * 0.5), offset=(pos[0], pos[1]))
+        return self.pos_to_mm((self.resx * 0.5, self.resy * 0.5), offset=(pos[0], pos[1]))
+
     def size_to_mm(self, size):
         """ Calculate size of perceived pixels (in cnc units = mm) """
         w = self.viewx * size[0] / self.resx
