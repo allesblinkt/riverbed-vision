@@ -18,12 +18,12 @@ def status_json():
 
 @app.route('/sleep', methods=['POST'])
 def sleep():
-    status.write('state', 'sleeping')
+    status.write(state='sleeping')
     return 'ok'
 
 @app.route('/unsleep', methods=['POST'])
 def unsleep():
-    status.write('state', 'working')
+    status.write(state='working')
     return 'ok'
 
 if __name__ == '__main__':

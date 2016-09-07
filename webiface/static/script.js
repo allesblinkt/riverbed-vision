@@ -5,6 +5,9 @@ var updateStatus = function(data) {
     document.getElementById('status_posx').innerHTML = data.posx;
     document.getElementById('status_posy').innerHTML = data.posy;
     document.getElementById('status_posz').innerHTML = data.posz;
+    document.getElementById('status_pose').innerHTML = data.pose;
+    document.getElementById('status_vacuum').innerHTML = data.vacuum;
+    document.getElementById('status_light').innerHTML = data.light;
     buttonsEnabled(true);
 }
 

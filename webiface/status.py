@@ -11,11 +11,12 @@ def read(keys=[]):
     except:
         return None
 
-def write(key, data):
+def write(**data):
     for _ in range(10): # try writing 10 times
         try:
             d = shelve.open('/tmp/jller.status', 'c')
-            d[key] = data
+            for k in data.keys():
+                d[k] = data[k]
             d.close()
             return
         except OSError as e:
