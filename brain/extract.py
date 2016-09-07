@@ -271,7 +271,7 @@ def threshold_adaptive_with_saturation(image):
     thresh_s_img = cv2.adaptiveThreshold(gray_s_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -15)
 
     thresh_v_sure_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -5)
-    thresh_v_sure_img[gray_v_img > 252] = 0    # prevent adaptive runaway
+    thresh_v_sure_img[gray_v_img > 230] = 0    # prevent adaptive runaway
 
     # Secondary static threshhold on saturation
     thresh_s_img[gray_s_img > 235] = 0
@@ -450,7 +450,7 @@ def main():
         full_fn = os.path.join(p, fn)
         log.info('Processing %s', full_fn)
         frame = cv2.imread(full_fn)
-        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=False, debug_wait=False)
+        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=True)
 
 
     # grab_0429_1380.jpg
