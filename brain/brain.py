@@ -11,7 +11,7 @@ from art import art_step
 from extract import process_image
 
 from utils import random_on_circle
-from stone import StoneMap
+from stone import StoneMap, Stone
 
 from log import makelog
 log = makelog('brain')
@@ -407,7 +407,7 @@ class Brain(object):
 
     def next_step(self):
         log.debug('Getting next step...')
-        r = art_step(self.map)
+        r = art_step(self.stone_map)
         log.debug('Getting next step. Done.')
         return r
 
