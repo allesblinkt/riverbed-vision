@@ -108,7 +108,7 @@ class MachineController(object):
             self.go(e=0.5)
             self.block()
 
-        self.go(e=1.0)
+        self.go(e=3.0)
         self._command('G92 E0')   # reset E axis to 0
         status.write(pose=0)
 
