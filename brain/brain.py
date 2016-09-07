@@ -48,6 +48,7 @@ class Machine(object):
             self.z = z
         if e is not None:
             self.e = e
+        status.write(posx=self.x, posy=self.y, posz=self.z, pose=self.e)
 
     def check_movement(self, x=None, y=None, z=None, e=None):
         return self.control.check_movement(x=x, y=y, z=z, e=e)
@@ -63,9 +64,12 @@ class Machine(object):
         for i in range(tries):
             log.info('Pickup try {} of {}'.format(i + 1, tries))
             self.control.light(True)
+            status.write(light=True)
             # self.control.vacuum(True)   # Turned on in pickup routine
+            status.write(vacuum=True)
             h = self.control.pickup_custom()
             self.control.light(False)
+            status.write(light=False)
             if h is not None:
                 log.info('Picked up at height {}'.format(h, ))
                 self.last_pickup_height = h
@@ -82,9 +86,12 @@ class Machine(object):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
         self.control.light(True)
+        status.write(light=True)
         self.go(z=max(self.last_pickup_height - extra_z_down, 0))
         self.control.vacuum(False)
+        status.write(vacuum=False)
         self.control.light(False)
+        status.write(light=False)
         self.control.pickup_top()
         self.last_pickup_height = None
 
@@ -111,12 +118,13 @@ class Camera(object):
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4667'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_auto=1'])  # means disable
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_absolute=39'])
+        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_absolute=19'])
         subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'brightness=30'])
 
     def pos_to_mm(self, pos, offset=(0, 0)):
         """ Calculate distance of perceived pixel from center of the view (in cnc units = mm) """
-        dx, dy = -3.0, +66.00  # distance offset from head center to camera center
+        # distance offset from head center to camera center
+        dx, dy = -3.0, +62.00 # used to be -3, +66
         x = dx + self.viewx * (pos[0] / self.resx - 0.5) + offset[0]
         y = dy + self.viewy * (pos[1] / self.resy - 0.5) + offset[1]
         return x, y

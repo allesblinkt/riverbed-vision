@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import re
 import serial
 import threading
@@ -6,9 +6,10 @@ import logging
 import Pyro4
 import netifaces
 
-NEWLINE = '\n'
+NEWLINE = b'\n'
 DEVICE  = '/dev/ttyAMA0'
 PORT    = 5001
+IFACE   = 'wlan0'
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -74,6 +75,25 @@ class MachineController(object):
         self._command('G28 Z0')
         self.block()
 
+    def home_e(self):
+        # big steps
+        while True:
+            self._command('G92 E0')   # reset E axis to 0
+            result = self._command('M119', read_result=True)
+            if result.find('min_z:1') > -1:
+                break
+            self.go(e=-3)
+            self.block()
+        # opposite side
+        while True:
+            self._command('G92 E0')   # reset E axis to 0
+            result = self._command('M119', read_result=True)
+            if result.find('min_z:0') > -1:
+                break
+            self.go(e=0.5)
+            self.block()
+        self._command('G92 E0')   # reset E axis to 0
+
     def get_pickup_z(self):
         return self.pickup_z
 
@@ -91,7 +111,7 @@ class MachineController(object):
                 log.warn('Invalid movement: Z=%f', kwargs['z'])
                 return False
         if 'e' in kwargs and kwargs['e'] is not None:
-            if kwargs['e'] < 0 or kwargs['e'] > 180:
+            if kwargs['e'] < -3 or kwargs['e'] > 180:
                 log.warn('Invalid movement: E=%f', kwargs['e'])
                 return False
         return True
@@ -224,15 +244,15 @@ class MachineController(object):
         if self.serial_port:
             with self.serial_mutex:
                 self.serial_port.flushInput()
-                self.serial_port.write(cmd_str + NEWLINE)
+                self.serial_port.write(bytes(cmd_str, 'utf-8') + NEWLINE)
                 # self.serial_port.flushOutput()
-                line = self.serial_port.readline()
+                line = self.serial_port.readline().decode('utf-8')
                 log.debug('Received line "%s"', line.rstrip())
                 if read_result:
                     if line.startswith('ok'):
                         raise StateException('Expected result, but OK returned')
                     result = line
-                    line = self.serial_port.readline()
+                    line = self.serial_port.readline().decode('utf-8')
                     log.debug('Received line#2 "%s"', line.rstrip())
                 else:
                     result = None
@@ -274,7 +294,7 @@ class SerialOpenError(Exception):
 
 if __name__ == '__main__':
     try: # raspi detection
-        host = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
+        host = netifaces.ifaddresses(IFACE)[netifaces.AF_INET][0]['addr']
     except:
         host = 'localhost'
     daemon = Pyro4.Daemon(host=host, port=PORT)
