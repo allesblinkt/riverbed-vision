@@ -16,7 +16,8 @@ def write(**data):
         try:
             d = shelve.open('/tmp/jller.status', 'c')
             for k in data.keys():
-                d[k] = data[k]
+                if data[k] is not None:
+                    d[k] = data[k]
             d.close()
             return
         except OSError as e:

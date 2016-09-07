@@ -16,13 +16,13 @@ def status_json():
     s = status.read(['state'])
     return jsonify(s)
 
-@app.route('/sleep', methods=['POST'])
-def sleep():
-    status.write(state='sleeping')
+@app.route('/pause', methods=['POST'])
+def pause():
+    status.write(state='paused')
     return 'ok'
 
-@app.route('/unsleep', methods=['POST'])
-def unsleep():
+@app.route('/unpause', methods=['POST'])
+def unpause():
     status.write(state='working')
     return 'ok'
 
