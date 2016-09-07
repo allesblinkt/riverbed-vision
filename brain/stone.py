@@ -93,7 +93,10 @@ class StoneMap(object):
             meta = False
 
             with open('map/{}.data'.format(self.name), 'rb') as f:
+                log.debug('Opening map file')
                 d = serialization.load(f)
+                log.debug('Opened map file')
+
                 self.size = d['size']
 
                 if not isinstance(d['stage'], (int, float, complex)):
