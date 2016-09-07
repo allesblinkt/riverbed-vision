@@ -119,6 +119,8 @@ class StoneMap(object):
                     log.debug('Loading stones from NEW format #2')
                     sm = d['stones2']
 
+                    log.info('Loaded %d stones and %d metadata', len(self.stones), len(sm))
+
                     assert len(self.stones) == len(sm)
                     for i in range(len(sm)):
                         self.stones[i].color = sm[i]['color']
