@@ -218,15 +218,33 @@ class Brain(object):
         log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
         x, y = self.machine.x, self.machine.y
         st = self.machine.cam.grab_extract(x, y, save=False)
-        stones_n = []
+        new_stones = []
 
         for s in st:
             s.center = self.machine.cam.pos_to_mm(s.center, offset=(x, y))
             s.size = self.machine.cam.size_to_mm(s.size)
             s.rank = 0.0
-            stones_n.append(s)
-        
-        log.debug('Continous scan: found %d stones', len(stones_n))
+            s.bogus = False
+            new_stones.append(s)
+
+        log.debug('Continous scan: found %d stones', len(new_stones))
+
+        camera_center = self.cam.camera_center_to_mm((x, y))
+        old_stones = self.stone_map.get_at_with_border(camera_center, border_size=max(self.cam.resx, self.cam.resy))
+
+        add_count = 0
+        remove_count = 0
+
+        for new_stone in new_stones:
+            # Add it
+            add_count += 1
+            self.stones_map.add_stone(new_stone)
+
+            for old_stone in old_stones:
+                remove_count += 1
+
+                if new_stone.coincides(old_stone):
+                    self.stone_map.remove_stone(old_stone)
         # select stones outside of the view
         # TODO: get these right:
 
