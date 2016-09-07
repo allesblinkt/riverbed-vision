@@ -237,6 +237,8 @@ class Brain(object):
         add_count = 0
         remove_count = 0
 
+        self.save_map_wait()
+
         for new_stone in new_stones:
             # Add it
             add_count += 1
@@ -414,8 +416,8 @@ class Brain(object):
             return False
 
         self.m.go(x=c1[0], y=c1[1], e=a1)
-        self.scan_update()
-        self.m.go(x=c1[0], y=c1[1], e=a1)
+        # self.scan_update()
+        # self.m.go(x=c1[0], y=c1[1], e=a1)
 
         ret = self.m.lift_up(x=c1[0], y=c1[1])
 
@@ -487,6 +489,7 @@ class Brain(object):
                 log.debug('Placing stone {} from {} to {}'.format(i, s.center, nc))
 
                 success_move = self._move_stone(s.center, s.angle, nc, na)
+                self.save_map_wait()
                 if success_move:   # Pickup worked
                     self.stone_map.move_stone(s, new_center=nc, angle=na)
                     self.stone_map.stage = stage  # Commit stage
@@ -498,6 +501,7 @@ class Brain(object):
                     self.save_map()
 
             elif force:  # Art wants us to advance anyhow
+                self.save_map_wait()
                 self.stone_map.stage = stage  # Commit stage
                 self.save_map()
             else:
