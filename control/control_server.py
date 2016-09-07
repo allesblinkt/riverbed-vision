@@ -205,7 +205,7 @@ class MachineController(object):
             self.go(z=pick_z)
             self.block()
 
-            if pick_z < 0.05:
+            if pick_z < end_z + 1.0:
                 self.dwell(2000)
                 self.block()
 
