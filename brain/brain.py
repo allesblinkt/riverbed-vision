@@ -437,6 +437,12 @@ class Brain(object):
         if ret:
             self.m.go(x=c2[0], y=c2[1], e=a2)
             self.m.lift_down()
+
+            d_head = self.machine.head_delta(e=a2)
+            pickup_pos = (d_head[0] + c2[0], d_head[1] + c2[1])
+            scan_pos = self.machine.cam.camera_pos_to_mm(pickup_pos)
+
+            self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
             self.scan_update()
 
             return True
