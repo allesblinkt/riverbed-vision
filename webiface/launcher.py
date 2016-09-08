@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import os
 
 brain_proc = None
 
@@ -18,7 +19,11 @@ def run():
     # start brain and assign proc to brain_proc
     try:
         global brain_proc
-        brain_proc = subprocess.Popen(['/home/stick/work/scm/pebe/riverbed-vision/webiface/blink.sh']) # FIXME: correct args to Popen
+        path = __file__.split('/')[:-2] + ['brain']
+        cwd = '/'.join(path)
+        arg0 = '/'.join(path + ['brain.py'])
+        print('brain cwd=%s arg0=%s ' % (cwd, arg0), file=sys.stderr)
+        brain_proc = subprocess.Popen([arg0], cwd=cwd)
         print('brain started (PID %d)' % brain_proc.pid, file=sys.stderr)
     except Exception as e:
         print('brain start failed:', e, file=sys.stderr)
