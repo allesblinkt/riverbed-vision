@@ -211,6 +211,9 @@ class StoneMap(object):
         if stone in self.stones:
             self.stones.remove(stone)
             self.spatialmap.remove(stone)
+            return True
+
+        return False
 
     def randomize(self, count=2000):
         """ Populate the map with random stones """

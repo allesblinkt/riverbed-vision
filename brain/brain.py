@@ -261,8 +261,8 @@ class Brain(object):
 
             for old_stone in old_stones:
                 if new_stone.coincides(old_stone):
-                    remove_count += 1
-                    self.stone_map.remove_stone(old_stone)
+                    if self.stone_map.remove_stone(old_stone):
+                        remove_count += 1
 
         log.debug('Added %d new stones and removes %d old stones', add_count, remove_count)
 
