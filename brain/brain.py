@@ -252,8 +252,22 @@ class Brain(object):
 
         add_count = 0
         remove_count = 0
+        purge_count = 0
 
         self.save_map_wait()
+
+        for old_stone in old_stones:
+            cx = old_stone.center[0]
+            cy = old_stone.center[1]
+
+            d_x = abs(camera_center[0] - cx)
+            d_y = abs(camera_center[1] - cy)
+
+            stone_ext = old_stone.size[0]
+
+            if d_x + stone_ext < camera.viewx * 0.5 or d_y + stone_ext < camera.viewy * 0.5:
+                if self.stone_map.remove_stone(old_stone):
+                    purge_count += 1
 
         for new_stone in new_stones:
             # Add it
@@ -265,7 +279,7 @@ class Brain(object):
                     if self.stone_map.remove_stone(old_stone):
                         remove_count += 1
 
-        log.debug('Added %d new stones and removes %d old stones', add_count, remove_count)
+        log.debug('Added %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
 
         # select stones outside of the view
         # TODO: get these right:
