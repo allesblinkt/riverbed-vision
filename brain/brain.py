@@ -132,8 +132,8 @@ class Camera(object):
         # distance offset from head center to camera center
         dx = self.offset_x
         dy = self.offset_y
-        x = -dx + pos[0]
-        y = -dy + pos[1]
+        x = pos[0] - dx
+        y = pos[1] - dy
         return x, y
 
     def camera_center_to_mm(self, pos):
