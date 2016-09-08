@@ -7,7 +7,7 @@ def read(keys=[]):
         d.close()
         return v
     except:
-        return None
+        return {}
 
 def write(**data):
     for _ in range(10): # try writing 10 times
