@@ -350,7 +350,7 @@ class StoneMap(object):
                 d = {'stones2': s}
                 serialization.dump(d, f)
             # backup with timestamp
-            shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data'.format(self.name, ts))
+            shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data2'.format(self.name, ts))
         log.debug('Saving map... Done.')
 
 if __name__ == '__main__':
