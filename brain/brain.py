@@ -412,7 +412,7 @@ class Brain(object):
             log.debug('End selecting/reducing stones')
             # copy selected stones to storage
             self.stone_map.stones = [s for s in chosen_stones]
-            self.stone_map.stage = (0, 0, None, None)
+            self.stone_map.stage = (0, 0, None, None, None)
 
             log.debug('Reduced from {} to {} stones'.format(len(stones), len(self.stone_map.stones)))
 
