@@ -2,6 +2,22 @@
 <html>
 <head>
 <title>Jller</title>
+<style type="text/css">
+body {
+    font-family: sans-serif;
+}
+button {
+    margin: 1em;
+    font-size: 1.25em;
+    padding: 0.5em;
+}
+table {
+    margin: 1em;
+}
+p {
+    max-width: 40em;
+}
+</style>
 </head>
 <body>
 <h1>Jller</h1>
@@ -9,6 +25,7 @@
 <h2>Status</h2>
 
 <table>
+<tr><th>alive:</th><td id="status_alive">?</td></tr>
 <tr><th>state:</th><td id="status_state">?</td></tr>
 <tr><th>x:</th><td id="status_posx">?</td></tr>
 <tr><th>y:</th><td id="status_posy">?</td></tr>
@@ -21,6 +38,14 @@
 <button onclick="buttonAction('pause');">pause</button>
 
 <button onclick="buttonAction('unpause');">unpause</button>
+
+<h2>Something happened</h2>
+
+<p>Don't just use this button. It is here if the machine stopped working, e.g. if one of the axis failed or someone pressed the Emergency Stop.</p>
+
+<button onclick="buttonAction('start');">reinitialize</button>
+
+<button onclick="buttonAction('kill');" style="display: none;">kill</button>
 
 <script src="/static/script.js" type="text/javascript"></script>
 
