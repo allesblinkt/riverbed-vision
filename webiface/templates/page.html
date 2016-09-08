@@ -4,18 +4,26 @@
 <title>Jller</title>
 <style type="text/css">
 body {
-    font-family: sans-serif;
+    font-family: serif;
+    font-size: 3.25em;
 }
 button {
     margin: 1em;
     font-size: 1.25em;
     padding: 0.5em;
 }
-table {
+td, th {
+	text-align: left;
     margin: 1em;
+   	font-size: 1.25em;
 }
+
+h2.spacehead {
+	margin-top: 5em;
+}
+
 p {
-    max-width: 40em;
+    /*max-width: 40em;*/
 }
 </style>
 </head>
@@ -25,7 +33,7 @@ p {
 <h2>Status</h2>
 
 <table>
-<tr><th>alive:</th><td id="status_alive">?</td></tr>
+<tr><th>brain alive:</th><td id="status_alive">?</td></tr>
 <tr><th>state:</th><td id="status_state">?</td></tr>
 <tr><th>x:</th><td id="status_posx">?</td></tr>
 <tr><th>y:</th><td id="status_posy">?</td></tr>
@@ -39,9 +47,9 @@ p {
 
 <button onclick="buttonAction('unpause');">unpause</button>
 
-<h2>Something happened</h2>
+<h2 class="spacehead">Something happened</h2>
 
-<p>Don't just use this button. It is here if the machine stopped working, e.g. if one of the axis failed or someone pressed the Emergency Stop.</p>
+<p>Don't just use this button. It is here if the machine stopped working, e.g. if one of the axis failed or someone pressed the Emergency Stop. In those cases, <i>brain alive</i> should be false. Before reinitializing, please make sure that the big axis is aligned again (as explained) and the Emergency Stop is not active.</p>
 
 <button onclick="buttonAction('start');">reinitialize</button>
 
