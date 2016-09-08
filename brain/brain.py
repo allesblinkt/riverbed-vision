@@ -431,21 +431,11 @@ class Brain(object):
             return False
 
         self.m.go(x=c1[0], y=c1[1], e=a1)
-        # self.scan_update()
-        # self.m.go(x=c1[0], y=c1[1], e=a1)
-
         ret = self.m.lift_up(x=c1[0], y=c1[1])
 
         if ret:
             self.m.go(x=c2[0], y=c2[1], e=a2)
             self.m.lift_down()
-
-            d_head = self.machine.head_delta(a2)
-            pickup_pos = (d_head[0] + c2[0], d_head[1] + c2[1])
-            scan_pos = self.machine.cam.camera_pos_to_mm(pickup_pos)
-
-            self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
-            self.scan_update()
 
             return True
         else:
@@ -513,6 +503,13 @@ class Brain(object):
                 if success_move:   # Pickup worked
                     self.stone_map.move_stone(s, new_center=nc, angle=na)
                     self.stone_map.stage = stage  # Commit stage
+
+                    d_head = self.machine.head_delta(na)
+                    pickup_pos = (d_head[0] + nc[0], d_head[1] + nc[1])
+                    scan_pos = self.machine.cam.camera_pos_to_mm(pickup_pos)
+                    self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
+                    self.scan_update()
+
                     log.info('Placement worked')
                     self.save_map()
                 else:  # Fail, flag
