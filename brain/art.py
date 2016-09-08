@@ -38,6 +38,13 @@ def find_best_match(stone, selection, bucket_size_c=10, bucket_size_s=50):
     min_colors = sorted(selection, key=lambda x: compare_colors(x.color, stone.color))
     min_structures = sorted(selection, key=lambda x: compare_histograms(x.structure, stone.structure))
 
+    # for s in selection:
+    #     log.info(stone.color)
+
+    #     log.info(s.color)
+    #     log.info(compare_colors(stone.color, s.color))
+    #     log.info("===")
+
     color_set = set(min_colors[:bucket_size_c])
     structure_set = set(min_structures[:bucket_size_s])
 
@@ -141,7 +148,7 @@ def art_step(stonemap):
                 stage1_first = s
                 stage1_last = s
             else:
-                s = find_best_match(stage1_first, sel)
+                s = find_best_match(stage1_last, sel)
                 stage1_y += stage1_last.size[1] + s.size[1] + 5
                 stage1_last = s
             chosen_stone = s
