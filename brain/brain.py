@@ -506,7 +506,11 @@ class Brain(object):
 
         while True:
             chosen_stone, nc, na, stage, force = self.next_step()
+
+            log.info('Pausing here, if state paused...')
             self.c.check_pause()
+            log.info('Continuing.')
+
             if chosen_stone is not None:
                 s = chosen_stone
                 if nc is None:
