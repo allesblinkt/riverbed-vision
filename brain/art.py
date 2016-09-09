@@ -11,7 +11,6 @@ MAX_STAGE_MODE = 2  # How many stages / modes can we do (+1)
 WORKAREA_START_X = 2300
 
 flower_seeds = None
-min_l, max_l = None, None    # Cache luma calculations
 #min_l, max_l = None, None    # Cache luma calculations
 min_l, max_l = 30, 150    # Cache luma calculations
 
