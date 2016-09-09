@@ -268,7 +268,7 @@ class Brain(object):
             bounds_tol = 0.5 * 0.75 * 0.5
             center_tol = 0.5 * 0.5
             is_in_bounds = d_x + stone_ext < camera.viewx * bounds_tol and d_y + stone_ext < camera.viewy * bounds_tol
-            is_in_center = d_x < camera.view * center_tol and d_y < camera.view * center_tol
+            is_in_center = d_x < camera.viewx * center_tol and d_y < camera.viewy * center_tol
             if is_in_bounds and is_in_center:
                 if self.stone_map.remove_stone(old_stone):
                     purge_count += 1
@@ -519,6 +519,7 @@ class Brain(object):
 
                 success_move = self._move_stone(s.center, s.angle, nc, na)
                 self.save_map_wait()
+
                 if success_move:   # Pickup worked
                     self.stone_map.move_stone(s, new_center=nc, angle=na)
                     self.stone_map.stage = stage  # Commit stage
@@ -549,9 +550,9 @@ class Brain(object):
                 time.sleep(1)
 
 if __name__ == '__main__':
-    brain = Brain(use_machine=True, create_new_map=False)
+    brain = Brain(use_machine=False, create_new_map=True)
     brain.start()
-    # brain.scan_from_files()
+    brain.scan_from_files()
     # brain.scan(startx=1700, analyze=False)
     # brain.demo1()
-    brain.performance()
+    # brain.performance()
