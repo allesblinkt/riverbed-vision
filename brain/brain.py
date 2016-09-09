@@ -265,7 +265,9 @@ class Brain(object):
 
             stone_ext = old_stone.size[0]
 
-            if d_x + stone_ext < camera.viewx * 0.5 and d_y + stone_ext < camera.viewy * 0.5:
+            tol = 0.75 * 0.5
+
+            if d_x + stone_ext < camera.viewx * tol and d_y + stone_ext < camera.viewy * tol:
                 if self.stone_map.remove_stone(old_stone):
                     purge_count += 1
 
