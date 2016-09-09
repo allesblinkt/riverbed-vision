@@ -233,7 +233,7 @@ class Brain(object):
 
         log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
         x, y = self.machine.x, self.machine.y
-        st = self.machine.cam.grab_extract(x, y, save=True)
+        st = self.machine.cam.grab_extract(x, y, save=False)
         new_stones = []
 
         for s in st:
