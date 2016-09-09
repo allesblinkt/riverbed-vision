@@ -8,7 +8,7 @@ import threshholding
 
 blank = cv2.imread('blank.png')
 # orig_color_img = cv2.imread('cap3.png')
-orig_color_img = cv2.imread('../brain/map_offline/grab_1636_0281.jpg')
+orig_color_img = cv2.imread('../brain/map_offline/grab_2145_0345.jpg')
     # grab_0429_1380.jpg
     # grab_0429_1380.jpg
     # grab_1755_1173.jpg
