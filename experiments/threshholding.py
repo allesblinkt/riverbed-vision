@@ -20,21 +20,30 @@ def bla(orig_color_img, blank_img):
     half_img = cv2.resize(color_img, (color_img.shape[1]//2, color_img.shape[0]//2))
     image = half_img
 
+   
+    # image = cv2.resize(image, (image.shape[1]//4, image.shape[0]//4))
+
     # Grayscale conversion, blurring, threshold
+   # Grayscale conversion, blurring, threshold
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    h_img, s_img, v_img = cv2.split(hsv_img)
+    # h_img, s_img, v_img = cv2.split(hsv_img)   # TODO: use numpy?
+    # h_img = hsv_img[:, :, 0]  # TODO: check
+    s_img = hsv_img[:, :, 1]
+    v_img = hsv_img[:, :, 2]
+    h_img = hsv_img[:, :, 0]
 
     gray_s_img = cv2.GaussianBlur(255 - s_img, (15, 15), 0)
     gray_v_img = cv2.GaussianBlur(v_img, (5, 5), 0)
 
     thresh_v_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -15)
     thresh_s_img = cv2.adaptiveThreshold(gray_s_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -15)
+    thresh_v_img[gray_v_img > 240] = 0    # prevent adaptive runaway
 
     thresh_v_sure_img = cv2.adaptiveThreshold(gray_v_img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 151, -5)
-    thresh_v_sure_img[gray_v_img > 252] = 0    # prevent adaptive runaway
+    thresh_v_sure_img[gray_v_img > 230] = 0    # prevent adaptive runaway
 
     # Secondary static threshhold on saturation
-    thresh_s_img[gray_s_img > 235] = 0
+    #thresh_s_img[gray_s_img > 235] = 255
 
     # "AND" with relaxed thresshold of values
     thresh_s_img[thresh_v_img < 128] = 0
@@ -43,15 +52,6 @@ def bla(orig_color_img, blank_img):
     thresh_s_img[thresh_v_sure_img > 128] = 255
 
     thresh_img = thresh_s_img
-
-    # thresh_img = cv2.resize(thresh_img, (thresh_img.shape[1]*4, thresh_img.shape[0]*4), interpolation=cv2.INTER_CUBIC)
-    #thresh_img = cv2.GaussianBlur(thresh_img, (19, 19), 0)
-    _, thresh_img = cv2.threshold(thresh_img, 128, 255, cv2.THRESH_BINARY)
-
-    # print((time.time() - start)  * 1000)
-    # elapsed_b = (time.time() - start)  * 1000
-    # print(elapsed_b)
-    # print((elapsed_a/elapsed_b)*100.0)
 
 
     #cv2.imshow('orig_color_img', orig_color_img)
