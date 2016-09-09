@@ -25,7 +25,7 @@ def find_flower_pos(stonemap, stone, center):
         stone_dummy.center = new_center
         stone_dummy.angle = angle % 180
 
-        if in_workarea(stone_dummy) and stonemap.can_put(stone_dummy, border=5):
+        if in_workarea(stone_dummy) and stonemap.can_put(stone_dummy, border=4):
             return new_center, angle % 180
 
         angle += (137.50776405 / 5.0)
