@@ -557,9 +557,9 @@ class Brain(object):
                 time.sleep(1)
 
 if __name__ == '__main__':
-    brain = Brain(use_machine=False, create_new_map=True)
+    brain = Brain(use_machine=True, create_new_map=False)
     brain.start()
-    brain.scan_from_files()
+    # brain.scan_from_files()
     # brain.scan(startx=1700, analyze=False)
     # brain.demo1()
-    # brain.performance()
+    brain.performance()
