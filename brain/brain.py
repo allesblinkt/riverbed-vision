@@ -528,10 +528,10 @@ class Brain(object):
                     self.stone_map.move_stone(s, new_center=nc, angle=na)
                     self.stone_map.stage = stage  # Commit stage
 
-                    putdown_post = (nc[0], nc[1])
-                    scan_pos = self.machine.cam.camera_pos_to_mm(putdown_post)
-                    self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
-                    self.scan_update()
+                    # putdown_pos = (nc[0], nc[1])
+                    # scan_pos = self.machine.cam.camera_pos_to_mm(putdown_pos)
+                    # self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
+                    # self.scan_update()
 
                     log.info('Placement worked')
                     self.save_map()
