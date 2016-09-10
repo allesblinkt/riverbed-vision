@@ -73,7 +73,7 @@ def art_step(stonemap):
         # stage1_last = stonemap.stones[stage1_last_index] if stage1_last_index is not None else None   # TODO: First 
     else:
         log.info('Created new stage')
-        stage_mode = 0
+        stage_mode = -1
         stage1_y = None
         stage1_last = None
         stage1_first = None
@@ -110,6 +110,14 @@ def art_step(stonemap):
     # clean unusable holes
     stonemap.holes = [h for h in stonemap.holes if not in_workarea(h) and h.center[0] + h.size <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1)]
 
+
+    if stage_mode == -1:   # Unflag to clear stones
+        sel = [s for s in stonemap.stones if not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step) ]
+
+        if sel:
+            for s in sel:
+                s.flag = False
+        stage_mode == 0
     if stage_mode == 0:   # Clear area
         sel = [s for s in stonemap.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step) ]
         if sel:
@@ -159,7 +167,7 @@ def art_step(stonemap):
             if stage1_y > 1545:
                 stage1_y = None
                 stage_step += 1
-                stage_mode = 0
+                stage_mode = -1
 
     elif stage_mode == 2:   # Done
         pass
