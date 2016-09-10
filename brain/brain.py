@@ -256,6 +256,19 @@ class Brain(object):
 
         self.save_map_wait()
 
+        # Remove doublettes
+        for new_stone in new_stones:
+            # Add it
+            add_count += 1
+            self.stone_map.add_stone(new_stone)
+
+            for old_stone in old_stones:
+                if new_stone.coincides(old_stone):
+                    if self.stone_map.remove_stone(old_stone):
+                        new_stone.flag = old_stone.flag
+                        remove_count += 1
+
+        # Purge
         for old_stone in old_stones:
             cx = old_stone.center[0]
             cy = old_stone.center[1]
@@ -272,16 +285,6 @@ class Brain(object):
             if is_in_bounds and is_in_center:
                 if self.stone_map.remove_stone(old_stone):
                     purge_count += 1
-
-        for new_stone in new_stones:
-            # Add it
-            add_count += 1
-            self.stone_map.add_stone(new_stone)
-
-            for old_stone in old_stones:
-                if new_stone.coincides(old_stone):
-                    if self.stone_map.remove_stone(old_stone):
-                        remove_count += 1
 
         log.debug('Added %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
 
@@ -554,9 +557,9 @@ class Brain(object):
                 time.sleep(1)
 
 if __name__ == '__main__':
-    brain = Brain(use_machine=True, create_new_map=False)
+    brain = Brain(use_machine=False, create_new_map=True)
     brain.start()
-    # brain.scan_from_files()
+    brain.scan_from_files()
     # brain.scan(startx=1700, analyze=False)
     # brain.demo1()
-    brain.performance()
+    # brain.performance()
