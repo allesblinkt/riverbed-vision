@@ -24,11 +24,14 @@ ones = np.ones_like(maxi)
 
 max_thresh = threshold(maxi, None, ones * 224, 255)
 
+shadow = max_thresh - avg
+
 for i in range(4):
     cv2.imshow('img[%d]' % i, img[i])
 
 cv2.imshow('avg', avg)
 cv2.imshow('maxi', maxi)
 cv2.imshow('max_thresh', max_thresh)
+cv2.imshow('shadow', shadow)
 
 cv2.waitKey(0)
