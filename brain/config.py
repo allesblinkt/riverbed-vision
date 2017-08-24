@@ -41,8 +41,8 @@ class Machine(object):
     head_length = 0.0
     lift_up_tries = 2
     lift_up_jitter_rad = 3
-    lift_down_extra_z_down = 3.0
-    lift_down_eject_dwell = 100     # TODO: check
+    lift_down_extra_z_down = 2.5
+    lift_down_eject_dwell = 15
 
 class Brain(object):
 
