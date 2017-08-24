@@ -52,7 +52,7 @@ class Brain(object):
     init_x = 100
     init_y = 100
     init_e = 90
-    init_feedrate = 17500
+    init_feedrate = 32000
 
 class StoneMap(object):
 
