@@ -39,6 +39,8 @@ class MachineController(object):
         self.limits_y = [0, 1730]
         self.limits_z = [0, 110]
         self.limits_e = [-10000, 10000]
+
+        self.scan_z = 80.0
         self.pickup_z = 40.0
 
         if port_name:
@@ -119,6 +121,9 @@ class MachineController(object):
 
     def get_pickup_z(self):
         return self.pickup_z
+
+    def get_scan_z(self):
+        return self.scan_z
 
     def _check_movement(self, **kwargs):
         if 'x' in kwargs and kwargs['x'] is not None:
