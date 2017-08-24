@@ -34,7 +34,7 @@ class MachineController(object):
         self.serial_mutex = threading.Lock()
         self.serial_port = None
         self.port_name = port_name
-        self.pickup_z = 50.0
+        self.pickup_z = 40.0
 
         if port_name:
             log.info('Opening serial port %s at %d bps', port_name, baudrate)
@@ -189,7 +189,7 @@ class MachineController(object):
         self.home_z()
         return None
 
-    def pickup_custom(self, start_z=26.0, end_z=3.0, step=2.0):   # end at 0.0 for the new sucker, 1.5 for the new
+    def pickup_custom(self, start_z=24.0, end_z=0.0, step=1.5):   # end at 0.0 for the new sucker, 1.5 for the new
         self.pickup_top()
 
         has_picked = False
@@ -216,9 +216,9 @@ class MachineController(object):
                 has_picked = True
 
         if has_picked:
-            self.dwell(1500)
+            self.dwell(1000)
             self.block()
-            self.pickup_top()  # This also homes...
+            self.pickup_top()
 
             result = self._command('M119', read_result=True)   # Read again
             if result.find('Probe: 1') > -1:
