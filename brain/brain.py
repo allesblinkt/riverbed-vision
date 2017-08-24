@@ -315,8 +315,8 @@ class Brain(config.Brain):
 
     def scan(self, startx=0, starty=0, analyze=True):
         log.debug('Begin scanning')
-        self.c.pickup_top()
-        self.z = self.c.get_pickup_z()
+        self.c.scan_top()
+        self.z = self.c.get_scan_z()
         self.m.go(e=self.init_e)
         self.c.block()
 
