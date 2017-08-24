@@ -258,7 +258,7 @@ class MachineController(object):
 
     def light(self, state, channel=None):
         if channel is not None:
-            pwm_val = min(255, channel * (32) + 32)
+            pwm_val = min(255, channel * 15 + 15)
         else:
             pwm_val = 255
 
