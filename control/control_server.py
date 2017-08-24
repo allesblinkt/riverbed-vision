@@ -251,6 +251,10 @@ class MachineController(object):
         self._command(cmd_str)
         status.write(vacuum=True if state else False)
 
+    def eject(self, state):
+        cmd_str = 'M44' if state else 'M45'
+        self._command(cmd_str)
+        status.write(eject=True if state else False)
 
     def light(self, state, channel=None):
         if channel is not None:
