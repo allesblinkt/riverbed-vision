@@ -8,8 +8,8 @@ class Camera(object):
     view_transpose = False
     view_flip = False
 
-    offset_x = -3.0
-    offset_y = +62.00  # used to be -3, +66
+    offset_x = -6.0  # -3.0
+    offset_y = 45.5  # +62.00
 
     v4l_params_1 = {
         'brightness': 128,
