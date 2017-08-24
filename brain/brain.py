@@ -161,8 +161,8 @@ class Camera(config.Camera):
         self.machine.control.light(True, light_channel)
         try:
             cam = cv2.VideoCapture(self.index)
-            cam.set(cv2.CAP_PROP_FRAME_WIDTH, int(self.resy))
-            cam.set(cv2.CAP_PROP_FRAME_HEIGHT, int(self.resx))
+            cam.set(cv2.CAP_PROP_FRAME_WIDTH, int(self.resx))
+            cam.set(cv2.CAP_PROP_FRAME_HEIGHT, int(self.resy))
             cam.set(cv2.CAP_PROP_FPS, 10)
             # cam.set(cv2.CAP_PROP_EXPOSURE, 19)
             # cam.set(cv2.CAP_PROP_BRIGHTNESS, 10)
@@ -174,8 +174,9 @@ class Camera(config.Camera):
 
             cam.release()
             if ret:
-                frame = cv2.transpose(frame)
-                if self.flipall:
+                if self.view_transpose:
+                    frame = cv2.transpose(frame)
+                if self.view_flip:
                     frame = cv2.flip(frame, -1)
                 ret = frame
         except:

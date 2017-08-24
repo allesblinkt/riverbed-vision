@@ -1,10 +1,13 @@
 class Camera(object):
+    resx = 1920.0  # image width (in pixels). Transposed!
+    resy = 1080.0  # image height (in pixels). Transposed!
+                   
+    viewx = 95.0 * 2.0  # view width (in cnc units = mm). Transposed!
+    viewy = 53.0 * 2.0  # view height (in cnc units = mm). Transposed!
+                        
+    view_transpose = False
+    view_flip = False
 
-    resx = 720.0  # image width (in pixels). Transposed!
-    resy = 1280.0  # image height (in pixels). Transposed!
-    viewx = 39.0 * 2.0  # view width (in cnc units = mm). Transposed!
-    viewy = 69.0 * 2.0  # view height (in cnc units = mm). Transposed!
-    flipall = True
     offset_x = -3.0
     offset_y = +62.00  # used to be -3, +66
 
