@@ -1,15 +1,15 @@
 class Camera(object):
-    resx = 1920.0  # image width (in pixels). Transposed!
-    resy = 1080.0  # image height (in pixels). Transposed!
+    resx = 1080.0  # image width (in pixels). Enter transposed!
+    resy = 1920.0  # image height (in pixels). Enter transposed!
                    
-    viewx = 95.0 * 2.0  # view width (in cnc units = mm). Transposed!
-    viewy = 53.0 * 2.0  # view height (in cnc units = mm). Transposed!
+    viewx = 53.0 * 2.0  # view width (in cnc units = mm). Enter transposed!
+    viewy = 95.0 * 2.0  # view height (in cnc units = mm). Enter transposed!
                         
-    view_transpose = False
-    view_flip = False
+    view_transpose = True
+    view_flip = True
 
-    offset_x = -6.0  # -3.0
-    offset_y = 45.5  # +62.00
+    offset_x = 45.0  # -3.0
+    offset_y = -6.0  # +62.00
 
     v4l_params_1 = {
         'brightness': 128,
