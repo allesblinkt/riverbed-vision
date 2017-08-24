@@ -194,6 +194,7 @@ class MachineController(object):
 
         has_picked = False
         pick_z = start_z
+        self.eject(False)
         self.vacuum(True)
 
         self.go(z=pick_z)
@@ -250,8 +251,18 @@ class MachineController(object):
         self._command(cmd_str)
         status.write(vacuum=True if state else False)
 
-    def light(self, state):
-        cmd_str = 'M108' if state else 'M109'
+
+    def light(self, state, channel=None):
+        if channel is not None:
+            pwm_val = min(255, channel * (32) + 32)
+        else:
+            pwm_val = 255
+
+        if state:
+            cmd_str = 'M108 S%d' % (pwm_val, )
+        else:
+            cmd_str = 'M109'
+
         self._command(cmd_str)
         status.write(light=True if state else False)
 
