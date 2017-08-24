@@ -115,13 +115,32 @@ class Camera(object):
         self.flipall = True
         self.offset_x = -3.0
         self.offset_y = 62.00  # used to be -3, +66
+  
+        camera_params = {
+            'brightness': 128,
+            'contrast': 128,
+            'saturation': 128,
+            'white_balance_temperature_auto': 0,
+            'gain': 0,
+            'power_line_frequency': 1,   # 50 Hz
+            'white_balance_temperature': 5000,
+            'sharpness': 128,
+            'backlight_compensation': 0,
+            'exposure_auto': 1,
+            'exposure_absolute': 250,
+            'exposure_auto_priority': 0,
+            'pan_absolute': 0,
+            'tilt_absolute': 0,
+            'focus_absolute': 25,
+            'focus_auto': 0,
+            'zoom_absolute': 100
+        }
 
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature_auto=0'])
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'white_balance_temperature=4667'])
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_auto=1'])  # means disable
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'exposure_absolute=19'])
-        subprocess.call(['v4l2-ctl', '-d', self.videodev, '-c', 'brightness=30'])
-
+        v4l_cmd = ['v4l2-ctl', '-d', self.videodev]
+        for param_key, param_val in camera_params.items():
+            cmd_params = ['-c', '%s=%d' % (param_key, param_val)]
+            subprocess.call(v4l_cmd + cmd_params)
+       
     def pos_to_mm(self, pos, offset=(0, 0)):
         """ Calculate distance of perceived pixel from center of the view (in cnc units = mm) """
         # distance offset from head center to camera center
