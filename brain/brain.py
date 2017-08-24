@@ -129,7 +129,8 @@ class Camera(config.Camera):
             subprocess.call(v4l_cmd + cmd_params)
        
     def pos_to_mm(self, pos, offset=(0, 0)):
-        """ Calculate distance of perceived pixel from center of the view (in cnc units = mm) """
+        """ Calculate distance of perceived pixel from center of the view 
+            (in cnc units = mm) """
         # distance offset from head center to camera center
         dx = self.offset_x
         dy = self.offset_y
@@ -138,7 +139,9 @@ class Camera(config.Camera):
         return x, y
 
     def camera_pos_to_mm(self, pos):
-        """ Converts from camera center to head coordinates """
+        """ Converts from camera center to head coordinates
+            In other words, if you want to have the camera over a specific
+            point, you would use this... """
         # distance offset from head center to camera center
         dx = self.offset_x
         dy = self.offset_y
