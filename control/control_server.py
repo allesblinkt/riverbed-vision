@@ -97,6 +97,8 @@ class MachineController(object):
         status.write(posz=0)
 
     def home_e(self):
+        raise Exception('home_e is not intended for the new machine')
+
         # big steps
         while True:
             self._command('G92 E0')   # reset E axis to 0
