@@ -85,6 +85,10 @@ class Machine(object):
         self.control.light(True)
         self.go(z=max(self.last_pickup_height - extra_z_down, 0))
         self.control.vacuum(False)
+        self.control.eject(True)
+        self.control.dwell(100)  # TODO: how long
+        self.control.eject(False)
+
         self.control.light(False)
         self.control.pickup_top()
         self.last_pickup_height = None
