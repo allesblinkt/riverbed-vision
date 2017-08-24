@@ -34,6 +34,11 @@ class MachineController(object):
         self.serial_mutex = threading.Lock()
         self.serial_port = None
         self.port_name = port_name
+
+        self.limits_x = [0, 3730]
+        self.limits_y = [0, 1730]
+        self.limits_z = [0, 110]
+        self.limits_e = [-10000, 10000]
         self.pickup_z = 40.0
 
         if port_name:
@@ -117,19 +122,19 @@ class MachineController(object):
 
     def _check_movement(self, **kwargs):
         if 'x' in kwargs and kwargs['x'] is not None:
-            if kwargs['x'] < 0 or kwargs['x'] > 3770:
+            if kwargs['x'] < self.limits_x[0] or kwargs['x'] > self.limits_x[1]:
                 log.warn('Invalid movement: X=%f', kwargs['x'])
                 return False
         if 'y' in kwargs and kwargs['y'] is not None:
-            if kwargs['y'] < 0 or kwargs['y'] > 1730:
+            if kwargs['y'] < self.limits_y[0] or kwargs['y'] > self.limits_y[1]:
                 log.warn('Invalid movement: Y=%f', kwargs['y'])
                 return False
         if 'z' in kwargs and kwargs['z'] is not None:
-            if kwargs['z'] < 0 or kwargs['z'] > self.pickup_z:
+            if kwargs['z'] < self.limits_z[0] or kwargs['z'] > self.limits_z[1]:
                 log.warn('Invalid movement: Z=%f', kwargs['z'])
                 return False
         if 'e' in kwargs and kwargs['e'] is not None:
-            if kwargs['e'] < -3 or kwargs['e'] > 180:
+            if kwargs['e'] < self.limits_e[0] or kwargs['e'] > self.limits_e[1]:
                 log.warn('Invalid movement: E=%f', kwargs['e'])
                 return False
         return True
