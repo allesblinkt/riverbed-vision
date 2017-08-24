@@ -169,8 +169,8 @@ class MachineController(object):
         """
         z = min(self.pickup_z, max(0.0, self.pickup_z - offset))
         self.go(z=z)
-        self.dwell(500)
-        self.home_z()   # Also home for safety
+        self.dwell(500)   
+        self.home_z()   # Also home for safety # TODO: really home?
 
     def pickup_g30(self):
         self.pickup_top()
