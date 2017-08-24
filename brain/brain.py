@@ -22,7 +22,7 @@ executor_save = ThreadPoolExecutor(max_workers=1)
 
 class DummyMachine(config.Machine):
 
-    def __init__(self, hostname=Machine.CONTROL_HOSTNAME):
+    def __init__(self, hostname=DummyMachine.CONTROL_HOSTNAME):
         self.uri = 'PYRO:control@{}:5001'.format(hostname)
         log.info('Connecting to control server at %s', self.uri)
 
