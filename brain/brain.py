@@ -145,9 +145,9 @@ class Camera(config.Camera):
         h = self.viewy * size[1] / self.resy
         return w, h
 
-    def grab(self, save=False):
-        log.debug('Taking picture at coords {},{}'.format(self.machine.x, self.machine.y))
-        self.machine.control.light(True)
+    def grab(self, save=False, light_channel=None):
+        log.debug('Taking picture at coords {},{} (light_channel={})'.format(self.machine.x, self.machine.y, light_channel))
+        self.machine.control.light(True, light_channel)
         try:
             cam = cv2.VideoCapture(self.index)
             cam.set(cv2.CAP_PROP_FRAME_WIDTH, int(self.resy))
@@ -169,9 +169,12 @@ class Camera(config.Camera):
                 ret = frame
         except:
             ret = None
-        self.machine.control.light(False)
+        self.machine.control.light(False, light_channel)
         if ret is not None and save:
-            fn = 'grab_{:04d}_{:04d}'.format(int(self.machine.x), int(self.machine.y))
+            if light_channel:
+                fn = 'grab_{:04d}_{:04d}_l{:d}'.format(int(self.machine.x), int(self.machine.y), light_channel)
+            else:
+                fn = 'grab_{:04d}_{:04d}'.format(int(self.machine.x), int(self.machine.y))
             log.debug('Saving {}.jpg'.format(fn))
             cv2.imwrite('map/{}.jpg'.format(fn), ret)
         return ret
