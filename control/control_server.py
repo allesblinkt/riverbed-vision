@@ -34,7 +34,7 @@ class MachineController(object):
         self.serial_mutex = threading.Lock()
         self.serial_port = None
         self.port_name = port_name
-        self.pickup_z = 40.0
+        self.pickup_z = 50.0
 
         if port_name:
             log.info('Opening serial port %s at %d bps', port_name, baudrate)
@@ -169,8 +169,8 @@ class MachineController(object):
         """
         z = min(self.pickup_z, max(0.0, self.pickup_z - offset))
         self.go(z=z)
-        self.dwell(500)   
-        self.home_z()   # Also home for safety # TODO: really home?
+        self.dwell(200)   
+        # self.home_z()   # Also home for safety # TODO: really home?
 
     def pickup_g30(self):
         self.pickup_top()
