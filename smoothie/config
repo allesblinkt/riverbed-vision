@@ -11,11 +11,11 @@ mm_per_arc_segment                           0.5              # Arcs are cut int
 # Arm solution configuration : Cartesian robot. Translates mm positions into stepper positions
 alpha_steps_per_mm                           51.282051282               # CHANGED. Steps per mm for alpha stepper
 beta_steps_per_mm                            51.282051282               # CHANGED. Steps per mm for beta stepper
-gamma_steps_per_mm                           88.88             # CHANGED. Steps per mm for gamma stepper
+gamma_steps_per_mm                           500.0             # CHANGED. Steps per mm for gamma stepper
 
 # Planner module configuration : Look-ahead and acceleration configuration
 planner_queue_size                           32               # DO NOT CHANGE THIS UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING
-acceleration                                 1500             # Acceleration in mm/second/second.
+acceleration                                 750             # Acceleration in mm/second/second.
 #z_acceleration                              500              # Acceleration for Z only moves in mm/s^2, 0 uses acceleration which is the default. DO NOT SET ON A DELTA
 acceleration_ticks_per_second                1000             # Number of times per second the speed is updated
 junction_deviation                           0.05             # Similar to the old "max_jerk", in millimeters,
@@ -31,7 +31,7 @@ microseconds_per_step_pulse                  4                # Duration of step
 base_stepping_frequency                      100000           # Base frequency for stepping
 
 # Cartesian axis speed limits
-x_axis_max_speed                             20000            # mm/min
+x_axis_max_speed                             25000            # mm/min
 y_axis_max_speed                             40000            # mm/min
 z_axis_max_speed                             3000             # mm/min
 
@@ -48,11 +48,11 @@ beta_en_pin                                  0.10             # Pin for beta ena
 beta_current                                 nc               # CHANGED. Y stepper motor current
 beta_max_rate                                120000.0          # mm/min
 
-gamma_step_pin                               2.2v            # Pin for gamma stepper step signal
-gamma_dir_pin                                0.20^           # Pin for gamma stepper direction
-gamma_en_pin                                 nc               # CHANGED. Pin for gamma enable
+gamma_step_pin                               2.2              # Pin for gamma stepper step signal
+gamma_dir_pin                                0.20             # Pin for gamma stepper direction
+gamma_en_pin                                 0.19             # CHANGED. Pin for gamma enable
 gamma_current                                nc               # CHANGED. Z stepper motor current
-gamma_max_rate                               10000.0            # mm/min
+gamma_max_rate                               1000.0            # mm/min
 
 # Serial communications configuration ( baud rate default to 9600 if undefined )
 uart0.baud_rate                              19200           # Baud rate for the default hardware serial port
@@ -62,7 +62,7 @@ second_usb_serial_enable                     false            # This enables a s
 #play_led_disable                            true             # disable the play led
 
 # kill button (used to be called pause) maybe assigned to a different pin, set to the onboard pin by default
-kill_button_enable                           true             # set to true to enable a kill button
+kill_button_enable                           false             # set to true to enable a kill button  # TODO: chane, reenable
 kill_button_pin                              1.9^!             # kill button pin. default is same as pause button 2.12 (2.11 is another good choice)
 
 #msd_disable                                 false            # disable the MSD (USB SDCARD) when set to true (needs special binary)
@@ -71,14 +71,14 @@ kill_button_pin                              1.9^!             # kill button pin
 
 # Extruder module configuration
 extruder.hotend.enable                          true             # Whether to activate the extruder module at all. All configuration is ignored if false
-extruder.hotend.steps_per_mm                    26.66666         # CHANGED. Steps per mm for extruder stepper
+extruder.hotend.steps_per_mm                    5.5555555        # CHANGED. Steps per mm for extruder stepper
 extruder.hotend.default_feed_rate               500              # Default rate ( mm/minute ) for moves where only the extruder moves
 extruder.hotend.acceleration                    300              # Acceleration for the stepper motor mm/sec²
 extruder.hotend.max_speed                       500              # mm/s
 
-extruder.hotend.step_pin                        2.3v            # Pin for extruder step signal
-extruder.hotend.dir_pin                         0.22v!            # Pin for extruder dir signal
-extruder.hotend.en_pin                          nc               # CHANGED. Will use 0.21 for rot limit. Pin for extruder enable signal
+extruder.hotend.step_pin                        2.3              # Pin for extruder step signal
+extruder.hotend.dir_pin                         0.22             # Pin for extruder dir signal
+extruder.hotend.en_pin                          0.21             # CHANGED. Will use 0.21 for rot limit. Pin for extruder enable signal
 
 # extruder offset
 #extruder.hotend.x_offset                        0                # x offset from origin in mm
@@ -196,22 +196,29 @@ switch.vacuum.input_off_command                M43              #
 switch.vacuum.output_pin                       0.23             #
 switch.vacuum.output_type                      digital          # just an on or off pin
 
+# Vacuum eject output. CHANGED
+switch.eject.enable                           true             #
+switch.eject.input_on_command                 M44              #
+switch.eject.input_off_command                M45              #
+switch.eject.output_pin                       2.5              # 
+switch.eject.output_type                      digital          # just an on or off pin
+
 # LED output. CHANGED
 switch.led.enable                           true             #
-switch.led.input_on_command                 M108              #
-switch.led.input_off_command                M109              #
-switch.led.output_pin                       0.25             #
-switch.led.output_type                      digital          # just an on or off pin
+switch.led.input_on_command                 M108             #
+switch.led.input_off_command                M109             #
+switch.led.output_pin                       2.4              #
+switch.led.output_type                      hwpwm              # just an on or off pin
 
 # Rotation limit input. CHANGED
-switch.rlimit.enable                           true             #
+# switch.rlimit.enable                           true             #
 # switch.rlimit.output_on_command                M18              # if the switch is hit, disable 
-switch.rlimit.input_pin                        0.21^             #
+# switch.rlimit.input_pin                        0.21^             #
 
 # Fault limit input. CHANGED
 switch.fault.enable                           true             #
-switch.fault.output_on_command                M112              # if the switch is hit, disable 
-switch.fault.input_pin                        1.10^!             #
+switch.fault.output_on_command                M112             # if the switch is hit, disable 
+switch.fault.input_pin                        1.10^!           #
 
 
 # automatically toggle a switch at a specified temperature. Different ones of these may be defined to monitor different temperatures and switch different swithxes
@@ -239,15 +246,15 @@ beta_max_endstop                             nc               # CHANGED.
 beta_homing_direction                        home_to_min      #
 beta_min                                     0                #
 beta_max                                     750              #
-gamma_min_endstop                            nc               #
-gamma_max_endstop                            0.19^            # CHANGED. 
+gamma_min_endstop                            nc               # CHANGED. Note: this is the rotator endswitch...
+gamma_max_endstop                            4.28^            # CHANGED. 
 gamma_homing_direction                       home_to_max      # CHANGED.
 gamma_min                                    0                #
 gamma_max                                    40               # CHANGED.
 
 # optional order in which axis will home, default is they all home at the same time,
 # if this is set it will force each axis to home one at a time in the specified order
-homing_order                                 ZXY              # x axis followed by y then z last
+homing_order                                 ZXY              # 
 
 # optional enable limit switches, actions will stop if any enabled limit switch is triggered
 #alpha_limit_enable                          false            # set to true to enable X min and max limit switches
