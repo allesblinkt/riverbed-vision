@@ -20,8 +20,36 @@ Limit <2000mm?
 
 
 
+Z Old
 
-Z
+4 times microstepping
+
+16/20 belt ratio
+
+800 steps/rev
+2 mm/rev
+
+Limit 
+
+
+
+E Old
+
+16 times microstepping
+x teeth to x tee
+
+
+1/3 ratio
+
+600 steps/rev
+
+
+360deg = 360mm
+
+
+
+
+Z Old
 
 16 times microstepping
 
@@ -32,7 +60,7 @@ Limit
 
 
 
-E
+E Old
 
 16 times microstepping
 x teeth to x tee
