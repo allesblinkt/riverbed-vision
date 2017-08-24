@@ -123,15 +123,15 @@ class Camera(object):
             'white_balance_temperature_auto': 0,
             'gain': 0,
             'power_line_frequency': 1,   # 50 Hz
-            'white_balance_temperature': 5000,
+            'white_balance_temperature': 5000,  # TODO: check
             'sharpness': 128,
             'backlight_compensation': 0,
-            'exposure_auto': 1,
-            'exposure_absolute': 250,
+            'exposure_auto': 1,   # TODO: check
+            'exposure_absolute': 250,    # TODO: check
             'exposure_auto_priority': 0,
             'pan_absolute': 0,
             'tilt_absolute': 0,
-            'focus_absolute': 25,
+            'focus_absolute': 25,   # TODO: check
             'focus_auto': 0,
             'zoom_absolute': 100
         }
