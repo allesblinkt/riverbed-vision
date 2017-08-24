@@ -104,12 +104,12 @@ class Machine(config.Machine):
 
     def head_delta(self, angle=None):
         # length of rotating head (in mm)
-        if not self.head_length:
+        if not self.head_arm_length:
             return (0.0, 0.0)
         if angle is None:
             angle = self.e
         angle = math.radians(angle)
-        return (0.0 + self.head_length * math.sin(angle), 0.0 + self.head_length * math.cos(angle))
+        return (0.0 + self.head_arm_length * math.sin(angle), 0.0 + self.head_arm_length * math.cos(angle))
 
 
 class Camera(config.Camera):

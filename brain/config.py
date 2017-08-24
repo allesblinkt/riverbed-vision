@@ -41,7 +41,7 @@ class Machine(object):
     # CONTROL_HOSTNAME = 'localhost'
     CONTROL_HOSTNAME = '10.0.42.42'
 
-    head_length = 0.0
+    head_arm_length = 0.0
     lift_up_tries = 2
     lift_up_jitter_rad = 3
     lift_down_extra_z_down = 2.5
