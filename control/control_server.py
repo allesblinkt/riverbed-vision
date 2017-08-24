@@ -227,7 +227,9 @@ class MachineController(object):
         # reset Z and switch off the vacuum; return nothing
         self.vacuum(False)
         self.pickup_top(offset=9.0)   # Come near the homing, so it will be faster...
-        self.home_z()
+        
+        self.pickup_top()
+        # self.home_z()
 
         return None
 
