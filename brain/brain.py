@@ -7,6 +7,8 @@ from concurrent.futures import ThreadPoolExecutor
 import Pyro4
 import cv2
 
+import config
+
 from art import art_step
 from extract import process_image
 
@@ -16,15 +18,12 @@ from stone import StoneMap, Stone
 from log import makelog
 log = makelog('brain')
 
-# CONTROL_HOSTNAME = 'localhost'
-CONTROL_HOSTNAME = '10.0.42.42'
-
 executor_save = ThreadPoolExecutor(max_workers=1)
 
-class Machine(object):
+class Machine(config.Machine):
     """ High-level operations on CNC """
 
-    def __init__(self, hostname):
+    def __init__(self, hostname=Machine.CONTROL_HOSTNAME):
         self.uri = 'PYRO:control@{}:5001'.format(hostname)
         log.info('Connecting to control server at %s', self.uri)
 
@@ -53,12 +52,11 @@ class Machine(object):
     def check_movement(self, x=None, y=None, z=None, e=None):
         return self.control.check_movement(x=x, y=y, z=z, e=e)
 
-    def lift_up(self, x, y, tries=2, jitter_rad=3):
+    def lift_up(self, x, y, tries=Machine.lift_up_tries, jitter_rad=Machine.lift_up_jitter_rad):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
 
-        jit_x = 0
-        jit_y = 0
+        jit_x, jit_y = 0, 0
 
         # try lifting up tries times
         for i in range(tries):
@@ -79,14 +77,14 @@ class Machine(object):
         log.info('Pickup failed after {} tries'.format(tries, ))
         return False
 
-    def lift_down(self, extra_z_down=3.0):
+    def lift_down(self, extra_z_down=Machine.lift_down_extra_z_down):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
         self.control.light(True)
         self.go(z=max(self.last_pickup_height - extra_z_down, 0))
         self.control.vacuum(False)
         self.control.eject(True)
-        self.control.dwell(100)  # TODO: how long
+        self.control.dwell(self.lift_down_eject_dwell)
         self.control.eject(False)
 
         self.control.light(False)
@@ -95,49 +93,27 @@ class Machine(object):
 
     def head_delta(self, angle=None):
         # length of rotating head (in mm)
-        length = 40.0
+        if not self.head_length:
+            return (0.0, 0.0)
         if angle is None:
             angle = self.e
         angle = math.radians(angle)
-        return (0.0 + length * math.sin(angle), 0.0 + length * math.cos(angle))
+        return (0.0 + self.head_length * math.sin(angle), 0.0 + self.head_length * math.cos(angle))
 
 
-class Camera(object):
+class Camera(config.Camera):
 
     def __init__(self, machine, index=0):
         self.machine = machine
         self.index = index
         self.videodev = '/dev/video' + str(index)
-        self.resx = 720.0  # image width (in pixels). Transposed!
-        self.resy = 1280.0  # image height (in pixels). Transposed!
-        self.viewx = 39.0 * 2.0  # view width (in cnc units = mm). Transposed!
-        self.viewy = 69.0 * 2.0  # view height (in cnc units = mm). Transposed!
-        self.flipall = True
-        self.offset_x = -3.0
-        self.offset_y = 62.00  # used to be -3, +66
-  
-        camera_params = {
-            'brightness': 128,
-            'contrast': 128,
-            'saturation': 128,
-            'white_balance_temperature_auto': 0,
-            'gain': 0,
-            'power_line_frequency': 1,   # 50 Hz
-            'white_balance_temperature': 5000,  # TODO: check
-            'sharpness': 128,
-            'backlight_compensation': 0,
-            'exposure_auto': 1,   # TODO: check
-            'exposure_absolute': 250,    # TODO: check
-            'exposure_auto_priority': 0,
-            'pan_absolute': 0,
-            'tilt_absolute': 0,
-            'focus_absolute': 25,   # TODO: check
-            'focus_auto': 0,
-            'zoom_absolute': 100
-        }
 
         v4l_cmd = ['v4l2-ctl', '-d', self.videodev]
-        for param_key, param_val in camera_params.items():
+        for param_key, param_val in self.v4l_params_1.items():
+            cmd_params = ['-c', '%s=%d' % (param_key, param_val)]
+            subprocess.call(v4l_cmd + cmd_params)
+        time.sleep(0.5)
+        for param_key, param_val in self.v4l_params_2.items():
             cmd_params = ['-c', '%s=%d' % (param_key, param_val)]
             subprocess.call(v4l_cmd + cmd_params)
        
@@ -174,13 +150,13 @@ class Camera(object):
         self.machine.control.light(True)
         try:
             cam = cv2.VideoCapture(self.index)
-            cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-            cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+            cam.set(cv2.CAP_PROP_FRAME_WIDTH, int(self.resy))
+            cam.set(cv2.CAP_PROP_FRAME_HEIGHT, int(self.resx))
             cam.set(cv2.CAP_PROP_FPS, 10)
             # cam.set(cv2.CAP_PROP_EXPOSURE, 19)
             # cam.set(cv2.CAP_PROP_BRIGHTNESS, 10)
 
-            for i in range(3):  # Dummy captures to clear the buffer
+            for i in range(self.grab_dummy_frames):
                 cam.read()
 
             ret, frame = cam.read()
@@ -223,11 +199,11 @@ class Camera(object):
         return stones
 
 
-class Brain(object):
+class Brain(config.Brain):
 
     def __init__(self, use_machine=True, create_new_map=False):
         if use_machine:
-            self.machine = Machine(CONTROL_HOSTNAME)
+            self.machine = Machine()
         else:
             self.machine = None
 
@@ -241,8 +217,8 @@ class Brain(object):
             self.c.home()
             self.c.home_e()
             self.c.home()
-            self.c.go(x=100, y=100, e=90)
-            self.c.feedrate(17500)
+            self.c.go(x=self.init_x, y=self.init_y, e=self.init_e)
+            self.c.feedrate(self.init_feedrate)
 
     def start(self):
         pass
@@ -252,7 +228,7 @@ class Brain(object):
         f()
 
     def scan_update(self):
-        self.m.go(e=90)
+        self.m.go(e=self.init_e)
 
         log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
         x, y = self.machine.x, self.machine.y
@@ -325,7 +301,7 @@ class Brain(object):
         log.debug('Begin scanning')
         self.c.pickup_top()
         self.z = self.c.get_pickup_z()
-        self.m.go(e=90)
+        self.m.go(e=self.init_e)
         self.c.block()
 
         stones = []

@@ -9,6 +9,8 @@ import numpy as np
 import time
 import shutil
 
+import config
+
 from utils import distance, SpatialHashMap
 from art import art_step
 
@@ -76,13 +78,12 @@ class StoneHole(object):
         self.size = min(stone.size)
 
 
-class StoneMap(object):
+class StoneMap(config.StoneMap):
 
     def __init__(self, name, create_new=False):
         self.name = name
         self.stones = []
         self.holes = []
-        self.size = 3770, 1730
         self.stage = 0
 
         log.info('Loading map')
