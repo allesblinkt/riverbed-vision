@@ -233,8 +233,6 @@ class Brain(config.Brain):
             self.c = self.machine.control
             self.c.reset()
             self.c.home()
-            self.c.home_e()
-            self.c.home()
             self.c.go(x=self.init_x, y=self.init_y, e=self.init_e)
             self.c.feedrate(self.init_feedrate)
 
