@@ -22,7 +22,7 @@ executor_save = ThreadPoolExecutor(max_workers=1)
 
 class DummyMachine(config.Machine):
 
-    def __init__(self, hostname=DummyMachine.CONTROL_HOSTNAME):
+    def __init__(self, hostname=config.Machine.CONTROL_HOSTNAME):
         self.uri = 'PYRO:control@{}:5001'.format(hostname)
         log.info('Connecting to control server at %s', self.uri)
 
@@ -34,7 +34,7 @@ class DummyMachine(config.Machine):
 class Machine(config.Machine):
     """ High-level operations on CNC """
 
-    def __init__(self, hostname=Machine.CONTROL_HOSTNAME):
+    def __init__(self, hostname=config.Machine.CONTROL_HOSTNAME):
         self.uri = 'PYRO:control@{}:5001'.format(hostname)
         log.info('Connecting to control server at %s', self.uri)
 
@@ -63,7 +63,7 @@ class Machine(config.Machine):
     def check_movement(self, x=None, y=None, z=None, e=None):
         return self.control.check_movement(x=x, y=y, z=z, e=e)
 
-    def lift_up(self, x, y, tries=Machine.lift_up_tries, jitter_rad=Machine.lift_up_jitter_rad):
+    def lift_up(self, x, y, tries=config.Machine.lift_up_tries, jitter_rad=config.Machine.lift_up_jitter_rad):
         if self.last_pickup_height is not None:
             raise Exception('lift_up called, but previous call not cleared using lift_down')
 
@@ -88,7 +88,7 @@ class Machine(config.Machine):
         log.info('Pickup failed after {} tries'.format(tries, ))
         return False
 
-    def lift_down(self, extra_z_down=Machine.lift_down_extra_z_down):
+    def lift_down(self, extra_z_down=config.Machine.lift_down_extra_z_down):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
         self.control.light(True)
