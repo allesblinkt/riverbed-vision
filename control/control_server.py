@@ -175,8 +175,17 @@ class MachineController(object):
         cmd_str = 'G4 P%d' % ms
         self._command(cmd_str)
 
+    def scan_top(self, offset=0):
+        """ Goes to the scan positio
+            If offset is specified, it will stay the offset away from the scan position
+        """
+        z = min(self.scan_z, max(0.0, self.scan_z - offset))
+        self.go(z=z)
+        self.dwell(200)   
+        # self.home_z()   # Also home for safety # TODO: really home?
+
     def pickup_top(self, offset=0):
-        """ Goes to the top position, also homes for additional safety.
+        """ Goes to the top position
             If offset is specified, it will stay the offset away from the top position
         """
         z = min(self.pickup_z, max(0.0, self.pickup_z - offset))
