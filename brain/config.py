@@ -6,7 +6,7 @@ class Camera(object):
     viewy = 69.0 * 2.0  # view height (in cnc units = mm). Transposed!
     flipall = True
     offset_x = -3.0
-    offset_y = 62.00  # used to be -3, +66
+    offset_y = +62.00  # used to be -3, +66
 
     v4l_params_1 = {
         'brightness': 128,
@@ -31,6 +31,26 @@ class Camera(object):
         'zoom_absolute': 100,
     }
 
+    grab_dummy_frames = 3
+
 class Machine(object):
 
+    # CONTROL_HOSTNAME = 'localhost'
+    CONTROL_HOSTNAME = '10.0.42.42'
+
     head_length = 0.0
+    lift_up_tries = 2
+    lift_up_jitter_rad = 3
+    lift_down_extra_z_down = 3.0
+    lift_down_eject_dwell = 100     # TODO: check
+
+class Brain(object):
+
+    init_x = 100
+    init_y = 100
+    init_e = 90
+    init_feedrate = 17500
+
+class StoneMap(object):
+
+    size = 3770, 1730
