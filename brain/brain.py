@@ -119,7 +119,29 @@ class Camera(config.Camera):
         self.index = index
         self.videodev = '/dev/video' + str(index)
 
-        v4l_cmd = ['v4l2-ctl', '-d', self.videodev]
+        if self.view_transpose:
+            self.resx = self.capture_height
+            self.resy = self.capture_width
+        else:
+            self.resx = self.capture_width
+            self.resy = self.capture_height
+
+        log.info('Video device %s', self.videodev)
+
+        cam = cv2.VideoCapture(self.index)
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH, int(self.capture_width))
+        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, int(self.capture_height))
+        cam.set(cv2.CAP_PROP_FPS, 10)
+        # cam.set(cv2.CAP_PROP_EXPOSURE, 19)
+        # cam.set(cv2.CAP_PROP_BRIGHTNESS, 10)
+        # 
+        # 
+        for i in range(self.grab_dummy_frames):
+            cam.read()
+
+        time.sleep(0.5)  # Wait for cam to be ready
+
+        v4l_cmd = ['v4l2-ctl', '-d', str(index)]
         for param_key, param_val in self.v4l_params_1.items():
             cmd_params = ['-c', '%s=%d' % (param_key, param_val)]
             subprocess.call(v4l_cmd + cmd_params)
@@ -127,7 +149,11 @@ class Camera(config.Camera):
         for param_key, param_val in self.v4l_params_2.items():
             cmd_params = ['-c', '%s=%d' % (param_key, param_val)]
             subprocess.call(v4l_cmd + cmd_params)
-       
+
+        self.cam = cam
+   
+
+
     def pos_to_mm(self, pos, offset=(0, 0)):
         """ Calculate distance of perceived pixel from center of the view 
             (in cnc units = mm) """
@@ -161,21 +187,15 @@ class Camera(config.Camera):
 
     def grab(self, save=False, light_channel=None):
         log.debug('Taking picture at coords {},{} (light_channel={})'.format(self.machine.x, self.machine.y, light_channel))
+        cam = self.cam
         self.machine.control.light(True, light_channel)
-        try:
-            cam = cv2.VideoCapture(self.index)
-            cam.set(cv2.CAP_PROP_FRAME_WIDTH, int(self.resx))
-            cam.set(cv2.CAP_PROP_FRAME_HEIGHT, int(self.resy))
-            cam.set(cv2.CAP_PROP_FPS, 10)
-            # cam.set(cv2.CAP_PROP_EXPOSURE, 19)
-            # cam.set(cv2.CAP_PROP_BRIGHTNESS, 10)
 
+        try:
             for i in range(self.grab_dummy_frames):
                 cam.read()
 
             ret, frame = cam.read()
 
-            cam.release()
             if ret:
                 if self.view_transpose:
                     frame = cv2.transpose(frame)
