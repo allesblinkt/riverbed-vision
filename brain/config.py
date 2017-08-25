@@ -1,6 +1,6 @@
 class Camera(object):
-    resx = 1080.0  # image width (in pixels). Enter transposed!
-    resy = 1920.0  # image height (in pixels). Enter transposed!
+    capture_width = 1920.0  # image width (in pixels).
+    capture_height = 1080.0  # image height (in pixels).
                    
     viewx = 53.0 * 2.0  # view width (in cnc units = mm). Enter transposed!
     viewy = 95.0 * 2.0  # view height (in cnc units = mm). Enter transposed!
