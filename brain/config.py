@@ -6,7 +6,7 @@ class Camera(object):
     viewy = 95.0 * 2.0  # view height (in cnc units = mm). Enter transposed!
                         
     view_transpose = True
-    view_flip = False
+    view_flip = False   # rotation by 180 deg?
 
     offset_x = 45.0  # -3.0
     offset_y = -6.0  # +62.00
