@@ -34,7 +34,7 @@ class Camera(object):
         'zoom_absolute': 100,
     }
 
-    grab_dummy_frames = 3
+    grab_dummy_frames = 10
 
 class Machine(object):
 
