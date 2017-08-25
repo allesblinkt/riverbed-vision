@@ -11,7 +11,7 @@ mm_per_arc_segment                           0.5              # Arcs are cut int
 # Arm solution configuration : Cartesian robot. Translates mm positions into stepper positions
 alpha_steps_per_mm                           51.282051282               # CHANGED. Steps per mm for alpha stepper
 beta_steps_per_mm                            51.282051282               # CHANGED. Steps per mm for beta stepper
-gamma_steps_per_mm                           500.0             # CHANGED. Steps per mm for gamma stepper
+gamma_steps_per_mm                           320.0             # CHANGED. Steps per mm for gamma stepper
 
 # Planner module configuration : Look-ahead and acceleration configuration
 planner_queue_size                           32               # DO NOT CHANGE THIS UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING
@@ -33,7 +33,7 @@ base_stepping_frequency                      100000           # Base frequency f
 # Cartesian axis speed limits
 x_axis_max_speed                             50000            # mm/min
 y_axis_max_speed                             50000            # mm/min
-z_axis_max_speed                             500             # mm/min
+z_axis_max_speed                             800              # mm/min
 
 # Stepper module pins ( ports, and pin numbers, appending "!" to the number will invert a pin )
 alpha_step_pin                               2.0              # Pin for alpha stepper step signal
@@ -52,7 +52,7 @@ gamma_step_pin                               2.2              # Pin for gamma st
 gamma_dir_pin                                0.20!            # Pin for gamma stepper direction
 gamma_en_pin                                 0.19             # CHANGED. Pin for gamma enable
 gamma_current                                nc               # CHANGED. Z stepper motor current
-gamma_max_rate                               600.0            # mm/min
+gamma_max_rate                               1600.0            # mm/min
 
 # Serial communications configuration ( baud rate default to 9600 if undefined )
 uart0.baud_rate                              19200           # Baud rate for the default hardware serial port
