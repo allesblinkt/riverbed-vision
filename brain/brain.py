@@ -342,8 +342,8 @@ class Brain(config.Brain):
 
         stones = []
         x, y = self.stone_map.size
-        stepx = int(self.machine.cam.viewx / 2.0)
-        stepy = int(self.machine.cam.viewy / 2.0)
+        stepx = int(self.machine.cam.viewx * self.scan_step[0])
+        stepy = int(self.machine.cam.viewy * self.scan_step[1])
         for i in range(int(startx), x + 1, stepx):
             for j in range(int(starty), y + 1, stepy):
                 self.m.go(x=i, y=j)
