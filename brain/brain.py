@@ -27,7 +27,7 @@ class DummyMachine(config.Machine):
         log.info('Connecting to control server at %s', self.uri)
 
         self.control = Pyro4.Proxy(self.uri)
-        self.cam = Camera(self)
+        self.cam = None  # Camera(self)
         self.x, self.y, self.z, self.e = 0.0, 0.0, 0.0, 0.0
 
 
