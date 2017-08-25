@@ -214,6 +214,13 @@ class Camera(config.Camera):
             cv2.imwrite('map/{}.jpg'.format(fn), ret)
         return ret
 
+    def grab_light_sequence(self, save=False):
+        self.grab(save=save, light_channel=0)
+        self.grab(save=save, light_channel=1)
+        self.grab(save=save, light_channel=2)
+        self.grab(save=save, light_channel=3)
+        self.grab(save=save, light_channel=None)
+
     def grab_extract(self, x, y, img=None, save=False):
         if img is None:
             frame = self.grab()
@@ -356,7 +363,7 @@ class Brain(config.Brain):
                         s.rank = 0.0
                         stones.append(s)
                 else:
-                    self.machine.cam.grab(save=True)
+                    self.machine.cam.grab_light_sequence(save=True)
         log.debug('End scanning')
         if analyze:
             # select correct stones
