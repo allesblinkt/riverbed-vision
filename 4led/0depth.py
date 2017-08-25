@@ -5,6 +5,11 @@ import numpy as np
 from scipy.stats import threshold
 from scipy.signal import convolve2d
 
+def sharpen(img):
+    blur = cv2.GaussianBlur(img, (7, 7), 0)
+    return cv2.addWeighted(img, 3, blur, -2, 0)
+
+
 DATASET = 'grab_0000_0000'
 
 USE_EMPTY = True
@@ -33,74 +38,68 @@ im1g = im1v * (1 - im1s)
 im2g = im2v * (1 - im2s)
 im3g = im3v * (1 - im3s)
 
-cv2.imshow('im1g', im1g)
-cv2.imshow('im2g', im2g)
-cv2.imshow('im3g', im3g)
+# cv2.imshow('im1g', im1g)
+# cv2.imshow('im2g', im2g)
+# cv2.imshow('im3g', im3g)
 
 im_min = np.minimum(np.minimum(im1g, im2g), im3g)
 im_avg = (im1g + im2g + im3g) / 3.0
 im_max = np.maximum(np.maximum(im1g, im2g), im3g)
 
-im_max2 = im_max * im_max
+# im_min = sharpen(im_min)
+# im_avg = sharpen(im_avg)
+# im_max = sharpen(im_max)
 
-cv2.imshow('im_min', im_min)
-cv2.imshow('im_avg', im_avg)
-cv2.imshow('im_max', im_max)
-cv2.imshow('im_max2', im_max2)
+# cv2.imshow('im_min', im_min)
+# cv2.imshow('im_avg', im_avg)
+# cv2.imshow('im_max', im_max)
 
-ones = np.ones_like(im_max2)
-max_thresh = threshold(im_max2, None, ones * 0.8, 1)
+thresh1 = cv2.adaptiveThreshold((im1g * 255).astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 17, 9) / 255
+thresh2 = cv2.adaptiveThreshold((im2g * 255).astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 17, 9) / 255
+thresh3 = cv2.adaptiveThreshold((im3g * 255).astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 17, 9) / 255
 
-cv2.imshow('max_thresh', max_thresh)
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+thresh1 = cv2.erode(thresh1, kernel, iterations=3)
+thresh2 = cv2.erode(thresh2, kernel, iterations=3)
+thresh3 = cv2.erode(thresh3, kernel, iterations=3)
 
-shadow = max_thresh - im_min
+# cv2.imshow('thresh1', thresh1)
+# cv2.imshow('thresh2', thresh2)
+# cv2.imshow('thresh3', thresh3)
 
-cv2.imshow('shadow', shadow)
+# thresh_min = cv2.adaptiveThreshold((im_min * 255).astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 17, 9) / 255
+# thresh_avg = cv2.adaptiveThreshold((im_avg * 255).astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 17, 9) / 255
+# thresh_max = cv2.adaptiveThreshold((im_max * 255).astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 17, 9) / 255
 
-"""
-im1r = im1g / im_max
-im2r = im2g / im_max
-im3r = im3g / im_max
+# cv2.imshow('thresh_min', thresh_min)
+# cv2.imshow('thresh_avg', thresh_avg)
+# cv2.imshow('thresh_max', thresh_max)
 
-cv2.imshow('im1r', im1r)
-cv2.imshow('im2r', im2r)
-cv2.imshow('im3r', im3r)
+sat = im1s + im2s + im3s
+thresh = thresh1 * thresh2 * thresh3
+thresh[im_min > 0.75] = 1
+thresh[im_max < 0.75] = 0
+thresh[sat > 0.4] = 0
+# cv2.imshow('thresh', thresh)
 
-imr = im1r * im2r * im3r
+final = thresh
+final = cv2.dilate(final, kernel, iterations=2)
+final = cv2.medianBlur((final * 255).astype(np.uint8), 3) / 255
+cv2.imshow('final', final)
 
-cv2.imshow('imr', imr)
-
-imd = im_max - imr
-
-cv2.imshow('imd', imd)
-"""
-
-# thresh = 0.65
-# im1t = threshold(threshold(im1r, threshmin=thresh, newval=0), threshmax=thresh, newval=1)
-# im2t = threshold(threshold(im2r, threshmin=thresh, newval=0), threshmax=thresh, newval=1)
-# im3t = threshold(threshold(im3r, threshmin=thresh, newval=0), threshmax=thresh, newval=1)
-
-# imt = im1t * im2t * im3t
-
-# cv2.imshow('im1t', im1t)
-# cv2.imshow('im2t', im2t)
-# cv2.imshow('im3t', im3t)
-# cv2.imshow('imt', imt)
-
-"""
-im1c = convolve2d(im1r, [[-1, -1, -1, -1], [-1, 0, 0, -1], [+1, 0, 0, +1], [+1, +1, +1, +1]], mode='same') # down
-im2c = convolve2d(im2r, [[+1, +1, -1, -1], [+1, 0, 0, -1], [+1, 0, 0, -1], [+1, +1, -1, -1]], mode='same') # left
-im3c = convolve2d(im3r, [[+1, +1, +1, +1], [-1, 0, 0, +1], [-1, 0, 0, +1], [-1, -1, -1, -1]], mode='same') # top-right
-
-# TODO: set border 2px to 0
-
-imc = im1c + im2c + im3c
-
-cv2.imshow('im1c', im1c)
-cv2.imshow('im2c', im2c)
-cv2.imshow('im3c', im3c)
-
-cv2.imshow('imc', imc)
-"""
+imc = im1.copy()
+_, contours, _ = cv2.findContours((255 - final * 255).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+cnt = 0
+for i in range(len(contours)):
+    ec, es, ea = cv2.minAreaRect(contours[i])
+    if es[0] < 40 or es[1] < 40:
+        continue
+    cv2.drawContours(imc, contours, i, (255, 0, 0), -1)
+    fit_center = (int(ec[0]), int(ec[1]))
+    fit_dim = (int(es[0]) // 2, int(es[1]) // 2)
+    fit_angle = int(ea)
+    cv2.ellipse(imc, fit_center, fit_dim, fit_angle, 0, 360, (0, 0, 255), 2)
+    cnt += 1
+cv2.imshow('imc (%d)' % cnt, imc)
 
 cv2.waitKey(0)
