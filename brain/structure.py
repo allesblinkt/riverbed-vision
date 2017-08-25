@@ -102,8 +102,6 @@ if __name__ == '__main__':
         graph_b_img = plot_hist(hist_b)
 
 
-
-
         # log.info('Score %0.3f',  (score, ))
         cv2.imshow('first', first_img)
         cv2.imshow('second', image)
