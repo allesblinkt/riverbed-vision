@@ -227,7 +227,7 @@ class Camera(config.Camera):
         focus_stack = [10, 30, 60]
 
         for focus in focus_stack:
-            self.cam.set_cam_parameter('focus_absolute', focus)
+            set_cam_parameter('focus_absolute', focus)
             suffix = '_%d' % (focus, )
             self.grab(save=save, light_channel=0, suffix=suffix)
 
