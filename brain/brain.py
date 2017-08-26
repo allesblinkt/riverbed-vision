@@ -12,7 +12,7 @@ import config
 from art import art_step
 from extract import process_image
 
-from utils import random_on_circle
+from utils import random_on_circle, frange_inclusive
 from stone import StoneMap, Stone
 
 from log import makelog
@@ -599,9 +599,9 @@ class Brain(config.Brain):
                 time.sleep(1)
 
 if __name__ == '__main__':
-    brain = Brain(use_machine=True, create_new_map=False)
+    brain = Brain(use_machine=True, create_new_map=True)
     brain.start()
     # brain.scan_from_files()
-    # brain.scan(startx=1700, analyze=False)
+    brain.scan(startx=0, analyze=False)
     # brain.demo1()
-    brain.performance()
+    # brain.performance()
