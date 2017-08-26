@@ -10,18 +10,19 @@ def sharpen(img):
     return cv2.addWeighted(img, 3, blur, -2, 0)
 
 
+DATADIR = 'grab_r2'
 DATASET = 'grab_0000_0000'
 
 USE_EMPTY = True
 
-im1 = cv2.imread(DATASET + '_l1.jpg')
-im2 = cv2.imread(DATASET + '_l2.jpg')
-im3 = cv2.imread(DATASET + '_l3.jpg')
+im1 = cv2.imread('%s/%s_l1.jpg' % (DATADIR, DATASET))
+im2 = cv2.imread('%s/%s_l2.jpg' % (DATADIR, DATASET))
+im3 = cv2.imread('%s/%s_l3.jpg' % (DATADIR, DATASET))
 
 if USE_EMPTY:
-    im1e = cv2.imread('empty_' + DATASET + '_l1.jpg')
-    im2e = cv2.imread('empty_' + DATASET + '_l2.jpg')
-    im3e = cv2.imread('empty_' + DATASET + '_l3.jpg')
+    im1e = cv2.imread('empty_l1.jpg')
+    im2e = cv2.imread('empty_l2.jpg')
+    im3e = cv2.imread('empty_l3.jpg')
     im1 = 255 - cv2.subtract(im1e, im1)
     im2 = 255 - cv2.subtract(im2e, im2)
     im3 = 255 - cv2.subtract(im3e, im3)
@@ -78,7 +79,7 @@ thresh3 = cv2.erode(thresh3, kernel, iterations=3)
 sat = im1s + im2s + im3s
 thresh = thresh1 * thresh2 * thresh3
 thresh[im_min > 0.75] = 1
-thresh[im_max < 0.75] = 0
+thresh[im_max < 0.65] = 0
 thresh[sat > 0.4] = 0
 # cv2.imshow('thresh', thresh)
 
