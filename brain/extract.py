@@ -14,11 +14,25 @@ from stone import Stone
 from log import makelog
 log = makelog(__name__)
 
-p_scalef = 2
+p_scalef = 2    # decimate by this for processing
 
-blank_img = cv2.imread('blank.png')
-blank_small_img = cv2.resize(blank_img, (blank_img.shape[1] // p_scalef, blank_img.shape[0] // p_scalef))
+def load_blank_imgs():
+    blank_fns = ['blank_l0.jpg', 'blank_l0.jpg', 'blank_l0.jpg', 'blank_l0.jpg']
+    blank_imgs = []
+    blank_small_imgs = []
 
+    for blank_fn in blank_fns:
+        im = cv2.imread(blank_fn)
+        blank_imgs.append(im)
+
+        scale = 1.0 / p_scalef 
+
+        im_small = cv2.resize(im, (0, 0), fx=scale, fy=scale.5)
+        blank_small_imgs.append(im_small)
+
+    return blank_imgs, blank_small_imgs
+
+blank_imgs, blank_small_imgs = load_blank_imgs()
 
 def analyze_contour_cuts(contour, step=7):
     """
