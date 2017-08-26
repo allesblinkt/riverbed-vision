@@ -314,8 +314,10 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
 
     small_img = cv2.resize(color_img, (color_img.shape[1] // p_scalef, color_img.shape[0] // p_scalef))
 
+    # TODO: handle image pack
+
     # subtract blank vignette
-    small_img = 255 - cv2.subtract(blank_small_img, small_img)
+    small_img = 255 - cv2.subtract(blank_small_imgs[0], small_img)
     thresh_img = threshold_adaptive_with_saturation(small_img)
 
     # Cleaning
@@ -433,7 +435,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
         cv2.imshow('markers', markers_img * 2000)
         cv2.imshow('segmented', segmented_img)
 
-        cv2.imshow('stones', result_img)
+        cv2.imshow('stones', cv2.resize(result_img, (0, 0), fx=0.5, fy=0.5))
 
         if debug_wait:
             key = cv2.waitKey()
@@ -454,9 +456,9 @@ def main():
     import fnmatch
 
     jpgfiles = []
-    p = 'map_offline'
+    p = 'grab_r2'
 
-    for file in os.listdir('map_offline'):
+    for file in os.listdir(p):
         if fnmatch.fnmatch(file, 'grab_*.jpg'):
             jpgfiles.append(file)
 
