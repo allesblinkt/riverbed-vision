@@ -113,6 +113,20 @@ def inkey():
     return ch
 
 
+def frange_inclusive(start, stop, step):
+    """ Range function that handles floats, but also will include the remainder to include `stop` """
+    current = start
+    prev_current = start
+    while current < stop:
+        yield current
+        prev_current = current
+        current += step
+
+    if prev_current < stop:
+        prev_current = current
+        yield stop
+
+
 class SpatialHashMap(object):
     """SpatialHashMap"""
 

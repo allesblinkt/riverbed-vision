@@ -350,8 +350,9 @@ class Brain(config.Brain):
         x, y = self.stone_map.size
         stepx = int(self.machine.cam.viewx * self.scan_step[0])
         stepy = int(self.machine.cam.viewy * self.scan_step[1])
-        for i in range(int(startx), x + 1, stepx):
-            for j in range(int(starty), y + 1, stepy):
+
+        for i in frange_inclusive(int(startx), x + 1, stepx):
+            for j in frange_inclusive(int(starty), y + 1, stepy):
                 self.m.go(x=i, y=j)
                 self.c.block()
                 if analyze:
