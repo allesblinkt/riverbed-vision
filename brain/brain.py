@@ -151,8 +151,11 @@ class Camera(config.Camera):
             subprocess.call(v4l_cmd + cmd_params)
 
         self.cam = cam
-   
 
+    def set_cam_parameter(self, key, value):
+        v4l_cmd = ['v4l2-ctl', '-d', str(self.index)]
+        cmd_params = ['-c', '%s=%d' % (key, value)]
+        subprocess.call(v4l_cmd + cmd_params)
 
     def pos_to_mm(self, pos, offset=(0, 0)):
         """ Calculate distance of perceived pixel from center of the view 
@@ -185,7 +188,7 @@ class Camera(config.Camera):
         h = self.viewy * size[1] / self.resy
         return w, h
 
-    def grab(self, save=False, light_channel=None):
+    def grab(self, save=False, light_channel=None, suffix=''):
         log.debug('Taking picture at coords {},{} (light_channel={})'.format(self.machine.x, self.machine.y, light_channel))
         cam = self.cam
         self.machine.control.light(True, light_channel)
@@ -207,9 +210,9 @@ class Camera(config.Camera):
         self.machine.control.light(False, light_channel)
         if ret is not None and save:
             if light_channel is not None:
-                fn = 'grab_{:04d}_{:04d}_l{:d}'.format(int(self.machine.x), int(self.machine.y), light_channel)
+                fn = 'grab_{:04d}_{:04d}_l{:d}{}'.format(int(self.machine.x), int(self.machine.y), light_channel, suffix)
             else:
-                fn = 'grab_{:04d}_{:04d}'.format(int(self.machine.x), int(self.machine.y))
+                fn = 'grab_{:04d}_{:04d}{}'.format(int(self.machine.x), int(self.machine.y), suffix)
             log.debug('Saving {}.jpg'.format(fn))
             cv2.imwrite('map/{}.jpg'.format(fn), ret)
         return ret
