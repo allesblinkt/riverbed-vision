@@ -206,7 +206,7 @@ class Camera(config.Camera):
             ret = None
         self.machine.control.light(False, light_channel)
         if ret is not None and save:
-            if light_channel:
+            if light_channel is not None:
                 fn = 'grab_{:04d}_{:04d}_l{:d}'.format(int(self.machine.x), int(self.machine.y), light_channel)
             else:
                 fn = 'grab_{:04d}_{:04d}'.format(int(self.machine.x), int(self.machine.y))
