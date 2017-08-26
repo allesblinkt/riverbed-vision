@@ -223,6 +223,14 @@ class Camera(config.Camera):
         self.grab(save=save, light_channel=2)
         self.grab(save=save, light_channel=3)
 
+    def grab_focus_sequence(self, save=False):
+        focus_stack = [10, 30, 60]
+
+        for focus in focus_stack:
+            self.cam.set_cam_parameter('focus_absolute', focus)
+            suffix = '_%d' % (focus, )
+            self.grab(save=save, light_channel=0, suffix=suffix)
+
     def grab_extract(self, x, y, img=None, save=False):
         if img is None:
             frame = self.grab()
@@ -369,7 +377,7 @@ class Brain(config.Brain):
                         s.rank = 0.0
                         stones.append(s)
                 else:
-                    self.machine.cam.grab_light_sequence(save=True)
+                    self.machine.cam.grab_focus_sequence(save=True)
         log.debug('End scanning')
 
         if analyze:
