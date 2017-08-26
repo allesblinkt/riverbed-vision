@@ -162,8 +162,8 @@ class MachineController(object):
         else:
             return False
 
-    def go(self, x=None, y=None, z=None, e=None):
-        if self._check_movement(x=x, y=y, z=z, e=e):
+    def go(self, x=None, y=None, z=None, e=None, force=False):
+        if self._check_movement(x=x, y=y, z=z, e=e) or force:
             cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
             status.write(posx=x, posy=y, posz=z, pose=e)
