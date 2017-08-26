@@ -228,7 +228,7 @@ class Camera(config.Camera):
 
         for focus in focus_stack:
             self.set_cam_parameter('focus_absolute', focus)
-            suffix = '_%d' % (focus, )
+            suffix = '_f%d' % (focus, )
             self.grab(save=save, light_channel=0, suffix=suffix)
 
     def grab_extract(self, x, y, img=None, save=False):
