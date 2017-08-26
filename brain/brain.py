@@ -219,7 +219,6 @@ class Camera(config.Camera):
         self.grab(save=save, light_channel=1)
         self.grab(save=save, light_channel=2)
         self.grab(save=save, light_channel=3)
-        self.grab(save=save, light_channel=None)
 
     def grab_extract(self, x, y, img=None, save=False):
         if img is None:
