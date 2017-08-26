@@ -27,6 +27,7 @@ files = sorted(glob.glob('%s/*_l0.jpg' % DATADIR))
 for filename in files:
 
     stem = filename[:-7]
+    print(stem)
 
     im1 = cv2.imread('%s_l1.jpg' % stem)
     im2 = cv2.imread('%s_l2.jpg' % stem)
@@ -96,7 +97,7 @@ for filename in files:
     final = thresh
     final = cv2.dilate(final, kernel, iterations=2)
     final = cv2.medianBlur((final * 255).astype(np.uint8), 3) / 255
-    cv2.imshow('final (%s)' % stem, final)
+    cv2.imshow('final', final)
 
     imc = im1.copy()
     _, contours, _ = cv2.findContours((255 - final * 255).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
@@ -111,12 +112,10 @@ for filename in files:
         fit_angle = int(ea)
         cv2.ellipse(imc, fit_center, fit_dim, fit_angle, 0, 360, (0, 0, 255), 2)
         cnt += 1
-    cv2.imshow('imc (%s => %d)' % (stem, cnt), imc)
+    print('contours', cnt)
+    cv2.imshow('imc', imc)
 
     k = cv2.waitKey(0)
-
-    cv2.destroyWindow('final (%s)' % stem)
-    cv2.destroyWindow('imc (%s => %d)' % (stem, cnt))
 
     if k == 27:
         break
