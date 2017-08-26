@@ -1,4 +1,5 @@
 .directory 
+.vscode
 
 *.bak
 
@@ -35,3 +36,6 @@ training/static/stones/**
 /brain/grabs.tar
 /training/voting.db.lock
 /training/voting.db.r*
+
+
+
