@@ -347,24 +347,28 @@ class Brain(config.Brain):
         self.c.block()
 
         stones = []
-        x, y = self.stone_map.size
-        stepx = int(self.machine.cam.viewx * self.scan_step[0])
-        stepy = int(self.machine.cam.viewy * self.scan_step[1])
+        end_x, end_y = self.stone_map.size
+        step_x = int(self.machine.cam.viewx * self.scan_step[0])
+        step_y = int(self.machine.cam.viewy * self.scan_step[1])
 
-        for i in frange_inclusive(int(startx), x + 1, stepx):
-            for j in frange_inclusive(int(starty), y + 1, stepy):
-                self.m.go(x=i, y=j)
+        for x in frange_inclusive(int(startx), end_x, step_x):
+            for y in frange_inclusive(int(starty), end_y, step_y):
+                self.m.go(x=x, y=y)
                 self.c.block()
+
+                log.info('Scanning at x: %d y: %d', x, y)
+
                 if analyze:
-                    st = self.machine.cam.grab_extract(i, j, save=True)
+                    st = self.machine.cam.grab_extract(x, y, save=True)
                     for s in st:
-                        s.center = self.machine.cam.pos_to_mm(s.center, offset=(i, j))
+                        s.center = self.machine.cam.pos_to_mm(s.center, offset=(x, y))
                         s.size = self.machine.cam.size_to_mm(s.size)
                         s.rank = 0.0
                         stones.append(s)
                 else:
                     self.machine.cam.grab_light_sequence(save=True)
         log.debug('End scanning')
+
         if analyze:
             # select correct stones
             log.debug('Begin selecting/reducing stones')
