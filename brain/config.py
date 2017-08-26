@@ -22,7 +22,7 @@ class Camera(object):
         'sharpness': 128,
         'backlight_compensation': 0,
         'exposure_auto': 1,   # TODO: check
-        'exposure_absolute': 100,
+        'exposure_absolute': 55,
         'exposure_auto_priority': 0,
         'pan_absolute': 0,
         'tilt_absolute': 0,
@@ -30,7 +30,7 @@ class Camera(object):
     }
 
     v4l_params_2 = {
-        'focus_absolute': 25,
+        'focus_absolute': 31,
         'zoom_absolute': 100,
     }
 
