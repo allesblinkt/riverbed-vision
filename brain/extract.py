@@ -27,7 +27,7 @@ def load_blank_imgs():
 
         scale = 1.0 / p_scalef 
 
-        im_small = cv2.resize(im, (0, 0), fx=scale, fy=scale.5)
+        im_small = cv2.resize(im, (0, 0), fx=scale, fy=scale)
         blank_small_imgs.append(im_small)
 
     return blank_imgs, blank_small_imgs
