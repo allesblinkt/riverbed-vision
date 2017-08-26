@@ -57,5 +57,4 @@ class Brain(object):
     scan_step = [0.66, 0.66]   # 1 would mean no overlap (full frame width)
 
 class StoneMap(object):
-
-    size = 3770, 1730
+    size = [3730, 1730]
