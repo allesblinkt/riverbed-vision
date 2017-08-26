@@ -40,7 +40,7 @@ class MachineController(object):
         self.limits_z = [0, 110]
         self.limits_e = [-10000, 10000]
 
-        self.scan_z = 80.0
+        self.scan_z = 100.0
         self.pickup_z = 40.0
 
         if port_name:
@@ -162,8 +162,8 @@ class MachineController(object):
         else:
             return False
 
-    def go(self, x=None, y=None, z=None, e=None, force=False):
-        if self._check_movement(x=x, y=y, z=z, e=e) or force:
+    def go(self, x=None, y=None, z=None, e=None):
+        if self._check_movement(x=x, y=y, z=z, e=e):
             cmd_str = 'G1' + ' ' + format_pos(x=x, y=y, z=z, e=e)
             self._command(cmd_str)
             status.write(posx=x, posy=y, posz=z, pose=e)
