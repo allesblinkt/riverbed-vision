@@ -340,8 +340,8 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     # color_img is list - we use new "double-focus" method, first image is sharp, second is unfocused
     if isinstance(color_img, list):
         # new method
-        small_img = cv2.resize(color_img[0], (0, 0), fx=process_scale, fy=process_scale))
-        small_img1 = cv2.resize(color_img[1], (0, 0), fx=process_scale, fy=process_scale))
+        small_img = cv2.resize(color_img[0], (0, 0), fx=process_scale, fy=process_scale)
+        small_img1 = cv2.resize(color_img[1], (0, 0), fx=process_scale, fy=process_scale)
         # subtract blank vignette
         small_img_float = small_img.astype(np.float32) / (blank_small_imgs[0].astype(np.float32) + 0.01)
         small_img1_float = small_img1.astype(np.float32) / (blank_small_imgs[0].astype(np.float32) + 0.01)
@@ -351,7 +351,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
         color_img = color_img[0]
     else:
         # old method
-        small_img = cv2.resize(color_img, (0, 0), fx=process_scale, fy=process_scale))
+        small_img = cv2.resize(color_img, (0, 0), fx=process_scale, fy=process_scale)
         # subtract blank vignette
         small_img = 255 - cv2.subtract(blank_small_imgs[0], small_img)
         # compute adaptive threshold
