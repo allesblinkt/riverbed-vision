@@ -443,7 +443,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
 
         contours_and_args = []
         for id, contour in enumerate(stones_contours):
-            contour /= process_scale   # enlarge to compensate for smaller processed image
+            contour *= round(1 / process_scale)   # enlarge to compensate for smaller processed image
             contours_and_args.append([frame_desc, id, contour, color_img, None, save_stones])
 
         stones = pool.starmap(process_stone, contours_and_args)
@@ -452,7 +452,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     else:
         stones = []
         for id, contour in enumerate(stones_contours):
-            contour /= process_scale   # enlarge to compensate for smaller processed image
+            contour *= round(1 / process_scale)   # enlarge to compensate for smaller processed image
             stones.append(process_stone(frame_desc, id, contour, color_img, result_img, save_stones))
 
     # Keep stones with a result
