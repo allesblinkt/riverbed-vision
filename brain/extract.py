@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
 import cv2
 import numpy as np
 import math
@@ -25,7 +26,7 @@ def load_blank_imgs():
         im = cv2.imread(blank_fn)
         blank_imgs.append(im)
 
-        scale = 1.0 / p_scalef 
+        scale = 1.0 / p_scalef
 
         im_small = cv2.resize(im, (0, 0), fx=scale, fy=scale)
         blank_small_imgs.append(im_small)
@@ -308,17 +309,54 @@ def threshold_adaptive_with_saturation(image):
     return thresh_img
 
 
+def threshold_double_focus(im0, im1):
+    im_s = cv2.cvtColor(im0, cv2.COLOR_BGR2HSV)[:,:,1]
+    im_v = cv2.cvtColor(im0, cv2.COLOR_BGR2HSV)[:,:,2]
+
+    im_sobel1 = cv2.Sobel(im0, ddepth=-1, dx=0, dy=1, ksize=3)
+    im_sobel2 = cv2.Sobel(im0, ddepth=-1, dx=1, dy=0, ksize=3)
+    im_sobel = cv2.magnitude(im_sobel1 * 2, im_sobel2 * 2)
+    im_sobel = cv2.cvtColor(im_sobel, cv2.COLOR_BGR2HSV)[:,:,2]
+    im_sobel[im_sobel > 0.3] = 1
+    im_sobel[im_sobel <= 0.3] = 0
+
+    im_diff = np.absolute(im0 - im1)
+    im_diff = cv2.cvtColor(im_diff, cv2.COLOR_BGR2HSV)[:,:,2]
+    im_diff[im_diff > 0.07] = 1
+
+    chain = np.maximum(im_sobel, im_diff)
+
+    chain[im_v < 0.51] = 1
+    chain[im_s > 0.14] = 1
+
+    chain = cv2.medianBlur((chain * 255).astype(np.uint8), 5)
+
+    return chain
+
+
 def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, debug_wait=False):
     log.debug('Start processing image: %s', frame_desc)
     start_time = time.time()
 
-    small_img = cv2.resize(color_img, (color_img.shape[1] // p_scalef, color_img.shape[0] // p_scalef))
-
-    # TODO: handle image pack
-
-    # subtract blank vignette
-    small_img = 255 - cv2.subtract(blank_small_imgs[0], small_img)
-    thresh_img = threshold_adaptive_with_saturation(small_img)
+    # color_img is list - we use new "double-focus" method, first image is sharp, second is unfocused
+    if isinstance(color_img, list):
+        # new method
+        small_img = cv2.resize(color_img[0], (color_img[0].shape[1] // p_scalef, color_img[0].shape[0] // p_scalef))
+        small_img1 = cv2.resize(color_img[1], (color_img[1].shape[1] // p_scalef, color_img[1].shape[0] // p_scalef))
+        # subtract blank vignette
+        small_img_float = small_img.astype(np.float32) / (blank_small_imgs[0].astype(np.float32) + 0.01)
+        small_img1_float = small_img1.astype(np.float32) / (blank_small_imgs[0].astype(np.float32) + 0.01)
+        # compute double-focus threshold
+        thresh_img = threshold_double_focus(small_img_float, small_img1_float)
+        # we'll be needing just focused image from now on
+        color_img = color_img[0]
+    else:
+        # old method
+        small_img = cv2.resize(color_img, (color_img.shape[1] // p_scalef, color_img.shape[0] // p_scalef))
+        # subtract blank vignette
+        small_img = 255 - cv2.subtract(blank_small_imgs[0], small_img)
+        # compute adaptive threshold
+        thresh_img = threshold_adaptive_with_saturation(small_img)
 
     # Cleaning
     kernel = np.ones((3, 3), np.uint8)
@@ -421,7 +459,6 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     # Keep stones with a result
     stones = [stone for stone in stones if stone is not None]
 
-
     elapsed_time = time.time() - start_time
 
     log.debug('End processing image: %s, Analysis took: %0.3fs', frame_desc, elapsed_time)
@@ -456,25 +493,28 @@ def main():
     import fnmatch
 
     jpgfiles = []
-    p = 'grab_r2'
+    p = 'grab_depth_r3'
+    double_focus = True
 
-    for file in os.listdir(p):
-        if fnmatch.fnmatch(file, 'grab_*.jpg'):
+    for file in sorted(os.listdir(p)):
+        if fnmatch.fnmatch(file, 'grab_*_f30.jpg'):
             jpgfiles.append(file)
-
-    # jpgfiles = ["grab_2652_0690.jpg", "grab_0975_0828.jpg"]
 
     for fn in jpgfiles:
         full_fn = os.path.join(p, fn)
         log.info('Processing %s', full_fn)
-        frame = cv2.imread(full_fn)
-        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=True)
 
+        if not double_focus:
+            frame = cv2.imread(full_fn)
+        else:
+            frame = [cv2.imread(full_fn), cv2.imread(full_fn.replace('_f30.jpg', '_f60.jpg'))]
+
+        stones, result_img, thresh_img, weight_img = process_image(fn, frame, save_stones='png', debug_draw=True, debug_wait=True)
 
     # grab_0429_1380.jpg
     # grab_0429_1380.jpg
     # grab_1755_1173.jpg
-    # grab_1911_0276.jpg,
+    # grab_1911_0276.jpg
 
     # FIXED
     # grab_1365_1311.jpg # Threshold saturation fail...
