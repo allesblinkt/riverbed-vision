@@ -224,16 +224,21 @@ class Camera(config.Camera):
         self.grab(save=save, light_channel=3)
 
     def grab_focus_sequence(self, save=False):
-        focus_stack = [10, 30, 60]
-
+        focus_stack = [30, 60]
+        res = []
         for focus in focus_stack:
             self.set_cam_parameter('focus_absolute', focus)
             suffix = '_f%d' % (focus, )
-            self.grab(save=save, light_channel=0, suffix=suffix)
+            im = self.grab(save=save, light_channel=0, suffix=suffix)
+            res.append(im)
+        return res
 
-    def grab_extract(self, x, y, img=None, save=False):
+    def grab_extract(self, x, y, img=None, save=False, double_focus=False):
         if img is None:
-            frame = self.grab()
+            if double_focus:
+                frame = self.grab_focus_sequence()
+            else:
+                frame = self.grab()
         else:
             frame = img
 
@@ -242,8 +247,14 @@ class Camera(config.Camera):
             return []
         fn = 'grab_{:04d}_{:04d}'.format(int(x), int(y))
         if save:
-            log.debug('Saving {}.jpg'.format(fn))
-            cv2.imwrite('map/{}.jpg'.format(fn), frame)
+            if double_focus:
+                log.debug('Saving {}_f30.jpg'.format(fn))
+                cv2.imwrite('map/{}.jpg'.format(fn), frame[0])
+                log.debug('Saving {}_f60.jpg'.format(fn))
+                cv2.imwrite('map/{}.jpg'.format(fn), frame[1])
+            else:
+                log.debug('Saving {}.jpg'.format(fn))
+                cv2.imwrite('map/{}.jpg'.format(fn), frame)
         stones, result_image, thresh_image, weight_image = process_image(fn, frame, save_stones='png')
         if save:
             log.debug('Saving {}-processed.jpg'.format(fn))
@@ -285,7 +296,7 @@ class Brain(config.Brain):
 
         log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
         x, y = self.machine.x, self.machine.y
-        st = self.machine.cam.grab_extract(x, y, save=False)
+        st = self.machine.cam.grab_extract(x, y, save=False, double_focus=True)
         new_stones = []
 
         for s in st:
@@ -370,7 +381,7 @@ class Brain(config.Brain):
                 log.info('Scanning at x: %d y: %d', x, y)
 
                 if analyze:
-                    st = self.machine.cam.grab_extract(x, y, save=True)
+                    st = self.machine.cam.grab_extract(x, y, save=True, double_focus=True)
                     for s in st:
                         s.center = self.machine.cam.pos_to_mm(s.center, offset=(x, y))
                         s.size = self.machine.cam.size_to_mm(s.size)
@@ -410,14 +421,15 @@ class Brain(config.Brain):
 
         bins = []
 
-        for file in os.listdir(p):
-            if fnmatch.fnmatch(file, 'grab*.jpg'):
+        for file in sorted(os.listdir(p)):
+            if fnmatch.fnmatch(file, 'grab*_f30.jpg'):
                 pngfiles.append(file)
 
         for fn in pngfiles:
-            m = re.search('\w+_(\d+)_(\d+)', fn)
+            m = re.search('\w+_(\d+)_(\d+)_l0_f30', fn)
 
             image = cv2.imread(os.path.join(p, fn), -1)
+            image2 = cv2.imread(os.path.join(p, fn.replace('_f30', '_f60')), -1)
             (h, w) = image.shape[:2]
 
             xp, yp = float(m.group(1)), float(m.group(2))
@@ -426,7 +438,7 @@ class Brain(config.Brain):
 
             localstones = []
 
-            st = cam.grab_extract(xp, yp, img=image, save=False)
+            st = cam.grab_extract(xp, yp, img=[image, image2], save=False, double_focus=True)
             for s in st:
                 s.center = cam.pos_to_mm(s.center, offset=(xp, yp))
                 s.size = cam.size_to_mm(s.size)
@@ -614,9 +626,9 @@ class Brain(config.Brain):
                 time.sleep(1)
 
 if __name__ == '__main__':
-    brain = Brain(use_machine=True, create_new_map=True)
+    brain = Brain(use_machine=True, create_new_map=False)
     brain.start()
     # brain.scan_from_files()
-    brain.scan(startx=0, analyze=False)
+    # brain.scan(startx=0, analyze=False)
     # brain.demo1()
-    # brain.performance()
+    brain.performance()
