@@ -308,14 +308,20 @@ def threshold_adaptive_with_saturation(image):
 
 
 def threshold_double_focus(im0, im1):
+    im0_bl =  cv2.GaussianBlur(im0, (15, 15), 0)  # blurred for color analysis
+
     im_hsr = cv2.cvtColor(im0, cv2.COLOR_BGR2HSV)
     im_s = im_hsr[:,:,1]
     im_v = im_hsr[:,:,2]
+
+    im_hsl = cv2.cvtColor(im0_bl, cv2.COLOR_BGR2HLS)
+    im_h = im_hsl[:,:,0] / 255.0   # H from HLS gives less noisy results
 
     im_sobel1 = cv2.Sobel(im0, ddepth=-1, dx=0, dy=1, ksize=3)
     im_sobel2 = cv2.Sobel(im0, ddepth=-1, dx=1, dy=0, ksize=3)
     im_sobel = cv2.magnitude(im_sobel1 * 2, im_sobel2 * 2)
     im_sobel = cv2.cvtColor(im_sobel, cv2.COLOR_BGR2HSV)[:,:,2]
+
     im_sobel[im_sobel > 0.3] = 1
     im_sobel[im_sobel <= 0.3] = 0
 
@@ -324,9 +330,8 @@ def threshold_double_focus(im0, im1):
     im_diff[im_diff > 0.07] = 1
 
     chain = np.maximum(im_sobel, im_diff)
-
-    chain[im_v < 0.51] = 1
-    chain[im_s > 0.14] = 1
+    chain[im_v < 0.51] = 1  # if dark
+    chain[np.logical_and(im_h < 0.25, im_s > 0.05)] = 1   # if saturated and reddish
 
     chain = cv2.medianBlur((chain * 255).astype(np.uint8), 5)
 
