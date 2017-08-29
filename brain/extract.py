@@ -308,8 +308,9 @@ def threshold_adaptive_with_saturation(image):
 
 
 def threshold_double_focus(im0, im1):
-    im_s = cv2.cvtColor(im0, cv2.COLOR_BGR2HSV)[:,:,1]
-    im_v = cv2.cvtColor(im0, cv2.COLOR_BGR2HSV)[:,:,2]
+    im_hsr = cv2.cvtColor(im0, cv2.COLOR_BGR2HSV)
+    im_s = im_hsr[:,:,1]
+    im_v = im_hsr[:,:,2]
 
     im_sobel1 = cv2.Sobel(im0, ddepth=-1, dx=0, dy=1, ksize=3)
     im_sobel2 = cv2.Sobel(im0, ddepth=-1, dx=1, dy=0, ksize=3)
