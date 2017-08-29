@@ -15,7 +15,7 @@ from stone import Stone
 from log import makelog
 log = makelog(__name__)
 
-p_scalef = 2    # decimate by this for processing
+process_scale = 0.5   # Process images at half size
 
 def load_blank_imgs():
     blank_fns = ['blank_l0.jpg', 'blank_l0.jpg', 'blank_l0.jpg', 'blank_l0.jpg']
@@ -26,9 +26,7 @@ def load_blank_imgs():
         im = cv2.imread(blank_fn)
         blank_imgs.append(im)
 
-        scale = 1.0 / p_scalef
-
-        im_small = cv2.resize(im, (0, 0), fx=scale, fy=scale)
+        im_small = cv2.resize(im, (0, 0), fx=process_scale, fy=process_scale)
         blank_small_imgs.append(im_small)
 
     return blank_imgs, blank_small_imgs
@@ -341,8 +339,10 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     # color_img is list - we use new "double-focus" method, first image is sharp, second is unfocused
     if isinstance(color_img, list):
         # new method
-        small_img = cv2.resize(color_img[0], (color_img[0].shape[1] // p_scalef, color_img[0].shape[0] // p_scalef))
-        small_img1 = cv2.resize(color_img[1], (color_img[1].shape[1] // p_scalef, color_img[1].shape[0] // p_scalef))
+
+        
+        small_img = cv2.resize(color_img[0], (0, 0), fx=process_scale, fy=process_scale))
+        small_img1 = cv2.resize(color_img[1], (0, 0), fx=process_scale, fy=process_scale))
         # subtract blank vignette
         small_img_float = small_img.astype(np.float32) / (blank_small_imgs[0].astype(np.float32) + 0.01)
         small_img1_float = small_img1.astype(np.float32) / (blank_small_imgs[0].astype(np.float32) + 0.01)
@@ -352,7 +352,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
         color_img = color_img[0]
     else:
         # old method
-        small_img = cv2.resize(color_img, (color_img.shape[1] // p_scalef, color_img.shape[0] // p_scalef))
+        small_img = cv2.resize(color_img, (0, 0), fx=process_scale, fy=process_scale))
         # subtract blank vignette
         small_img = 255 - cv2.subtract(blank_small_imgs[0], small_img)
         # compute adaptive threshold
@@ -444,7 +444,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
 
         contours_and_args = []
         for id, contour in enumerate(stones_contours):
-            contour *= p_scalef   # enlarge to compensate for smaller processed image
+            contour /= process_scale   # enlarge to compensate for smaller processed image
             contours_and_args.append([frame_desc, id, contour, color_img, None, save_stones])
 
         stones = pool.starmap(process_stone, contours_and_args)
@@ -453,7 +453,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     else:
         stones = []
         for id, contour in enumerate(stones_contours):
-            contour *= p_scalef   # enlarge to compensate for smaller processed image
+            contour /= process_scale   # enlarge to compensate for smaller processed image
             stones.append(process_stone(frame_desc, id, contour, color_img, result_img, save_stones))
 
     # Keep stones with a result
