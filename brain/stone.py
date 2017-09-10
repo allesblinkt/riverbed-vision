@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import pickle as serialization
 # import serpent as serialization
@@ -16,7 +16,6 @@ from art import art_step
 
 from log import makelog
 log = makelog(__name__)
-
 
 class Stone(object):
     def __init__(self, center, size, angle, color, structure, flag=False):
@@ -244,7 +243,7 @@ class StoneMap(config.StoneMap):
         self.save(meta=True)
         self._metadata()
 
-    def image(self, img, scale):
+    def image(self, img, scale, draw_holes=True):
         """Draw the map to an image."""
 
         log.debug('Creating map image')
@@ -260,10 +259,11 @@ class StoneMap(config.StoneMap):
             if s.flag:
                 cv2.circle(img, center, 3, (0, 69, 255))
 
-        for h in self.holes:
-            center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
-            size = int(h.size / scale)
-            cv2.circle(img, center, size, (255, 255, 255))
+        if draw_holes:
+            for h in self.holes:
+                center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
+                size = int(h.size / scale)
+                cv2.circle(img, center, size, (0, 0, 255), thickness=2)
 
     def image_svg(self, svg, scale, stone_scale=1.0, metadata_scale=1.0, crosshair_scale=1.0, hole_scale=1.0):
         """Draw the map to an svg image."""
@@ -365,7 +365,7 @@ if __name__ == '__main__':
         log.warn('No STONES!')
 
     while True:
-        img_map = np.zeros((map.size[1] / 2, map.size[0] / 2, 3), np.uint8)
+        img_map = np.ones((map.size[1] // 2, map.size[0] // 2, 3), np.uint8) * 255
         map.image(img_map, 2)
         cv2.imshow('map', img_map)
 
