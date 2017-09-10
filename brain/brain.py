@@ -13,12 +13,13 @@ from art import art_step
 from extract import process_image
 
 from utils import random_on_circle, frange_inclusive
-from stone import StoneMap, Stone
+from stone import StoneMap
 
 from log import makelog
 log = makelog('brain')
 
 executor_save = ThreadPoolExecutor(max_workers=1)
+
 
 class DummyMachine(config.Machine):
 
@@ -134,8 +135,6 @@ class Camera(config.Camera):
         cam.set(cv2.CAP_PROP_FPS, 10)
         # cam.set(cv2.CAP_PROP_EXPOSURE, 19)
         # cam.set(cv2.CAP_PROP_BRIGHTNESS, 10)
-        # 
-        # 
         for i in range(self.grab_dummy_frames):
             cam.read()
 
@@ -158,7 +157,7 @@ class Camera(config.Camera):
         subprocess.call(v4l_cmd + cmd_params)
 
     def pos_to_mm(self, pos, offset=(0, 0)):
-        """ Calculate distance of perceived pixel from center of the view 
+        """ Calculate distance of perceived pixel from center of the view
             (in cnc units = mm) """
         # distance offset from head center to camera center
         dx = self.offset_x
@@ -497,18 +496,18 @@ class Brain(config.Brain):
     def demo1(self):
         # demo program which moves stone back and forth
         while True:
-            self._move_stone_absolute((3500, 1000),  0, (3500, 1250), 90)
-            self._move_stone_absolute((3500, 1250), 90, (3500, 1000),  0)
+            self._move_stone_absolute((3500, 1000), 0, (3500, 1250), 90)
+            self._move_stone_absolute((3500, 1250), 90, (3500, 1000), 0)
 
     def demo2(self):
         while True:
-            self._move_stone((3500, 1000),  30, (3500, 1000), 120)
-            self._move_stone((3500, 1000), 120, (3500, 1000),  30)
+            self._move_stone((3500, 1000), 30, (3500, 1000), 120)
+            self._move_stone((3500, 1000), 120, (3500, 1000), 30)
 
     def demo3(self):
         while True:
-            self._move_stone((3700, 1000),  30, (3700, 1000), 120)
-            self._move_stone((3700, 1000), 120, (3700, 1000),  30)
+            self._move_stone((3700, 1000), 30, (3700, 1000), 120)
+            self._move_stone((3700, 1000), 120, (3700, 1000), 30)
 
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
@@ -624,6 +623,7 @@ class Brain(config.Brain):
                 self.save_map()
             else:
                 time.sleep(1)
+
 
 if __name__ == '__main__':
     brain = Brain(use_machine=True, create_new_map=False)

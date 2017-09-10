@@ -17,6 +17,7 @@ from art import art_step
 from log import makelog
 log = makelog(__name__)
 
+
 class Stone(object):
     def __init__(self, center, size, angle, color, structure, flag=False):
         self.center = center
@@ -354,11 +355,11 @@ class StoneMap(config.StoneMap):
             shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data2'.format(self.name, ts))
         log.debug('Saving map... Done.')
 
+
 if __name__ == '__main__':
     map = StoneMap('stonemap')
-    #map.stage = (0, 0, None, None, None)  # NOTE: use this to override the current state
+    # map.stage = (0, 0, None, None, None)  # NOTE: use this to override the current state
     map.save(meta=True)
-
 
     if len(map.stones) == 0:
         # map.randomize()

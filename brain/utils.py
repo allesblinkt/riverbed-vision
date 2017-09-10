@@ -95,7 +95,7 @@ def rotated_subimg(image, center, theta, width, height):
     mapping = np.array([[v_x[0], v_y[0], s_x],
                         [v_x[1], v_y[1], s_y]])
 
-    return cv2.warpAffine(image, mapping,(width, height), flags=cv2.WARP_INVERSE_MAP+cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE)
+    return cv2.warpAffine(image, mapping, (width, height), flags=cv2.WARP_INVERSE_MAP + cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE)
 
 
 def inkey():

@@ -108,7 +108,7 @@ def art_step(map):
     map.holes = [h for h in map.holes if not in_workarea(h) and h.center[0] + h.size <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1)]
 
     if stage_mode == 0:   # Clear area
-        sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step) ]
+        sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step)]
         if sel:
             s = sel[0]
             index = s.index

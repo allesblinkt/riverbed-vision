@@ -2,8 +2,6 @@
 import cv2
 import numpy as np
 
-from utils import distance2
-
 from log import makelog
 log = makelog(__name__)
 
@@ -38,9 +36,9 @@ def histogram_lab(img, n_bins=16):
 
 
 def kmeans_quantization(img, n_clusters):
-    """ Quantizises the image into a given number of clusters (n_clusters). 
+    """ Quantizises the image into a given number of clusters (n_clusters).
         This can work with images (4 channel) that have an alpha channel, this gets ignored,
-        but it will "spend" one cluster for that 
+        but it will "spend" one cluster for that
     """
     has_mask = img.shape[2] == 4
 
@@ -109,6 +107,7 @@ def lab_to_rgb(c):
     rgb = (cv2.cvtColor(dummy, cv2.COLOR_LAB2BGR)[0, 0]).tolist()
 
     return rgb
+
 
 if __name__ == '__main__':
     import os

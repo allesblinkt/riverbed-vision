@@ -1,5 +1,5 @@
 import math
-from random import choice, random
+from random import choice
 from coloranalysis import compare_colors
 from structure import compare_histograms
 from utils import map_value, constrain, distance
@@ -14,6 +14,7 @@ flower_seeds = None
 min_l, max_l = None, None    # Cache luma calculations
 
 flower_cache = {}
+
 
 def find_flower_pos(map, stone, center, max_radius=None, workarea=True):
     global flower_cache
@@ -76,6 +77,7 @@ def in_workarea(stone):
 def atan_angle(p1, p2):
     return math.degrees(math.atan2(p1[1] - p2[1], p1[0] - p2[0]))
 
+
 def art_step(map):
     if map.stage is not None:
         stage_mode, stage_step, stage1_y, stage1_last_index = map.stage
@@ -121,7 +123,7 @@ def art_step(map):
     log.debug('Stage mode %d', stage_mode)
 
     if stage_mode == 0:   # Clear circle strip
-        sel = [s for s in map.stones if not s.flag and distance(s.center, art_center) >= 100.0 * (stage_step) and distance(s.center, art_center) < 100.0 * (stage_step + 1) ]
+        sel = [s for s in map.stones if not s.flag and distance(s.center, art_center) >= 100.0 * (stage_step) and distance(s.center, art_center) < 100.0 * (stage_step + 1)]
         if sel:
             s = choice(sel)
             index = s.index
@@ -131,7 +133,7 @@ def art_step(map):
             new_center, new_angle = find_flower_pos(map, s, flower_seeds[bucket])
 
     elif stage_mode == 1:  # Fill circle strip
-        sel = [s for s in map.stones if not s.flag and distance(s.center, art_center) >= 100.0 * (stage_step + 1) ]
+        sel = [s for s in map.stones if not s.flag and distance(s.center, art_center) >= 100.0 * (stage_step + 1)]
 
         if sel:
             s = find_darkest(sel)

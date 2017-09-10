@@ -2,12 +2,11 @@
 
 import cv2
 import numpy as np
-import math
 import time
 import sys
 from multiprocessing import Pool
 
-from utils import rotated_subimg
+# from utils import rotated_subimg
 from coloranalysis import find_dominant_colors, lab_to_rgb
 from structure import lbp_histogram
 from stone import Stone
@@ -16,6 +15,7 @@ from log import makelog
 log = makelog(__name__)
 
 process_scale = 0.5   # Process images at half size
+
 
 def load_blank_imgs():
     blank_fns = ['blank_l0.jpg', 'blank_l0.jpg', 'blank_l0.jpg', 'blank_l0.jpg']
@@ -31,7 +31,9 @@ def load_blank_imgs():
 
     return blank_imgs, blank_small_imgs
 
+
 blank_imgs, blank_small_imgs = load_blank_imgs()
+
 
 def analyze_contour_cuts(contour, step=7):
     """
@@ -150,9 +152,9 @@ def falloff_gradient(x, x2, y, y2, pt, n, rad):   # max curvature influence     
     dots = (vecs.dot(n) - 0.75) * 5.0  # TODO: adjust
 
     grad = 1.0 - np.clip(mags[:, :, 0] / rad, 0.0, 1.0)
-    #dots = 1.0 - np.clip(dots[:, :], 0.0, 1.0)
+    # dots = 1.0 - np.clip(dots[:, :], 0.0, 1.0)
     result = 1.0 - (grad * dots)
-    #qresult = dots
+    # qresult = dots
     return result
 
 
@@ -195,13 +197,15 @@ def preselect_stone(img_size, center, dim, bbox):
 
 
 def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None):
-    m = cv2.moments(contour)
 
+    """
+    m = cv2.moments(contour)
     try:
         cx = int(m['m10'] / m['m00'])
         cy = int(m['m01'] / m['m00'])
     except:
         return None
+    """
 
     bbox = cv2.boundingRect(contour)
 
@@ -275,7 +279,7 @@ def threshold_adaptive_with_saturation(image):
     # h_img = hsv_img[:, :, 0]  # TODO: check
     s_img = hsv_img[:, :, 1]
     v_img = hsv_img[:, :, 2]
-    h_img = hsv_img[:, :, 0]
+    # h_img = hsv_img[:, :, 0]
 
     gray_s_img = cv2.GaussianBlur(255 - s_img, (15, 15), 0)
     gray_v_img = cv2.GaussianBlur(v_img, (5, 5), 0)
@@ -299,7 +303,6 @@ def threshold_adaptive_with_saturation(image):
 
     thresh_img = thresh_s_img
 
-
     # thresh_img = cv2.resize(thresh_img, (thresh_img.shape[1]*4, thresh_img.shape[0]*4), interpolation=cv2.INTER_CUBIC)
     # thresh_img = cv2.GaussianBlur(thresh_img, (9, 9), 0)
     # _, thresh_img = cv2.threshold(thresh_img, 128, 255, cv2.THRESH_BINARY)
@@ -308,25 +311,25 @@ def threshold_adaptive_with_saturation(image):
 
 
 def threshold_double_focus(im0, im1):
-    im0_bl =  cv2.GaussianBlur(im0, (15, 15), 0)  # blurred for color analysis
+    im0_bl = cv2.GaussianBlur(im0, (15, 15), 0)  # blurred for color analysis
 
     im_hsr = cv2.cvtColor(im0, cv2.COLOR_BGR2HSV)
-    im_s = im_hsr[:,:,1]
-    im_v = im_hsr[:,:,2]
+    im_s = im_hsr[:, :, 1]
+    im_v = im_hsr[:, :, 2]
 
     im_hsl = cv2.cvtColor(im0_bl, cv2.COLOR_BGR2HLS)
-    im_h = im_hsl[:,:,0] / 255.0   # H from HLS gives less noisy results
+    im_h = im_hsl[:, :, 0] / 255.0   # H from HLS gives less noisy results
 
     im_sobel1 = cv2.Sobel(im0, ddepth=-1, dx=0, dy=1, ksize=3)
     im_sobel2 = cv2.Sobel(im0, ddepth=-1, dx=1, dy=0, ksize=3)
     im_sobel = cv2.magnitude(im_sobel1 * 2, im_sobel2 * 2)
-    im_sobel = cv2.cvtColor(im_sobel, cv2.COLOR_BGR2HSV)[:,:,2]
+    im_sobel = cv2.cvtColor(im_sobel, cv2.COLOR_BGR2HSV)[:, :, 2]
 
     im_sobel[im_sobel > 0.3] = 1
     im_sobel[im_sobel <= 0.3] = 0
 
     im_diff = np.absolute(im0 - im1)
-    im_diff = cv2.cvtColor(im_diff, cv2.COLOR_BGR2HSV)[:,:,2]
+    im_diff = cv2.cvtColor(im_diff, cv2.COLOR_BGR2HSV)[:, :, 2]
     im_diff[im_diff > 0.07] = 1
 
     chain = np.maximum(im_sobel, im_diff)
@@ -433,7 +436,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
 
     segmented_img = markers_img.copy()
 
-    #watershed_img = cv2.cvtColor(thresh_img, cv2.COLOR_GRAY2RGB)
+    # watershed_img = cv2.cvtColor(thresh_img, cv2.COLOR_GRAY2RGB)
     watershed_img = small_img
     cv2.watershed(watershed_img, segmented_img)
     segmented_img[segmented_img == 1] = -1
@@ -526,6 +529,7 @@ def main():
     # for i in range(13, 30+1):
     #     frame = cv2.imread('../experiments/testdata/photo-{}.jpg'.format(i))
     #     process_image('photo-{}'.format(i), frame, save_stones='png', debug_draw=False)
+
 
 if __name__ == "__main__":
     main()
