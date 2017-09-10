@@ -364,9 +364,11 @@ if __name__ == '__main__':
         # map.randomize()
         log.warn('No STONES!')
 
+    IMAGE_SCALE = 2
+
     while True:
-        img_map = np.ones((map.size[1] // 2, map.size[0] // 2, 3), np.uint8) * 255
-        map.image(img_map, 2)
+        img_map = np.ones((map.size[1] // IMAGE_SCALE, map.size[0] // IMAGE_SCALE, 3), np.uint8) * 255
+        map.image(img_map, IMAGE_SCALE)
         cv2.imshow('map', img_map)
 
         cvkey = chr(cv2.waitKey(1) & 255)
