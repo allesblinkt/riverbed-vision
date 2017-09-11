@@ -34,6 +34,8 @@ class Camera(object):
         'zoom_absolute': 100,
     }
 
+    focus_stack = [30, 60]
+
     grab_dummy_frames = 10
 
 
@@ -57,7 +59,6 @@ class Brain(object):
     init_feedrate = 32000
 
     scan_step = [0.66, 0.66]  # 1 would mean no overlap (full frame width)
-
 
 class StoneMap(object):
     size = [3730, 1730]

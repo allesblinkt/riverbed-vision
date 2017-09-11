@@ -223,7 +223,6 @@ class Camera(config.Camera):
         self.grab(save=save, light_channel=3)
 
     def grab_focus_sequence(self, save=False):
-        focus_stack = [30, 60]
         res = []
         for focus in focus_stack:
             self.set_cam_parameter('focus_absolute', focus)
