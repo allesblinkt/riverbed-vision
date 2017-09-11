@@ -218,7 +218,7 @@ switch.led.output_type                      hwpwm              # just an on or o
 # Fault limit input. CHANGED
 switch.fault.enable                           true             #
 switch.fault.output_on_command                M112             # if the switch is hit, disable 
-switch.fault.input_pin                        1.10^!           #
+switch.fault.input_pin                        0.1^!           #
 
 
 # automatically toggle a switch at a specified temperature. Different ones of these may be defined to monitor different temperatures and switch different swithxes
@@ -312,9 +312,9 @@ panel.encoder_b_pin                          3.26!^            # encoder pin
 #panel.back_button_pin                       2.11!^            # back button         ; GLCD EXP2 Pin 8
 
 # pins used with other panels
-#panel.up_button_pin                         0.1!              # up button if used
-#panel.down_button_pin                       0.0!              # down button if used
-#panel.click_button_pin                      0.18!             # click button if used
+panel.up_button_pin                          1.0!              # up button if used
+panel.down_button_pin                       1.0!              # down button if used
+panel.click_button_pin                      1.18!             # click button if used
 
 panel.menu_offset                            0                 # some panels will need 1 here
 
