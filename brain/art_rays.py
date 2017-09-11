@@ -15,6 +15,7 @@ min_l, max_l = None, None    # Cache luma calculations
 
 flower_cache = {}
 
+
 def find_flower_pos(map, stone, center):
     global flower_cache
     if center in flower_cache:
@@ -66,6 +67,7 @@ def in_workarea(stone):
 def atan_angle(p1, p2):
     return math.degrees(math.atan2(p1[1] - p2[1], p1[0] - p2[0]))
 
+
 def art_step(map):
     if map.stage is not None:
         stage_mode, stage_step, stage1_y, stage1_last_index = map.stage
@@ -110,7 +112,7 @@ def art_step(map):
     art_center = (0, map.size[1] / 2)
 
     if stage_mode == 0:   # Clear area
-        sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step) ]
+        sel = [s for s in map.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (map.maxstonesize + 10) * (stage_step)]
         if sel:
             s = sel[0]
             index = s.index

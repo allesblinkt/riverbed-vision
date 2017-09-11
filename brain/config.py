@@ -1,10 +1,10 @@
 class Camera(object):
     capture_width = 1920.0  # image width (in pixels).
     capture_height = 1080.0  # image height (in pixels).
-                   
+
     viewx = 53.0 * 2.0  # view width (in cnc units = mm). Enter transposed!
     viewy = 95.0 * 2.0  # view height (in cnc units = mm). Enter transposed!
-                        
+
     view_transpose = True
     view_flip = False   # rotation by 180 deg?
 
@@ -36,6 +36,7 @@ class Camera(object):
 
     grab_dummy_frames = 10
 
+
 class Machine(object):
 
     # CONTROL_HOSTNAME = 'localhost'
@@ -47,6 +48,7 @@ class Machine(object):
     lift_down_extra_z_down = 2.5
     lift_down_eject_dwell = 15
 
+
 class Brain(object):
 
     init_x = 100
@@ -54,7 +56,8 @@ class Brain(object):
     init_e = 90
     init_feedrate = 32000
 
-    scan_step = [0.66, 0.66]   # 1 would mean no overlap (full frame width)
+    scan_step = [0.66, 0.66]  # 1 would mean no overlap (full frame width)
+
 
 class StoneMap(object):
     size = [3730, 1730]

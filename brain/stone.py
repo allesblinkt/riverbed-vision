@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import pickle as serialization
 # import serpent as serialization
@@ -244,7 +244,7 @@ class StoneMap(config.StoneMap):
         self.save(meta=True)
         self._metadata()
 
-    def image(self, img, scale):
+    def image(self, img, scale, draw_holes=True):
         """Draw the map to an image."""
 
         log.debug('Creating map image')
@@ -260,10 +260,11 @@ class StoneMap(config.StoneMap):
             if s.flag:
                 cv2.circle(img, center, 3, (0, 69, 255))
 
-        for h in self.holes:
-            center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
-            size = int(h.size / scale)
-            cv2.circle(img, center, size, (255, 255, 255))
+        if draw_holes:
+            for h in self.holes:
+                center = int((self.size[0] - h.center[0]) / scale), int(h.center[1] / scale)
+                size = int(h.size / scale)
+                cv2.circle(img, center, size, (0, 0, 255), thickness=2)
 
     def image_svg(self, svg, scale, stone_scale=1.0, metadata_scale=1.0, crosshair_scale=1.0, hole_scale=1.0):
         """Draw the map to an svg image."""
@@ -354,19 +355,21 @@ class StoneMap(config.StoneMap):
             shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data2'.format(self.name, ts))
         log.debug('Saving map... Done.')
 
+
 if __name__ == '__main__':
     map = StoneMap('stonemap')
-    #map.stage = (0, 0, None, None, None)  # NOTE: use this to override the current state
+    # map.stage = (0, 0, None, None, None)  # NOTE: use this to override the current state
     map.save(meta=True)
-
 
     if len(map.stones) == 0:
         # map.randomize()
         log.warn('No STONES!')
 
+    IMAGE_SCALE = 2
+
     while True:
-        img_map = np.zeros((map.size[1] / 2, map.size[0] / 2, 3), np.uint8)
-        map.image(img_map, 2)
+        img_map = np.ones((map.size[1] // IMAGE_SCALE, map.size[0] // IMAGE_SCALE, 3), np.uint8) * 255
+        map.image(img_map, IMAGE_SCALE)
         cv2.imshow('map', img_map)
 
         cvkey = chr(cv2.waitKey(1) & 255)

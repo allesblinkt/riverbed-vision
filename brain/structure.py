@@ -9,6 +9,7 @@ from scipy.stats import itemfreq
 from log import makelog
 log = makelog(__name__)
 
+
 def lbp_histogram(img, radius=5):
     """ Computes the LBP Histogram for a given images luminance channel and returns it """
 
@@ -44,16 +45,17 @@ def compare_histograms(a, b):
 def plot_hist(hist):
     graph_w = 300
     graph_h = 200
-    graph_img = np.zeros((graph_h, graph_w,3), np.uint8)
+    graph_img = np.zeros((graph_h, graph_w, 3), np.uint8)
 
     num_bins = len(hist)
-    for i in range(1, num_bins-2, 1):
+    for i in range(1, num_bins - 2, 1):
         x = int(i / num_bins * graph_w)
         bh = int(graph_h * hist[i] * 10.0)
         bw = int(graph_w / num_bins)
-        cv2.rectangle(graph_img, (x, graph_h-bh), (x+bw, graph_h), [255, 0, 0], cv2.FILLED)
+        cv2.rectangle(graph_img, (x, graph_h - bh), (x + bw, graph_h), [255, 0, 0], cv2.FILLED)
 
     return graph_img
+
 
 if __name__ == '__main__':
     import os
@@ -84,7 +86,7 @@ if __name__ == '__main__':
         t = time.time()
         hist_a = lbp_histogram(image, radius=3)
         hist_b = lbp_histogram(image, radius=12)
-        #print(hist)
+        # print(hist)
         log.info('Time for lbp_histogram: %.3fs', (time.time() - t))
 
         # t = time.time()
@@ -100,7 +102,6 @@ if __name__ == '__main__':
 
         graph_a_img = plot_hist(hist_a)
         graph_b_img = plot_hist(hist_b)
-
 
         # log.info('Score %0.3f',  (score, ))
         cv2.imshow('first', first_img)

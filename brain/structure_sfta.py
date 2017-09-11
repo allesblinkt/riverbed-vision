@@ -9,7 +9,7 @@ Alceu Costa
 
 import numpy as np
 import cv2
-#np.seterr(all='raise')
+# np.seterr(all='raise')
 
 
 def find_borders(img):
@@ -106,7 +106,7 @@ def sfta(img, nt):
     if len(np.shape(img)) == 3:
         img = np.mean(img, 2)
     elif len(np.shape(img)) != 2:
-        raise ImageDimensionError
+        raise ValueError
 
     img = img.astype(np.uint8)
 
@@ -151,7 +151,7 @@ def sfta(img, nt):
 
 
 if __name__ == '__main__':
-    from matplotlib import pyplot as plt
+    # from matplotlib import pyplot as plt
 
     pics = ['stone1.png', 'stone2.png', 'stone3.png', 'stone4.png', 'stone5.png']
 
@@ -161,9 +161,9 @@ if __name__ == '__main__':
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         hist = cv2.calcHist([hsv], [0, 1], None, [180, 256], [0, 180, 0, 256])
 
-        #plt.imshow(hist, interpolation='nearest')
-        cv2.imshow("hist  " + p, hist/255.0)
-        #plt.show()
+        # plt.imshow(hist, interpolation='nearest')
+        cv2.imshow("hist  " + p, hist / 255.0)
+        # plt.show()
 
         # for i in range(len(imgs)):
         #     print(imgs[i])

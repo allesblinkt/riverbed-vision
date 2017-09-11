@@ -11,7 +11,7 @@ MAX_STAGE_MODE = 2  # How many stages / modes can we do (+1)
 WORKAREA_START_X = 2300
 
 flower_seeds = None
-#min_l, max_l = None, None    # Cache luma calculations
+# min_l, max_l = None, None    # Cache luma calculations
 min_l, max_l = 30, 150    # Cache luma calculations
 
 
@@ -70,7 +70,7 @@ def in_workarea(stone):
 def art_step(stonemap):
     if stonemap.stage is not None:
         stage_mode, stage_step, stage1_y, stage1_last, stage1_first = stonemap.stage
-        # stage1_last = stonemap.stones[stage1_last_index] if stage1_last_index is not None else None   # TODO: First 
+        # stage1_last = stonemap.stones[stage1_last_index] if stage1_last_index is not None else None   # TODO: First
     else:
         log.info('Created new stage')
         stage_mode = -1
@@ -110,16 +110,15 @@ def art_step(stonemap):
     # clean unusable holes
     stonemap.holes = [h for h in stonemap.holes if not in_workarea(h) and h.center[0] + h.size <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1)]
 
-
     if stage_mode == -1:   # Unflag to clear stones
-        sel = [s for s in stonemap.stones if not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step) ]
+        sel = [s for s in stonemap.stones if not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step)]
 
         if sel:
             for s in sel:
                 s.flag = False
         stage_mode == 0
     if stage_mode == 0:   # Clear area
-        sel = [s for s in stonemap.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step) ]
+        sel = [s for s in stonemap.stones if not s.flag and not in_workarea(s) and s.center[0] + s.size[0] > WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 1) and s.center[0] + s.size[0] <= WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step)]
         if sel:
             s = sel[0]
             chosen_stone = s
