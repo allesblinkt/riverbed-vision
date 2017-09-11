@@ -7,10 +7,11 @@ if __name__ == '__main__':
     machine.cam = camera
 
     # machine.control.go(y=100)
+    focus_stack = camera.focus_stack
 
-    for focus in range(15, 50, 5):
+    for focus in focus_stack:
         camera.set_cam_parameter('focus_absolute', focus)
-        suffix = '_f%d' % (focus, )
+        suffix = '_f%d_manual' % (focus, )
 
         time.sleep(1)
         imgt = camera.grab(save=True, light_channel=0, suffix=suffix)
