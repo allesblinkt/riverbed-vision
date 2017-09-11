@@ -520,11 +520,13 @@ class Brain(config.Brain):
             log.warn('Invalid placement position {},{}. Aborting move.'.format(c2[0], c2[1]))
             return False
 
-        self.m.go(x=c1[0], y=c1[1], e=a1)
+        self.m.go(x=c1[0], y=c1[1])
+        self.m.go(e=a1)
         ret = self.m.lift_up(x=c1[0], y=c1[1])
 
         if ret:
-            self.m.go(x=c2[0], y=c2[1], e=a2)
+            self.m.go(x=c2[0], y=c2[1])
+            self.m.go(e=a2)
             self.m.lift_down()
 
             return True
