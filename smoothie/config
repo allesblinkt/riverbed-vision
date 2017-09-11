@@ -11,7 +11,7 @@ mm_per_arc_segment                           0.5              # Arcs are cut int
 # Arm solution configuration : Cartesian robot. Translates mm positions into stepper positions
 alpha_steps_per_mm                           51.282051282               # CHANGED. Steps per mm for alpha stepper
 beta_steps_per_mm                            51.282051282               # CHANGED. Steps per mm for beta stepper
-gamma_steps_per_mm                           320.0             # CHANGED. Steps per mm for gamma stepper
+gamma_steps_per_mm                           266.6667                   # CHANGED. Steps per mm for gamma stepper
 
 # Planner module configuration : Look-ahead and acceleration configuration
 planner_queue_size                           32               # DO NOT CHANGE THIS UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING
@@ -33,7 +33,7 @@ base_stepping_frequency                      100000           # Base frequency f
 # Cartesian axis speed limits
 x_axis_max_speed                             50000            # mm/min
 y_axis_max_speed                             50000            # mm/min
-z_axis_max_speed                             800              # mm/min
+z_axis_max_speed                             1000              # mm/min
 
 # Stepper module pins ( ports, and pin numbers, appending "!" to the number will invert a pin )
 alpha_step_pin                               2.0              # Pin for alpha stepper step signal
