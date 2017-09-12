@@ -29,10 +29,10 @@ def find_flower_pos(stonemap, stone, center):
         if in_workarea(stone_dummy) and stonemap.can_put(stone_dummy, border=4):
             return new_center, angle % 180
 
-        angle += (137.50776405 / 5.0)
+        angle += (137.50776405 / 10.0)
         if angle > 360:
             angle -= 360
-            radius += 2.0
+            radius += 1.0
 
 
 def find_best_match(stone, selection, bucket_size_c=10, bucket_size_s=50):
