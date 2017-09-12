@@ -56,7 +56,7 @@ class Brain(object):
     init_x = 100
     init_y = 100
     init_e = 90
-    init_feedrate = 32000
+    init_feedrate = 37000
 
     scan_step = [0.5, 0.6]  # 1 would mean no overlap (full frame width)
 
