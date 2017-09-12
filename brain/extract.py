@@ -166,6 +166,8 @@ def draw_normal(img, pt, normal, angle, scale=10.0):
 
 
 def preselect_stone(img_size, center, dim, bbox):
+    min_center_border_dist = 100  # px
+    min_axis_size = 50  # px
     bbox_tolerance = 2  # px
 
     # center too close to the edge
