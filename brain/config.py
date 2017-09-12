@@ -56,9 +56,9 @@ class Brain(object):
     init_x = 100
     init_y = 100
     init_e = 90
-    init_feedrate = 37000
+    init_feedrate = 32000
 
-    scan_step = [0.66, 0.66]  # 1 would mean no overlap (full frame width)
+    scan_step = [0.5, 0.6]  # 1 would mean no overlap (full frame width)
 
 
 class StoneMap(object):
