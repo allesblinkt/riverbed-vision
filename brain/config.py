@@ -36,7 +36,7 @@ class Camera(object):
 
     focus_stack = [30, 60]
 
-    grab_dummy_frames = 10
+    grab_dummy_frames = 15
 
 
 class Machine(object):
