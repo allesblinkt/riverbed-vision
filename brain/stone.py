@@ -145,6 +145,13 @@ class StoneMap(config.StoneMap):
         log.debug('Loaded %d stones', len(self.stones))
         self._metadata()
 
+    def copy(self):
+        import copy
+        return copy.copy(self)
+
+    def stone_count(self):
+        return len(self.stones)
+
     # precompute useful info, but don't store it
     def _metadata(self):
         self.maxstonesize = 0

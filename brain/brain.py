@@ -224,7 +224,7 @@ class Camera(config.Camera):
 
     def grab_focus_sequence(self, save=False):
         res = []
-        for focus in focus_stack:
+        for focus in self.focus_stack:
             self.set_cam_parameter('focus_absolute', focus)
             suffix = '_f%d' % (focus, )
             im = self.grab(save=save, light_channel=0, suffix=suffix)
@@ -312,11 +312,13 @@ class Brain(config.Brain):
         camera_center = camera.camera_center_to_mm((x, y))
         old_stones = self.stone_map.get_at_with_border(camera_center, border_size=max(camera.resx, camera.resy))
 
+        self.save_map_wait()
+
         add_count = 0
         remove_count = 0
         purge_count = 0
 
-        self.save_map_wait()
+        backup_map = self.stone_map.copy()
 
         # Remove doublettes
         for new_stone in new_stones:
@@ -348,7 +350,11 @@ class Brain(config.Brain):
                 if self.stone_map.remove_stone(old_stone):
                     purge_count += 1
 
-        log.debug('Added %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
+        if backup_map.stone_count() - self.stone_map.stone_count() >= 2:
+            self.stone_map = backup_map
+            log.debug('Ignored addition of %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
+        else:
+            log.debug('Added %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
 
         # select stones outside of the view
         # TODO: get these right:
