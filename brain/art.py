@@ -99,9 +99,9 @@ def art_step(stonemap):
             y = map_value(i, 0, 8, margin_y, max_y - margin_y)
 
             if i % 2 == 0:
-                x = max_x - 400.0
+                x = max_x - 500.0
             else:
-                x = max_x - 1150.0
+                x = max_x - 1050.0
 
             flower_seeds.append((x, y))
 
@@ -163,7 +163,7 @@ def art_step(stonemap):
             new_angle = 0
             x = WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 0.5)
             new_center = x, stage1_y
-            if stage1_y > 1520:
+            if stage1_y > 1545:
                 stage1_y = None
                 stage_step += 1
                 stage_mode = -1
