@@ -187,7 +187,7 @@ def preselect_stone(img_size, center, dim, bbox):
         return False
 
     small_img_side = min(img_size[0], img_size[1])
-    max_axis = small_img_side * 0.90 * 0.5
+    max_axis = small_img_side * 0.75
 
     # too big, machine sees carriage
     if dim[0] > max_axis or dim[1] > max_axis:
