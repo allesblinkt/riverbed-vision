@@ -302,7 +302,8 @@ class Brain(config.Brain):
             s.size = self.machine.cam.size_to_mm(s.size)
             s.rank = 0.0
             s.bogus = False
-            new_stones.append(s)
+            if self.stone_map.is_inside(s):
+                new_stones.append(s)
 
         log.debug('Continous scan: found %d stones', len(new_stones))
 
@@ -384,7 +385,8 @@ class Brain(config.Brain):
                         s.center = self.machine.cam.pos_to_mm(s.center, offset=(x, y))
                         s.size = self.machine.cam.size_to_mm(s.size)
                         s.rank = 0.0
-                        stones.append(s)
+                        if self.stone_map.is_inside(s):
+                            stones.append(s)
                 else:
                     self.machine.cam.grab_focus_sequence(save=True)
         log.debug('End scanning')
@@ -441,8 +443,9 @@ class Brain(config.Brain):
                 s.center = cam.pos_to_mm(s.center, offset=(xp, yp))
                 s.size = cam.size_to_mm(s.size)
                 s.rank = 0.0
-                stones.append(s)
-                localstones.append(s)
+                if self.stone_map.is_inside(s):
+                    stones.append(s)
+                    localstones.append(s)
 
             bin = {'x': xp, 'y': yp, 'stones': localstones}
             bins.append(bin)
@@ -481,7 +484,8 @@ class Brain(config.Brain):
                             other_stone.bogus = True
 
                     if not this_stone.bogus:
-                        chosen_stones.append(this_stone)
+                        if self.stone_map.is_inside(this_stone):
+                            chosen_stones.append(this_stone)
 
             log.debug('End selecting/reducing stones')
             # copy selected stones to storage
