@@ -92,14 +92,11 @@ class Machine(config.Machine):
     def lift_down(self, extra_z_down=config.Machine.lift_down_extra_z_down):
         if self.last_pickup_height is None:
             raise Exception('lift_down called without calling lift_up first')
-        self.control.light(True)
         self.go(z=max(self.last_pickup_height - extra_z_down, 0))
         self.control.vacuum(False)
         self.control.eject(True)
         self.control.dwell(self.lift_down_eject_dwell)
         self.control.eject(False)
-
-        self.control.light(False)
         self.control.pickup_top()
         self.last_pickup_height = None
 
@@ -535,8 +532,10 @@ class Brain(config.Brain):
 
         if ret:
             self.m.go(x=c2[0], y=c2[1])
+            self.control.light(True)
             self.m.go(e=a2)
             self.m.lift_down()
+            self.control.light(False)
 
             return True
         else:
