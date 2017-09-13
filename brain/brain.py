@@ -532,10 +532,10 @@ class Brain(config.Brain):
 
         if ret:
             self.m.go(x=c2[0], y=c2[1])
-            self.control.light(True)
+            self.c.light(True)
             self.m.go(e=a2)
             self.m.lift_down()
-            self.control.light(False)
+            self.c.light(False)
 
             return True
         else:
