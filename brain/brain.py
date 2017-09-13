@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import time
 import math
+import random
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
@@ -267,6 +268,9 @@ class Brain(config.Brain):
     def __init__(self, machine=None, create_new_map=False):
         self.machine = machine
         self.stone_map = StoneMap('stonemap', create_new=create_new_map)
+        self.cycle_count = 0   # How many cycles in this run
+        self.next_break_cycle = self.lunch_break_every[0]   # When to lunch break next?
+
         if self.machine:
             # shortcuts for convenience
             self.m = self.machine
@@ -578,6 +582,17 @@ class Brain(config.Brain):
             log.info('Pausing here, if state paused...')
             self.c.check_pause()
             log.info('Continuing.')
+
+            if self.cycle_count > self.next_break_cycle:
+                log.info('Go home for lunchbreak time')
+                self.c.scan_top()
+                self.c.home_z()
+                log.info('Making lunch break here, if speed slow...')
+                self.c.check_lunch_break(sleep_s=self.lunch_break_duration)
+                self.next_break_cycle = random.randint(self.lunch_break_every[0], self.lunch_break_every[1])
+                log.info('Continuing.')
+
+            self.cycle_count += 1
 
             if chosen_stone is not None:
                 s = chosen_stone
