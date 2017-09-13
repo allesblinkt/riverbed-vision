@@ -39,5 +39,15 @@ def unpause():
     status.write(state='working')
     return 'ok'
 
+@app.route('/speed_normal', methods=['POST'])
+def speed_normal():
+    status.write(speed='normal')
+    return 'ok'
+
+@app.route('/speed_slow', methods=['POST'])
+def speed_slow():
+    status.write(speed='slow')
+    return 'ok'
+
 if __name__ == '__main__':
     app.run()

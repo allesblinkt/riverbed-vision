@@ -70,6 +70,17 @@ class MachineController(object):
             else:
                 break
 
+    def check_lunch_break(self, sleep_s=60.0):
+        s = status.read()
+        start_t = time.time()
+
+        if s is not None and 'speed' in s and s['speed'] == 'slow':
+            while time.time() - start_t < sleep_s:
+                self.light(True)
+                time.sleep(6.0)
+                self.light(False)
+                time.sleep(6.0)
+
     def reset(self):
         # send newlines to clear noise
         if self.serial_port:

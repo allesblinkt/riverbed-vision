@@ -3,6 +3,7 @@ var updateInterval = 1000;
 var updateStatus = function(data) {
     document.getElementById('status_alive').innerHTML = data.alive;
     document.getElementById('status_state').innerHTML = data.state;
+    document.getElementById('status_speed').innerHTML = data.speed;    
     document.getElementById('status_posx').innerHTML = data.posx;
     document.getElementById('status_posy').innerHTML = data.posy;
     document.getElementById('status_posz').innerHTML = data.posz;
