@@ -73,10 +73,8 @@ class Machine(config.Machine):
         # try lifting up tries times
         for i in range(tries):
             log.info('Pickup try {} of {}'.format(i + 1, tries))
-            self.control.light(True)
             # self.control.vacuum(True)   # Turned on in pickup routine
             h = self.control.pickup_custom()
-            self.control.light(False)
             if h is not None:
                 log.info('Picked up at height {}'.format(h, ))
                 self.last_pickup_height = h
@@ -500,13 +498,16 @@ class Brain(config.Brain):
             return False
 
         self.m.go(x=c1[0], y=c1[1])
+        self.c.light(True)
+        self.c.dwell(1000)
         self.m.go(e=a1)
         ret = self.m.lift_up(x=c1[0], y=c1[1])
+        self.c.light(False)
 
         if ret:
             self.m.go(x=c2[0], y=c2[1])
             self.c.light(True)
-            self.c.dwell(500)
+            self.c.dwell(1000)
             self.m.go(e=a2)
             self.m.lift_down()
             self.c.light(False)
@@ -590,7 +591,7 @@ class Brain(config.Brain):
 
                     # we don't scan here, but let's pretend we do
                     self.c.light(True)
-                    self.c.dwell(500)
+                    self.c.dwell(1000)
                     self.c.light(False)
 
                     log.info('Placement worked')
