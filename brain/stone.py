@@ -362,8 +362,8 @@ class StoneMap(config.StoneMap):
             # backup with timestamp
             shutil.copy('map/{}.data2'.format(self.name), 'map/{}-{}.data2'.format(self.name, ts))
         if image:
-            img_map = np.ones((map.size[1] // IMAGE_SCALE, map.size[0] // IMAGE_SCALE, 3), np.uint8) * 255
-            map.image(img_map, IMAGE_SCALE)
+            img_map = np.ones((self.size[1] // IMAGE_SCALE, self.size[0] // IMAGE_SCALE, 3), np.uint8) * 255
+            self.image(img_map, IMAGE_SCALE)
             cv2.imwrite('/tmp/stonemap.png', img_map)
 
         log.debug('Saving map... Done.')
