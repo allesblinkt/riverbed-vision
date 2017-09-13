@@ -280,7 +280,7 @@ class Brain(config.Brain):
         f = getattr(self, prgname)
         f()
 
-    def scan_update(self):
+    def scan_update(self, stone):
         self.m.go(e=self.init_e)
 
         log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
@@ -308,6 +308,7 @@ class Brain(config.Brain):
         add_count = 0
         remove_count = 0
         purge_count = 0
+        the_new_stone = None
 
         backup_map = self.stone_map.copy()
 
@@ -320,7 +321,12 @@ class Brain(config.Brain):
             for old_stone in old_stones:
                 if new_stone.coincides(old_stone):
                     if self.stone_map.remove_stone(old_stone):
-                        new_stone.flag = old_stone.flag
+                        # carry over flags if the stone is not the center one
+                        if old_stone != stone:
+                            new_stone.flag = old_stone.flag
+                        # else mark the stone as new one
+                        else:
+                            the_new_stone = new_stone
                         remove_count += 1
 
         # Purge
@@ -344,8 +350,10 @@ class Brain(config.Brain):
         if backup_map.stone_count() - self.stone_map.stone_count() >= 2:
             self.stone_map = backup_map
             log.debug('Ignored addition of %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
+            return stone
         else:
             log.debug('Added %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
+            return the_new_stone
 
         # select stones outside of the view
         # TODO: get these right:
@@ -591,7 +599,6 @@ class Brain(config.Brain):
                     putdown_pos = (nc[0], nc[1])
                     scan_pos = self.machine.cam.camera_pos_to_mm(putdown_pos)
                     self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
-                    # self.scan_update()
 
                     # we don't scan here, but let's pretend we do
                     self.c.light(True)
@@ -601,14 +608,27 @@ class Brain(config.Brain):
                     log.info('Placement worked')
                     self.save_map()
                 else:  # Fail, flag
+                    log.info('Placement failed')
                     s.flag = True
 
                     pickup_pos = (s.center[0], s.center[1])
                     scan_pos = self.machine.cam.camera_pos_to_mm(pickup_pos)
                     self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
-                    self.scan_update()
+                    new_s = self.scan_update(s)
 
-                    log.info('Placement failed')
+                    if new_s and new_s != s:
+                        # try pickup again
+                        log.debug('Retry placing stone {} from {} to {}'.format(s, new_s.center, nc))
+                        success_move = self._move_stone(new_s.center, new_s.angle, nc, na)
+                        if success_move:
+                            self.stone_map.move_stone(new_s, new_center=nc, angle=na)
+                            self.stone_map.stage = stage  # Commit stage
+                            log.info('Retry placement worked')
+                            self.save_map()
+                        else:
+                            new_s.flag = True
+                            log.info('Retry placement failed')
+
                     self.save_map()
 
             elif force:  # Art wants us to advance anyhow
