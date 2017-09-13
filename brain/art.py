@@ -162,6 +162,14 @@ def art_step(stonemap):
             chosen_stone = s
             new_angle = 0
             x = WORKAREA_START_X - (stonemap.maxstonesize + 10) * (stage_step + 0.5)
+
+            stone_dummy = chosen_stone.copy()
+            stone_dummy.center = x, stage1_y
+            stone_dummy.angle = new_angle
+            while not stonemap.can_put(stone_dummy):
+                stage1_y += 5
+                stone_dummy.center = x, stage1_y
+
             new_center = x, stage1_y
             if stage1_y > 1520:
                 stage1_y = None
