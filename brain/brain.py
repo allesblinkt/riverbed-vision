@@ -262,25 +262,17 @@ class Camera(config.Camera):
 
 class Brain(config.Brain):
 
-    def __init__(self, use_machine=True, create_new_map=False):
-        if use_machine:
-            self.machine = Machine()
-        else:
-            self.machine = None
-
+    def __init__(self, machine=None, create_new_map=False):
+        self.machine = machine
         self.stone_map = StoneMap('stonemap', create_new=create_new_map)
-        # shortcuts for convenience
-
         if self.machine:
+            # shortcuts for convenience
             self.m = self.machine
             self.c = self.machine.control
             self.c.reset()
             self.c.home()
             self.c.go(x=self.init_x, y=self.init_y, e=self.init_e)
             self.c.feedrate(self.init_feedrate)
-
-    def start(self):
-        pass
 
     def run(self, prgname):
         f = getattr(self, prgname)
@@ -407,7 +399,7 @@ class Brain(config.Brain):
             self.stone_map.stones = [s for s in stones if s.rank >= 1.5]
             self.stone_map.save()
 
-    def scan_from_files(self, analyze=True):
+    def scan_from_files(self, analyze=True, picdir='map'):
         import re
         import os
         import fnmatch
@@ -418,21 +410,18 @@ class Brain(config.Brain):
         cam = Camera(None)
 
         stones = []
-        p = "map_offline/"   # looks here for pngs...
-
         pngfiles = []
-
         bins = []
 
-        for file in sorted(os.listdir(p)):
+        for file in sorted(os.listdir(picdir)):
             if fnmatch.fnmatch(file, 'grab*_f30.jpg'):
                 pngfiles.append(file)
 
         for fn in pngfiles:
             m = re.search('\w+_(\d+)_(\d+)_l0_f30', fn)
 
-            image = cv2.imread(os.path.join(p, fn), -1)
-            image2 = cv2.imread(os.path.join(p, fn.replace('_f30', '_f60')), -1)
+            image = cv2.imread(os.path.join(picdir, fn), -1)
+            image2 = cv2.imread(os.path.join(picdir, fn.replace('_f30', '_f60')), -1)
             (h, w) = image.shape[:2]
 
             xp, yp = float(m.group(1)), float(m.group(2))
@@ -498,22 +487,6 @@ class Brain(config.Brain):
             log.debug('Reduced from {} to {} stones'.format(len(stones), len(self.stone_map.stones)))
 
             self.stone_map.save(meta=True)
-
-    def demo1(self):
-        # demo program which moves stone back and forth
-        while True:
-            self._move_stone_absolute((3500, 1000), 0, (3500, 1250), 90)
-            self._move_stone_absolute((3500, 1250), 90, (3500, 1000), 0)
-
-    def demo2(self):
-        while True:
-            self._move_stone((3500, 1000), 30, (3500, 1000), 120)
-            self._move_stone((3500, 1000), 120, (3500, 1000), 30)
-
-    def demo3(self):
-        while True:
-            self._move_stone((3700, 1000), 30, (3700, 1000), 120)
-            self._move_stone((3700, 1000), 120, (3700, 1000), 30)
 
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
@@ -635,10 +608,28 @@ class Brain(config.Brain):
                 time.sleep(1)
 
 
-if __name__ == '__main__':
-    brain = Brain(use_machine=True, create_new_map=False)
-    brain.start()
-    # brain.scan_from_files()
-    # brain.scan(startx=0, analyze=False)
-    # brain.demo1()
+def brain_scan(startx=0):
+    m = Machine()
+    brain = Brain(machine=m, create_new_map=True)
+    brain.scan(startx=startx, analyze=False)
+
+
+def brain_analyze_offline():
+    brain = Brain(create_new_map=True)
+    brain.scan_from_files(analyze=True, picdir='map_offline')
+
+
+def brain_performance():
+    m = Machine()
+    brain = Brain(machine=m, create_new_map=False)
     brain.performance()
+
+
+if __name__ == '__main__':
+    try:
+        # brain_scan(startx=0)
+        # brain_analyze_offline()
+        brain_performance()
+    except:
+        log.exception('exception in main:')
+        raise
