@@ -566,7 +566,7 @@ class Brain(config.Brain):
 
     def save_map(self):
         self.save_map_wait()
-        self.future_save = executor_save.submit(self.stone_map.save, meta=True)
+        self.future_save = executor_save.submit(self.stone_map.save, meta=True, image=True)
 
     def next_step(self):
         log.debug('Getting next step...')

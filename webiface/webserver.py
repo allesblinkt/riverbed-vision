@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_file
 from flask.json import jsonify
 
 import launcher
@@ -18,6 +18,10 @@ def status_json():
     s = status.read()
     s['alive'] = launcher.is_alive()
     return jsonify(s)
+
+@app.route('/map.png')
+def map_image():
+    return send_file(open('/tmp/stonemap.png', 'rb'), mimetype='image/png', cache_timeout=1)
 
 @app.route('/start', methods=['POST'])
 def start():
