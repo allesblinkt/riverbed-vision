@@ -73,10 +73,8 @@ class Machine(config.Machine):
         # try lifting up tries times
         for i in range(tries):
             log.info('Pickup try {} of {}'.format(i + 1, tries))
-            self.control.light(True)
             # self.control.vacuum(True)   # Turned on in pickup routine
             h = self.control.pickup_custom()
-            self.control.light(False)
             if h is not None:
                 log.info('Picked up at height {}'.format(h, ))
                 self.last_pickup_height = h
@@ -250,7 +248,11 @@ class Camera(config.Camera):
             else:
                 log.debug('Saving {}.jpg'.format(fn))
                 cv2.imwrite('map/{}.jpg'.format(fn), frame)
+
+        self.machine.control.light(True)
         stones, result_image, thresh_image, weight_image = process_image(fn, frame, save_stones='png')
+        self.machine.control.light(False)
+
         if save:
             log.debug('Saving {}-processed.jpg'.format(fn))
             cv2.imwrite('map/{}-processed.jpg'.format(fn), result_image)
@@ -262,16 +264,11 @@ class Camera(config.Camera):
 
 class Brain(config.Brain):
 
-    def __init__(self, use_machine=True, create_new_map=False):
-        if use_machine:
-            self.machine = Machine()
-        else:
-            self.machine = None
-
+    def __init__(self, machine=None, create_new_map=False):
+        self.machine = machine
         self.stone_map = StoneMap('stonemap', create_new=create_new_map)
-        # shortcuts for convenience
-
         if self.machine:
+            # shortcuts for convenience
             self.m = self.machine
             self.c = self.machine.control
             self.c.reset()
@@ -279,14 +276,11 @@ class Brain(config.Brain):
             self.c.go(x=self.init_x, y=self.init_y, e=self.init_e)
             self.c.feedrate(self.init_feedrate)
 
-    def start(self):
-        pass
-
     def run(self, prgname):
         f = getattr(self, prgname)
         f()
 
-    def scan_update(self):
+    def scan_update(self, stone):
         self.m.go(e=self.init_e)
 
         log.debug('Continous scan: start (%d stones)', len(self.stone_map.stones))
@@ -314,6 +308,7 @@ class Brain(config.Brain):
         add_count = 0
         remove_count = 0
         purge_count = 0
+        the_new_stone = None
 
         backup_map = self.stone_map.copy()
 
@@ -326,7 +321,12 @@ class Brain(config.Brain):
             for old_stone in old_stones:
                 if new_stone.coincides(old_stone):
                     if self.stone_map.remove_stone(old_stone):
-                        new_stone.flag = old_stone.flag
+                        # carry over flags if the stone is not the center one
+                        if old_stone != stone:
+                            new_stone.flag = old_stone.flag
+                        # else mark the stone as new one
+                        else:
+                            the_new_stone = new_stone
                         remove_count += 1
 
         # Purge
@@ -350,8 +350,10 @@ class Brain(config.Brain):
         if backup_map.stone_count() - self.stone_map.stone_count() >= 2:
             self.stone_map = backup_map
             log.debug('Ignored addition of %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
+            return stone
         else:
             log.debug('Added %d new stones and removes %d old stones. %d purged', add_count, remove_count, purge_count)
+            return the_new_stone
 
         # select stones outside of the view
         # TODO: get these right:
@@ -407,7 +409,7 @@ class Brain(config.Brain):
             self.stone_map.stones = [s for s in stones if s.rank >= 1.5]
             self.stone_map.save()
 
-    def scan_from_files(self, analyze=True):
+    def scan_from_files(self, analyze=True, picdir='map'):
         import re
         import os
         import fnmatch
@@ -418,21 +420,18 @@ class Brain(config.Brain):
         cam = Camera(None)
 
         stones = []
-        p = "map_offline/"   # looks here for pngs...
-
         pngfiles = []
-
         bins = []
 
-        for file in sorted(os.listdir(p)):
+        for file in sorted(os.listdir(picdir)):
             if fnmatch.fnmatch(file, 'grab*_f30.jpg'):
                 pngfiles.append(file)
 
         for fn in pngfiles:
             m = re.search('\w+_(\d+)_(\d+)_l0_f30', fn)
 
-            image = cv2.imread(os.path.join(p, fn), -1)
-            image2 = cv2.imread(os.path.join(p, fn.replace('_f30', '_f60')), -1)
+            image = cv2.imread(os.path.join(picdir, fn), -1)
+            image2 = cv2.imread(os.path.join(picdir, fn.replace('_f30', '_f60')), -1)
             (h, w) = image.shape[:2]
 
             xp, yp = float(m.group(1)), float(m.group(2))
@@ -499,22 +498,6 @@ class Brain(config.Brain):
 
             self.stone_map.save(meta=True)
 
-    def demo1(self):
-        # demo program which moves stone back and forth
-        while True:
-            self._move_stone_absolute((3500, 1000), 0, (3500, 1250), 90)
-            self._move_stone_absolute((3500, 1250), 90, (3500, 1000), 0)
-
-    def demo2(self):
-        while True:
-            self._move_stone((3500, 1000), 30, (3500, 1000), 120)
-            self._move_stone((3500, 1000), 120, (3500, 1000), 30)
-
-    def demo3(self):
-        while True:
-            self._move_stone((3700, 1000), 30, (3700, 1000), 120)
-            self._move_stone((3700, 1000), 120, (3700, 1000), 30)
-
     def _move_stone_absolute(self, c1, a1, c2, a2):
         log.debug('Abs moving stone center %s angle %s to center %s angle %s', str(c1), str(a1), str(c2), str(a2))
 
@@ -527,12 +510,16 @@ class Brain(config.Brain):
             return False
 
         self.m.go(x=c1[0], y=c1[1])
+        self.c.light(True)
+        self.c.dwell(1000)
         self.m.go(e=a1)
         ret = self.m.lift_up(x=c1[0], y=c1[1])
+        self.c.light(False)
 
         if ret:
             self.m.go(x=c2[0], y=c2[1])
             self.c.light(True)
+            self.c.dwell(1000)
             self.m.go(e=a2)
             self.m.lift_down()
             self.c.light(False)
@@ -612,19 +599,36 @@ class Brain(config.Brain):
                     putdown_pos = (nc[0], nc[1])
                     scan_pos = self.machine.cam.camera_pos_to_mm(putdown_pos)
                     self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
-                    # self.scan_update()
+
+                    # we don't scan here, but let's pretend we do
+                    self.c.light(True)
+                    self.c.dwell(1000)
+                    self.c.light(False)
 
                     log.info('Placement worked')
                     self.save_map()
                 else:  # Fail, flag
+                    log.info('Placement failed')
                     s.flag = True
 
                     pickup_pos = (s.center[0], s.center[1])
                     scan_pos = self.machine.cam.camera_pos_to_mm(pickup_pos)
                     self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
-                    self.scan_update()
+                    new_s = self.scan_update(s)
 
-                    log.info('Placement failed')
+                    if new_s and new_s != s:
+                        # try pickup again
+                        log.debug('Retry placing stone {} from {} to {}'.format(s, new_s.center, nc))
+                        success_move = self._move_stone(new_s.center, new_s.angle, nc, na)
+                        if success_move:
+                            self.stone_map.move_stone(new_s, new_center=nc, angle=na)
+                            self.stone_map.stage = stage  # Commit stage
+                            log.info('Retry placement worked')
+                            self.save_map()
+                        else:
+                            new_s.flag = True
+                            log.info('Retry placement failed')
+
                     self.save_map()
 
             elif force:  # Art wants us to advance anyhow
@@ -635,10 +639,28 @@ class Brain(config.Brain):
                 time.sleep(1)
 
 
-if __name__ == '__main__':
-    brain = Brain(use_machine=True, create_new_map=False)
-    brain.start()
-    # brain.scan_from_files()
-    # brain.scan(startx=0, analyze=False)
-    # brain.demo1()
+def brain_scan(startx=0):
+    m = Machine()
+    brain = Brain(machine=m, create_new_map=True)
+    brain.scan(startx=startx, analyze=False)
+
+
+def brain_analyze_offline():
+    brain = Brain(create_new_map=True)
+    brain.scan_from_files(analyze=True, picdir='map_offline')
+
+
+def brain_performance():
+    m = Machine()
+    brain = Brain(machine=m, create_new_map=False)
     brain.performance()
+
+
+if __name__ == '__main__':
+    try:
+        # brain_scan(startx=0)
+        # brain_analyze_offline()
+        brain_performance()
+    except:
+        log.exception('exception in main:')
+        raise
