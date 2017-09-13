@@ -166,7 +166,7 @@ def art_step(stonemap):
             stone_dummy = chosen_stone.copy()
             stone_dummy.center = x, stage1_y
             stone_dummy.angle = new_angle
-            while not stonemap.can_put(stone_dummy):
+            while not stonemap.can_put(stone_dummy, tight=True):
                 stage1_y += 5
                 stone_dummy.center = x, stage1_y
 

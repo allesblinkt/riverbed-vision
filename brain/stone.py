@@ -35,15 +35,16 @@ class Stone(object):
     def copy(self):
         return Stone(self.center, self.size, self.angle, self.color, self.structure, self.flag)
 
-    def overlaps(self, other, border=2):
+    def overlaps(self, other, border=2, tight=False):
         """ Checks whether stone overlaps with another stone """
         dx = self.center[0] - other.center[0]
         dy = self.center[1] - other.center[1]
-        dsq = dx * dx + dy * dy
-        rs = (self.size[0] + other.size[0] + border)
-        # d = distance(self.center, other.center)
-        # TODO: double check all this...
-        return dsq < rs * rs  # add 2 mm
+        if not tight:
+            dsq = dx * dx + dy * dy
+            rs = (self.size[0] + other.size[0] + border)
+            return dsq < rs * rs
+        else:
+            return abs(dx) + border <= self.size[0] + other.size[0] and abs(dy) + border <= self.size[1] + other.size[0]
 
     def coincides(self, stone):
         """ Check if two stones overlap so much that they could be the same """
@@ -185,21 +186,20 @@ class StoneMap(config.StoneMap):
     def get_at_with_border(self, center, border_size):
         return self.spatialmap.get_at_with_border(center, border_size)
 
-    def can_put(self, stone, border=2):
+    def can_put(self, stone, border=2, tight=False):
         """Checks if we can put the stone to a new position."""
-        border_size = (max(stone.size) + self.maxstonesize)  # FIXME: Check *2 or not. Not sure
+        border_size = (max(stone.size) + self.maxstonesize)
         candidates = self.spatialmap.get_at_with_border(stone.center, border_size)
+        return self.can_put_list(stone, candidates, border=border, tight=tight)
 
-        return self.can_put_list(stone, candidates, border=border)
-
-    def can_put_list(self, stone, stones, border=2):
+    def can_put_list(self, stone, stones, border=2, tight=False):
         """Check if we can put a stone. Warning: Slow. Simply compares against the whole list of given stones."""
         if not self.is_inside(stone):
             return False
 
         # sr = 50
         for s in stones:
-            if stone.overlaps(s, border=border):
+            if stone.overlaps(s, border=border, tight=tight):
                 return False
         return True
 
