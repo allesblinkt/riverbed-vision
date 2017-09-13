@@ -593,7 +593,7 @@ class Brain(config.Brain):
                 self.next_break_cycle += random.randint(self.lunch_break_every[0], self.lunch_break_every[1])
                 log.info('Continuing.')
             else:
-            self.cycle_count += 1
+                self.cycle_count += 1
 
             if chosen_stone is not None:
                 s = chosen_stone
