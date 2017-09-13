@@ -506,6 +506,7 @@ class Brain(config.Brain):
         if ret:
             self.m.go(x=c2[0], y=c2[1])
             self.c.light(True)
+            self.c.dwell(500)
             self.m.go(e=a2)
             self.m.lift_down()
             self.c.light(False)
@@ -586,6 +587,11 @@ class Brain(config.Brain):
                     scan_pos = self.machine.cam.camera_pos_to_mm(putdown_pos)
                     self.m.go(x=scan_pos[0], y=scan_pos[1], e=90)
                     # self.scan_update()
+
+                    # we don't scan here, but let's pretend we do
+                    self.c.light(True)
+                    self.c.dwell(500)
+                    self.c.light(False)
 
                     log.info('Placement worked')
                     self.save_map()
