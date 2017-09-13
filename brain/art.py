@@ -166,7 +166,9 @@ def art_step(stonemap):
             stone_dummy = chosen_stone.copy()
             stone_dummy.center = x, stage1_y
             stone_dummy.angle = new_angle
-            while not stonemap.can_put(stone_dummy, tight=True):
+            # ignore stones exactly below me (they are from previous activity)
+            ignore = [s for s in stonemap.stones if s.center[0] == x and s.center[1] < stage1_y]
+            while not stonemap.can_put(stone_dummy, tight=True, ignore=ignore):
                 stage1_y += 5
                 stone_dummy.center = x, stage1_y
 

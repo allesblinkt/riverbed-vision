@@ -186,10 +186,11 @@ class StoneMap(config.StoneMap):
     def get_at_with_border(self, center, border_size):
         return self.spatialmap.get_at_with_border(center, border_size)
 
-    def can_put(self, stone, border=2, tight=False):
+    def can_put(self, stone, border=2, tight=False, ignore=[]):
         """Checks if we can put the stone to a new position."""
         border_size = (max(stone.size) + self.maxstonesize)
         candidates = self.spatialmap.get_at_with_border(stone.center, border_size)
+        candidates = [c for c in candidates if c not in ignore]
         return self.can_put_list(stone, candidates, border=border, tight=tight)
 
     def can_put_list(self, stone, stones, border=2, tight=False):
