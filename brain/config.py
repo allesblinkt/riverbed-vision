@@ -61,7 +61,7 @@ class Brain(object):
     scan_step = [0.5, 0.6]  # 1 would mean no overlap (full frame width)
 
     lunch_break_every = [5, 10]
-    lunch_break_duration = 60.0
+    lunch_break_duration = 120.0
 
 
 class StoneMap(object):
