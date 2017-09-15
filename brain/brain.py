@@ -252,6 +252,7 @@ class Camera(config.Camera):
 
         if self.machine:
         self.machine.control.light(True)
+
         stones, result_image, thresh_image, weight_image = process_image(fn, frame, save_stones='png')
         
         if self.machine:
