@@ -251,12 +251,12 @@ class Camera(config.Camera):
                 cv2.imwrite('map/{}.jpg'.format(fn), frame)
 
         if self.machine:
-        self.machine.control.light(True)
+            self.machine.control.light(True)
 
         stones, result_image, thresh_image, weight_image = process_image(fn, frame, save_stones='png')
         
         if self.machine:
-        self.machine.control.light(False)
+            self.machine.control.light(False)
 
         if save:
             log.debug('Saving {}-processed.jpg'.format(fn))
