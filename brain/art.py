@@ -8,7 +8,7 @@ from log import makelog
 log = makelog(__name__)
 
 MAX_STAGE_MODE = 2  # How many stages / modes can we do (+1)
-WORKAREA_START_X = 2300
+WORKAREA_START_X = 2350
 
 flower_seeds = None
 # min_l, max_l = None, None    # Cache luma calculations
