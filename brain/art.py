@@ -99,9 +99,9 @@ def art_step(stonemap):
             y = map_value(i, 0, 8, margin_y, max_y - margin_y)
 
             if i % 2 == 0:
-                x = max_x - 400.0
+                x = max_x - 350.0
             else:
-                x = max_x - 1050.0
+                x = max_x - 950.0
 
             flower_seeds.append((x, y))
 
