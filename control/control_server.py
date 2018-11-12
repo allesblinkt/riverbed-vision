@@ -26,6 +26,7 @@ def format_pos(**kwargs):
     return ' '.join(['{}{:0.2f}'.format(k.upper(), v) for k, v in sorted(kwargs.items()) if v is not None])
 
 
+@Pyro4.expose
 class MachineController(object):
 
     def __init__(self, port_name, baudrate=19200):
