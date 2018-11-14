@@ -223,7 +223,7 @@ class Camera(config.Camera):
         for focus in self.focus_stack:
             self.set_cam_parameter('focus_absolute', focus)
             suffix = '_f%d' % (focus, )
-            im = self.grab(save=save, light_channel=0, suffix=suffix)
+            im = self.grab(save=save, light_channel=None, suffix=suffix)
             res.append(im)
         return res
 
