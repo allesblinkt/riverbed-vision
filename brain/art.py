@@ -12,7 +12,7 @@ WORKAREA_START_X = 2350
 
 flower_seeds = None
 # min_l, max_l = None, None    # Cache luma calculations
-min_l, max_l = 10, 120    # Cache luma calculations
+min_l, max_l = 30, 170    # Cache luma calculations
 
 
 def find_flower_pos(stonemap, stone, center):
@@ -123,7 +123,9 @@ def art_step(stonemap):
             s = sel[0]
             chosen_stone = s
 
-            bucket = map_value(s.color[0], min_l, max_l, 0, len(flower_seeds) + 1)
+            l_norm =  map_value(s.color[0], min_l, max_l, 0.0, 1.0)
+            l_norm = pow(l_norm, 2.0)
+            bucket = map_value(l_norm, 0.0, 1.0, 0.0, len(flower_seeds) + 1)
             bucket = constrain(int(bucket), 0, len(flower_seeds) - 1)
             new_center, new_angle = find_flower_pos(stonemap, s, flower_seeds[bucket])
 
