@@ -334,7 +334,7 @@ def threshold_double_focus(im0, im1):
 
     chain = np.maximum(im_sobel, im_diff)
     chain[im_v < 0.51] = 1  # if dark
-    chain[np.logical_and(im_h < 0.25, im_s > 0.05)] = 1   # if saturated and reddish
+    chain[np.logical_and(im_h < 0.25, im_s > 0.125)] = 1   # if saturated and reddish
 
     chain = cv2.medianBlur((chain * 255).astype(np.uint8), 5)
 
@@ -372,7 +372,7 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
 
     # Blur thresholded image for curvature analysis
     thresh_blur_img = cv2.GaussianBlur(thresh_img, (3, 3), 0)
-    _, thresh_blur_img = cv2.threshold(thresh_blur_img, 128, 255, cv2.THRESH_BINARY)
+    _, thresh_blur_img = cv2.threshold(thresh_blur_img, 50, 255, cv2.THRESH_BINARY)
 
     # Contouring
     _, contours, _ = cv2.findContours(thresh_blur_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
