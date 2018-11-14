@@ -14,7 +14,7 @@ from stone import Stone
 from log import makelog
 log = makelog(__name__)
 
-process_scale = 0.5   # Process images at half size
+process_scale = 0.5  # Process images at half size
 
 
 def load_blank_imgs():
@@ -500,7 +500,7 @@ def main():
     import fnmatch
 
     jpgfiles = []
-    p = 'grab_depth_r3'
+    p = 'map_offline'
     double_focus = True
 
     for file in sorted(os.listdir(p)):
