@@ -436,7 +436,21 @@ class Brain(config.Brain):
                 pngfiles.append(file)
 
         for fn in pngfiles:
-            m = re.search('\w+_(\d+)_(\d+)_l0_f30', fn)
+            log.info('Checking file {}'.format(fn, ))
+
+            m = re.search('\w+_(\d+)_(\d+)_f30', fn)
+
+            image = cv2.imread(os.path.join(picdir, fn), -1)
+            image2 = cv2.imread(os.path.join(picdir, fn.replace('_f30', '_f60')), -1)
+
+            (h, w) = image.shape[:2]
+            (h2, w2) = image2.shape[:2]
+
+
+        for fn in pngfiles:
+            log.info('Starting file {}'.format(fn, ))
+
+            m = re.search('\w+_(\d+)_(\d+)_f30', fn)
 
             image = cv2.imread(os.path.join(picdir, fn), -1)
             image2 = cv2.imread(os.path.join(picdir, fn.replace('_f30', '_f60')), -1)
