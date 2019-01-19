@@ -36,7 +36,7 @@ class MachineController(object):
         self.serial_port = None
         self.port_name = port_name
 
-        self.limits_x = [0, 3730]
+        self.limits_x = [0, 3650]
         self.limits_y = [0, 1730]
         self.limits_z = [0, 110]
         self.limits_e = [-10000, 10000]
