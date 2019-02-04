@@ -222,7 +222,7 @@ class MachineController(object):
         self.home_z()
         return None
 
-    def pickup_custom(self, start_z=24.0, end_z=0.0, step=1.5):   # end at 0.0 for the new sucker, 1.5 for the new
+    def pickup_custom(self, start_z=24.0, end_z=1.0, step=1.5):   # end at 0.0 for the new sucker, 1.5 for the new
         self.pickup_top()
 
         has_picked = False
