@@ -22,7 +22,7 @@ class Camera(object):
         'sharpness': 128,
         'backlight_compensation': 0,
         'exposure_auto': 1,   # TODO: check
-        'exposure_absolute': 40,
+        'exposure_absolute': 100,
         'exposure_auto_priority': 0,
         'pan_absolute': 0,
         'tilt_absolute': 0,
