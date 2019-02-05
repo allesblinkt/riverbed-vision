@@ -17,6 +17,8 @@ log = makelog(__name__)
 process_scale = 0.5  # Process images at half size
 
 
+pool = None
+
 def load_blank_imgs():
     blank_fns = ['blank_l0.jpg', 'blank_l0.jpg', 'blank_l0.jpg', 'blank_l0.jpg']
     blank_imgs = []
@@ -447,7 +449,10 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
     _, stones_contours, _ = cv2.findContours(segmented_img, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_NONE)
 
     if not debug_draw:
-        pool = Pool(8)    # TODO: make the number of processes configurable
+        global pool
+
+        if pool is None:
+            pool = Pool(8)    # TODO: make the number of processes configurable
 
         contours_and_args = []
         for id, contour in enumerate(stones_contours):
@@ -456,7 +461,6 @@ def process_image(frame_desc, color_img, save_stones=None, debug_draw=False, deb
 
         stones = pool.starmap(process_stone, contours_and_args)
 
-        pool.close()
     else:
         stones = []
         for id, contour in enumerate(stones_contours):
