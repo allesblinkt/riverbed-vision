@@ -9,7 +9,7 @@ class Camera(object):
     view_flip = False   # rotation by 180 deg?
 
     offset_x = 45.0  # -3.0
-    offset_y = -6.0  # +62.00
+    offset_y = -6.25  # +62.00
 
     v4l_params_1 = {
         'brightness': 128,
@@ -18,11 +18,11 @@ class Camera(object):
         'white_balance_temperature_auto': 0,
         'gain': 0,
         'power_line_frequency': 1,   # 50 Hz
-        'white_balance_temperature': 4420,  # TODO: check
+        'white_balance_temperature': 5700,  # TODO: check
         'sharpness': 128,
         'backlight_compensation': 0,
         'exposure_auto': 1,   # TODO: check
-        'exposure_absolute': 100,
+        'exposure_absolute': 15,
         'exposure_auto_priority': 0,
         'pan_absolute': 0,
         'tilt_absolute': 0,
