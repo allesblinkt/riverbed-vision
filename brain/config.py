@@ -18,11 +18,11 @@ class Camera(object):
         'white_balance_temperature_auto': 0,
         'gain': 0,
         'power_line_frequency': 1,   # 50 Hz
-        'white_balance_temperature': 5700,  # TODO: check
+        'white_balance_temperature': 5200,  # TODO: check
         'sharpness': 128,
         'backlight_compensation': 0,
         'exposure_auto': 1,   # TODO: check
-        'exposure_absolute': 15,
+        'exposure_absolute': 75,
         'exposure_auto_priority': 0,
         'pan_absolute': 0,
         'tilt_absolute': 0,
