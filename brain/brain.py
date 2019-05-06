@@ -435,6 +435,9 @@ class Brain(config.Brain):
             if fnmatch.fnmatch(file, 'grab*_f30.jpg'):
                 pngfiles.append(file)
 
+        pngfiles = pngfiles[::-1]   # reverse, cause trouble is likely to be at the end
+        # pngfiles = pngfiles[:100]   # reverse, cause trouble is likely to be at the end
+
         for fn in pngfiles:
             log.info('Checking file {}'.format(fn, ))
 
@@ -446,6 +449,7 @@ class Brain(config.Brain):
             (h, w) = image.shape[:2]
             (h2, w2) = image2.shape[:2]
 
+            del image, image2
 
         for fn in pngfiles:
             log.info('Starting file {}'.format(fn, ))
@@ -463,6 +467,9 @@ class Brain(config.Brain):
             localstones = []
 
             st = cam.grab_extract(xp, yp, img=[image, image2], save=False, double_focus=True)
+
+            del image, image2
+
             for s in st:
                 s.center = cam.pos_to_mm(s.center, offset=(xp, yp))
                 s.size = cam.size_to_mm(s.size)
@@ -481,6 +488,7 @@ class Brain(config.Brain):
 
         log.debug('End scanning')
         chosen_stones = []
+
         if analyze:
             # select correct stones
             log.debug('Begin selecting/reducing stones')
