@@ -263,6 +263,7 @@ class Camera(config.Camera):
             cv2.imwrite('map/{}-processed.jpg'.format(fn), result_image)
             cv2.imwrite('map/{}-threshold.jpg'.format(fn), thresh_image)
             cv2.imwrite('map/{}-weight.jpg'.format(fn), weight_image * 255)
+
         log.debug('Found {} stones'.format(len(stones)))
         return stones
 
@@ -698,11 +699,36 @@ def brain_performance():
     brain.performance()
 
 
+def parse_args():
+    """ Parse command line arguments and return args namespace """
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run Jllers brain")
+
+    parser = argparse.ArgumentParser()
+    command_group = parser.add_mutually_exclusive_group()
+    command_group.add_argument('performance', help='Performs the usual business', nargs='?', default='performance')
+    command_group.add_argument('scan', help='Scan the surface to images', nargs='?')
+    command_group.add_argument('analyze', help='Analyze pictures and create initial map', nargs='?')
+
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == '__main__':
+    args = parse_args()
     try:
-        # brain_scan(startx=0)
-        # brain_analyze_offline()
-        brain_performance()
+        if args.performance == 'performance':
+            log.exception('Doing performance!')
+            brain_performance()
+        elif args.performance == 'scan':
+            log.exception('Doing scan!')
+            brain_scan(startx=0)
+        elif args.performance == 'analyze':
+            log.exception('Doing analyze!')
+            brain_analyze_offline()
+        else:
+            raise ValueError('Performance option not recognized')
     except:
         log.exception('exception in main:')
         raise
