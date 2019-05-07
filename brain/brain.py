@@ -688,9 +688,9 @@ def brain_scan(startx=0):
     brain.scan(startx=startx, analyze=False)
 
 
-def brain_analyze_offline():
+def brain_analyze_offline(picdir):
     brain = Brain(create_new_map=True)
-    brain.scan_from_files(analyze=True, picdir='map_offline')
+    brain.scan_from_files(analyze=True, picdir=picdir)
 
 
 def brain_performance():
@@ -709,7 +709,10 @@ def parse_args():
     command_group = parser.add_mutually_exclusive_group()
     command_group.add_argument('performance', help='Performs the usual business', nargs='?', default='performance')
     command_group.add_argument('scan', help='Scan the surface to images', nargs='?')
-    command_group.add_argument('analyze', help='Analyze pictures and create initial map', nargs='?')
+    command_group.add_argument('analyze', help='Analyze pictures offline and create initial map', nargs='?')
+
+    parser.add_argument('--scan-start-x', default=0, type=int, help='Start the scan at specified X position')
+    parser.add_argument('--analyze-dir', default='map_offline', type=str, help='Perform offline analysis from images in this directory')
 
     args = parser.parse_args()
     return args
@@ -717,16 +720,17 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
+
     try:
         if args.performance == 'performance':
             log.exception('Doing performance!')
             brain_performance()
         elif args.performance == 'scan':
-            log.exception('Doing scan!')
-            brain_scan(startx=0)
+            log.exception('Doing scan from %d mm !', args.scan_start_x)
+            brain_scan(startx=args.scan_start_x)
         elif args.performance == 'analyze':
-            log.exception('Doing analyze!')
-            brain_analyze_offline()
+            log.exception('Doing analyze from %s !', args.analyze_dir)
+            brain_analyze_offline(args.analyze_dir)
         else:
             raise ValueError('Performance option not recognized')
     except:
