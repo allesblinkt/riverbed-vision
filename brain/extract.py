@@ -211,7 +211,10 @@ def process_stone(frame_desc, id, contour, src_img, result_img, save_stones=None
 
     bbox = cv2.boundingRect(contour)
 
-    ec, es, ea = cv2.minAreaRect(contour)
+    try:
+        ec, es, ea = cv2.fitEllipse(contour)
+    except:
+        ec, es, ea = cv2.minAreaRect(contour)
 
     fit_center = (int(ec[0]), int(ec[1]))
     fit_dim = (int(es[0]) // 2, int(es[1]) // 2)
