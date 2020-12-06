@@ -372,9 +372,15 @@ class StoneMap(config.StoneMap):
 
 if __name__ == '__main__':
     map = StoneMap('stonemap')
-    # map.stage = (0, 0, None, None, None)  # NOTE: use this to override the current state
+
+    import sys
+  
+    stage_mode, stage_step, stage1_y, stage1_last, stage1_first = stonemap.stage
+
+    map.stage = (0, 3, None, None, None)  # NOTE: use this to override the current state
     map.save(meta=True)
 
+    sys.exit(-1)
     if len(map.stones) == 0:
         # map.randomize()
         log.warn('No STONES!')
@@ -402,6 +408,8 @@ if __name__ == '__main__':
             svg_drawing.save()
 
         chosen_stone, nc, na, stage, force = art_step(map)
+
+        print(stage)
 
         do_fail = False                  # Never fail
         # do_fail = uniform(0, 1) < 0.05   # Simulates that 5% of stones cannot be picked up
