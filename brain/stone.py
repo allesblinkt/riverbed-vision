@@ -375,12 +375,12 @@ if __name__ == '__main__':
 
     import sys
   
-    stage_mode, stage_step, stage1_y, stage1_last, stage1_first = stonemap.stage
+    # stage_mode, stage_step, stage1_y, stage1_last, stage1_first = stonemap.stage
 
-    map.stage = (0, 3, None, None, None)  # NOTE: use this to override the current state
-    map.save(meta=True)
+    # map.stage = (0, 3, None, None, None)  # NOTE: use this to override the current state
+    # map.save(meta=True)
 
-    sys.exit(-1)
+    # sys.exit(-1)
     if len(map.stones) == 0:
         # map.randomize()
         log.warn('No STONES!')
