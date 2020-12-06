@@ -273,6 +273,10 @@ class Brain(config.Brain):
     def __init__(self, machine=None, create_new_map=False):
         self.machine = machine
         self.stone_map = StoneMap('stonemap', create_new=create_new_map)
+
+        self.stone_map.stage = (0, 3, None, None, None)  # NOTE: use this to override the current state
+
+
         self.cycle_count = 0   # How many cycles in this run
         self.next_break_cycle = self.lunch_break_every[0]   # When to lunch break next?
 
