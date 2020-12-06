@@ -12,7 +12,7 @@ WORKAREA_START_X = 2400
 
 flower_seeds = None
 # min_l, max_l = None, None    # Cache luma calculations
-min_l, max_l = 15, 165    # Cache luma calculations
+min_l, max_l = 0, 165    # Cache luma calculations
 
 
 def find_flower_pos(stonemap, stone, center):
