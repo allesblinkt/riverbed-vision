@@ -9,10 +9,14 @@ log = makelog(__name__)
 
 MAX_STAGE_MODE = 2  # How many stages / modes can we do (+1)
 WORKAREA_START_X = 2400
+FLOWERS = 9
+
 
 flower_seeds = None
+flower_luma_bins = None
+
 # min_l, max_l = None, None    # Cache luma calculations
-min_l, max_l = 0, 165    # Cache luma calculations
+min_l, max_l = 0, 135    # Cache luma calculations
 
 
 def find_flower_pos(stonemap, stone, center):
@@ -26,12 +30,12 @@ def find_flower_pos(stonemap, stone, center):
         stone_dummy.center = new_center
         stone_dummy.angle = angle % 180
 
-        if in_workarea(stone_dummy) and stonemap.can_put(stone_dummy, border=4):
+        if in_workarea(stone_dummy) and stonemap.can_put(stone_dummy, border=2):
             return new_center, angle % 180
 
         angle += (137.50776405 / 10.0)
-        if angle > 360:
-            angle -= 360
+        if angle > 360.0:
+            angle -= 360.0
             radius += 1.0
 
 
@@ -87,6 +91,7 @@ def art_step(stonemap):
         max_l = max(stonemap.stones, key=lambda x: x.color[0]).color[0]
 
     global flower_seeds
+    global flower_luma_bins
 
     # Generate seeds
     if flower_seeds is None:
@@ -94,9 +99,9 @@ def art_step(stonemap):
 
         flower_seeds = []
 
-        for i in range(9):
+        for i in range(FLOWERS):
             margin_y = 180
-            y = map_value(i, 0, 8, margin_y, max_y - margin_y)
+            y = map_value(i, 0, FLOWERS - 1, margin_y, max_y - margin_y)
 
             if i % 2 == 0:
                 x = max_x - 350.0
