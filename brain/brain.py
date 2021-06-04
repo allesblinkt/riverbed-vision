@@ -14,7 +14,7 @@ from art import art_step
 from extract import process_image
 
 from utils import random_on_circle, frange_inclusive
-from stone import StoneMap
+from stone import StoneMap, Stone
 
 from log import makelog
 log = makelog('brain')
